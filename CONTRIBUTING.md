@@ -31,9 +31,22 @@ Since **status checks** require another branch (you can't commit directly to dev
 
 **Support Branches naming conventions:**
 
-- format `tag/description`
+- format `tag/project/description`
 - tags `feature`, `hot-fix` and `release` are reserved by [Git Flow][git flow]
+- project is optional and id's the affected [project](#projects)
 - description `addt-<technology-name>` when adding a new technology for easier pin-pointing
+
+### Projects
+
+qip is a monorepo with multiple services:
+
+- **webapi**
+
+    web server that exposes the qip api
+
+- **webclient**
+
+    web app, called client to better differentiate from webapi (otherwise only one letter off)
 
 ## In Practice
 
@@ -45,7 +58,7 @@ Since **status checks** require another branch (you can't commit directly to dev
 
 2. Work on feature. **Commit often!** 
 
-    Follow [The Seven rules of a grat Git commit message](https://chris.beams.io/posts/git-commit/#seven-rules)
+    Follow [The Seven rules of a great Git commit message](https://chris.beams.io/posts/git-commit/#seven-rules)
 
     [Strive for atomic commits](https://www.freshconsulting.com/atomic-commits/).
     Smaller commits have more precise diffs and a clear sequence, thus are easier to understand. 
