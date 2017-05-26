@@ -12,6 +12,16 @@ module.exports = {
         enforce: 'pre',
         test: /\.jsx?$/,
         loader: 'standard-loader'
+      },
+      {
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['react']
+          }
+        }
       }
     ]
   },

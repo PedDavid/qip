@@ -2,10 +2,10 @@ import React from 'react'
 import { render } from 'react-dom'
 
 function Hello () {
-  return React.createElement('div', null, `Hello webpack World`)
+  return <div>Hello React JSX World! powered by Babel</div>
 }
 
 render(
-  React.createElement(Hello, null, null),
+  <Hello />,
   document.getElementById('root')
 )
