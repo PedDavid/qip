@@ -1,5 +1,5 @@
 function sum (a, b) {
-  throw new Error('Not implemented')
+  return a + b
 }
 
 module.exports = sum
