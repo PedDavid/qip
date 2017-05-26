@@ -6,6 +6,9 @@
   "repository": "https://github.com/PedDavid/qip.git",
   "author": "qip",
   "license": "MIT",
+  "scripts": {
+    "test": "jest"
+  },
   "devDependencies": {
     "jest": "^20.0.4"
   }
