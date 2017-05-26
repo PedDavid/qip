@@ -7,9 +7,13 @@
   "author": "qip",
   "license": "MIT",
   "scripts": {
-    "test": "jest"
+    "test": "standard && jest"
   },
   "devDependencies": {
-    "jest": "^20.0.4"
+    "jest": "^20.0.4",
+    "standard": "^10.0.2"
+  },
+  "standard": {
+    "globals": ["it", "expect"]
   }
 }
