@@ -1,7 +1,11 @@
-function component () {
-  const element = document.createElement('div')
-  element.innerHTML = 'Hello webpack World'
-  return element
+import React from 'react'
+import { render } from 'react-dom'
+
+function Hello () {
+  return React.createElement('div', null, `Hello webpack World`)
 }
 
-document.body.appendChild(component())
+render(
+  React.createElement(Hello, null, null),
+  document.getElementById('root')
+)
