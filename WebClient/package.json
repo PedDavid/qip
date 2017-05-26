@@ -8,12 +8,14 @@
   "license": "MIT",
   "scripts": {
     "build": "webpack",
+    "start": "webpack-dev-server",
     "test": "standard && jest"
   },
   "devDependencies": {
     "jest": "^20.0.4",
     "standard": "^10.0.2",
-    "webpack": "^2.6.1"
+    "webpack": "^2.6.1",
+    "webpack-dev-server": "^2.4.5"
   },
   "standard": {
     "globals": [
