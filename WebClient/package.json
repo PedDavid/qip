@@ -7,13 +7,21 @@
   "author": "qip",
   "license": "MIT",
   "scripts": {
+    "build": "webpack",
+    "start": "webpack-dev-server",
     "test": "standard && jest"
   },
   "devDependencies": {
     "jest": "^20.0.4",
-    "standard": "^10.0.2"
+    "standard": "^10.0.2",
+    "standard-loader": "^6.0.1",
+    "webpack": "^2.6.1",
+    "webpack-dev-server": "^2.4.5"
   },
   "standard": {
-    "globals": ["it", "expect"]
+    "globals": [
+      "it",
+      "expect"
+    ]
   }
 }
