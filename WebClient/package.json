@@ -12,6 +12,7 @@
     "test": "standard && jest"
   },
   "devDependencies": {
+    "babel-core": "^6.24.1",
     "jest": "^20.0.4",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
