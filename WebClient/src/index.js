@@ -1,11 +1,13 @@
+// @flow
+
 import React from 'react'
 import { render } from 'react-dom'
 
-function Hello () {
-  return <div>Hello React JSX World! powered by Babel</div>
+function Hello ({name}: {name: string}) {
+  return <div>Hello {name}</div>
 }
 
 render(
-  <Hello />,
+  <Hello name='Pedro' />,
   document.getElementById('root')
 )
