@@ -13,8 +13,10 @@
   },
   "devDependencies": {
     "babel-core": "^6.24.1",
+    "babel-eslint": "^7.2.3",
     "babel-loader": "^7.0.0",
     "babel-preset-react": "^6.24.1",
+    "eslint-plugin-flowtype": "^2.33.0",
     "jest": "^20.0.4",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
@@ -24,6 +26,8 @@
     "webpack-dev-server": "^2.4.5"
   },
   "standard": {
+    "plugins": ["flowtype"],
+    "parser": "babel-eslint",
     "globals": [
       "it",
       "expect"
