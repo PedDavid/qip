@@ -14,6 +14,7 @@ module.exports = {
       {
         enforce: 'pre',
         test: /\.jsx?$/,
+        exclude: /node_modules/,
         loader: 'standard-loader'
       },
       {
@@ -22,6 +23,14 @@ module.exports = {
         use: {
           loader: 'babel-loader'
         }
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader']
+      },
+      {
+        test: /\.(png|ttf|eot|svg|woff2?)$/,
+        loader: 'url-loader?publicPath=dist/'
       }
     ]
   },
