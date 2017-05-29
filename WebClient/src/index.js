@@ -3,7 +3,7 @@
 import React from 'react'
 import { render } from 'react-dom'
 
-import Canvas from './components/Canvas.jsx'
+import Canvas from './components/Canvas'
 
 function Hello ({name}: {name: string}) {
   return <div>Hello {name}</div>
