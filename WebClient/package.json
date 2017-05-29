@@ -15,6 +15,8 @@
     "babel-core": "^6.24.1",
     "babel-eslint": "^7.2.3",
     "babel-loader": "^7.0.0",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-preset-env": "^1.5.1",
     "babel-preset-react": "^6.24.1",
     "eslint-plugin-flowtype": "^2.33.0",
     "jest": "^20.0.4",
@@ -26,9 +28,12 @@
     "webpack-dev-server": "^2.4.5"
   },
   "standard": {
-    "plugins": ["flowtype"],
+    "plugins": [
+      "flowtype"
+    ],
     "parser": "babel-eslint",
     "globals": [
+      "describe",
       "it",
       "expect"
     ]
