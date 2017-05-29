@@ -3,11 +3,18 @@
 import React from 'react'
 import { render } from 'react-dom'
 
+import Canvas from './components/Canvas.jsx'
+
 function Hello ({name}: {name: string}) {
   return <div>Hello {name}</div>
 }
 
 render(
-  <Hello name='Pedro' />,
+  <div>
+    <Hello name='Pedro' />
+    <Canvas width={300} height={300} onDown={evt => {}}>
+      HTML5 Canvas not supported
+    </Canvas>
+  </div>,
   document.getElementById('root')
 )
