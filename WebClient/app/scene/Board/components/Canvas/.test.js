@@ -4,22 +4,22 @@ import { shallow, mount } from 'enzyme'
 import Canvas from '.'
 
 describe('Component: Canvas', () => {
+  const props = { width: 1, height: 1 }
+  const wrapper = shallow(<Canvas {...props} />)
   it('Is not null', () => {
-    const wrapper = shallow(<Canvas />)
     expect(wrapper).not.toBeNull()
   })
   it('Is instance of Canvas', () => {
-    const wrapper = shallow(<Canvas />)
     expect(wrapper.instance()).toBeInstanceOf(Canvas)
   })
   it('Type is <canvas>', () => {
-    const wrapper = shallow(<Canvas />)
     expect(wrapper.type()).toBe('canvas')
   })
   it('Props are delivered', () => {
-    const props = { width: 1, height: 1 }
-    const wrapper = shallow(<Canvas {...props} />)
     expect(wrapper.instance().props).toMatchObject(props)
+  })
+  it('Renders as expected', () => {
+    expect(wrapper.html()).toMatchSnapshot()
   })
   // Otherwise browsers throw warnings because prop is unknown to <canvas>
   it('Does not pass listeners to <canvas>', () => {
