@@ -6,7 +6,7 @@ import { render } from 'react-dom'
 
 import { Header, Sidebar, Segment, Button, Menu, Icon } from 'semantic-ui-react'
 
-import Canvas from './components/Canvas'
+import Canvas from './scene/Board/components/Canvas'
 
 class SideBarOverlay extends React.Component {
   state = {visible: false}
@@ -43,7 +43,7 @@ render(
   <div>
     <SideBarOverlay>
       <Header as='h1'>Hello Semantic UI</Header>
-      <Canvas width={300} height={300} onDown={evt => {}}>
+      <Canvas width={300} height={300}>
         HTML5 Canvas not supported
       </Canvas>
     </SideBarOverlay>

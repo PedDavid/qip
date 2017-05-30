@@ -1,4 +1,4 @@
-import { findNearest, INVALID_IDX } from './../../src/util/Math'
+import { findNearest, INVALID_IDX } from './Math'
 
 describe('Util: findNearest', () => {
   const identity = element => element

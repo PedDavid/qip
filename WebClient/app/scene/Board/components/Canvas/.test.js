@@ -1,7 +1,7 @@
 import React from 'react'
 import { shallow, mount } from 'enzyme'
 
-import Canvas from '../../src/components/Canvas'
+import Canvas from '.'
 
 describe('Component: Canvas', () => {
   it('Is not null', () => {
@@ -29,8 +29,23 @@ describe('Component: Canvas', () => {
     expect(wrapper.instance().props).toHaveProperty('onDown')
     expect(wrapper.props()).not.toHaveProperty('onDown')
   })
+  it('Receives all listeners', () => {
+    const listeners = {
+      onDown: evt => {},
+      onUp: evt => {},
+      onMove: evt => {},
+      onOut: evt => {}
+    }
+    const wrapper = shallow(<Canvas {...listeners} />)
+    expect(wrapper).not.toBeNull()
+  })
   it('Mounts', () => {
     const wrapper = mount(<Canvas />)
     expect(wrapper).not.toBeNull()
+  })
+  it('Updates and does not change state', () => {
+    const wrapper = mount(<Canvas />)
+    const updated = wrapper.update()
+    expect(updated).toMatchObject(wrapper)
   })
 })
