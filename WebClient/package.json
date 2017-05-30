@@ -9,8 +9,7 @@
   "scripts": {
     "build": "webpack",
     "start": "webpack-dev-server",
-    "test": "standard && jest",
-    "test:coverage": "standard && jest --coverage"
+    "test": "standard && jest"
   },
   "devDependencies": {
     "babel-core": "^6.24.1",
