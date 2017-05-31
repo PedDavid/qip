@@ -1,14 +1,15 @@
 // @flow
 
-import 'semantic-ui-css/semantic.min.css'
 import React from 'react'
-import { render } from 'react-dom'
+import {
+  Sidebar,
+  Segment,
+  Button,
+  Menu,
+  Icon
+} from 'semantic-ui-react'
 
-import { Header, Sidebar, Segment, Button, Menu, Icon } from 'semantic-ui-react'
-
-import Canvas from './components/Canvas'
-
-class SideBarOverlay extends React.Component {
+export default class SideBarOverlay extends React.Component {
   state = {visible: false}
   toggleVisibility = () => this.setState({ visible: !this.state.visible })
 
@@ -18,7 +19,7 @@ class SideBarOverlay extends React.Component {
       <div>
         <Button onClick={this.toggleVisibility}>Toggle Visibility</Button>
         <Sidebar.Pushable as={Segment}>
-          <Sidebar as={Menu} animation='overlay' width='thin' visible={visible} icon='labeled' vertical inverted>
+          <Sidebar as={Menu} animation='overlay' direction='top' visible={visible} inverted>
             <Menu.Item name='home'>
               <Icon name='home' />
               Home
@@ -38,15 +39,3 @@ class SideBarOverlay extends React.Component {
     )
   }
 }
-
-render(
-  <div>
-    <SideBarOverlay>
-      <Header as='h1'>Hello Semantic UI</Header>
-      <Canvas width={300} height={300} onDown={evt => {}}>
-        HTML5 Canvas not supported
-      </Canvas>
-    </SideBarOverlay>
-  </div>,
-  document.getElementById('root')
-)
