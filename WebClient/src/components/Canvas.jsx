@@ -14,7 +14,7 @@ export default class Canvas extends React.Component {
   canvas: window.EventListener
 
   componentDidMount () {
-    if (this.props.onDow) {
+    if (this.props.onDown) {
       this.canvas.addEventListener('pointerdown', this.props.onDown, false)
     }
     if (this.props.onUp) {

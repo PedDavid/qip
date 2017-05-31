@@ -1,69 +1,72 @@
 import { Point } from './../Point'
-import { Figure } from './../Figure'
+import Line from './../Line'
 import { Rect } from './../Rect'
 
-export function CanvasEraser (grid, canvasContext, items) {
-  this.erasing = false
-  let movingEraser
-  let eraseLine
-  let currentEraserSize
+import Tool from './Tool'
 
-  this.onDown = function (currentItem, coord, event, currScale) {
+export default class Eraser implements Tool {
+  constructor (grid, width) {
+    this.width = width
+
+    this.grid = grid
+
+    this.movingEraser = null
+    this.eraseLine = null
+    this.previousPoint = null
+  }
+
+  onPress (event, currScale) {
+    const coord = { x: event.offsetX, y: event.offsetY }
     // event.clientX - 5 + document.body.scrollLeft, event.clientY - 5 + document.body.scrollTop
-    this.erasing = true
-    currentEraserSize = items.erasers.filter(eraser => eraser.name === currentItem.eraser.name)[0].size
 
-    erase(coord.x, coord.y, currScale)
+    this.erase(coord.x, coord.y, currScale, event.target)
 
     const point = new Point(Math.round(coord.x), Math.round(coord.y))
-    eraseLine = new Figure('eraseLineId')
-    eraseLine.addPoint(point)
+    this.previousPoint = point
 
     // if (event.button == 5) {
     // this.erasedByStylus = true
     // changeStyle(document.getElementById("eraser"))
   }
 
-  this.onMove = function (currItem, coord, event, currScale) {
-    // verificar se o evento ocorreu nas mesmas coordenadas que anteriormente
-    if ((eraseLine == null || eraseLine.points[0].x === coord.x) && eraseLine.points[0].y === coord.y) {
-      return // nesse caso ignorá-lo
+  onSwipe (event, currScale) {
+    const coord = { x: event.offsetX, y: event.offsetY }
+    const previousPoint = this.previousPoint
+    // Ignore if swiped to last coordinates
+    if (previousPoint === null || (previousPoint.x === coord.x && previousPoint.y === coord.y)) {
+      return
     }
 
     const point = new Point(Math.round(coord.x), Math.round(coord.y))
-    eraseLine.addPoint(point)
-    movingEraser = true
-    erase(coord.x, coord.y, currScale)
+    this.eraseLine = new Line(this.previousPoint, point)
+    this.movingEraser = true
+    this.erase(coord.x, coord.y, currScale, event.target)
 
-    // After erase, reset eraseLine. This way eraseLine always has 2 points, optimizing line iteration in method erase()
-    eraseLine = new Figure('eraseLineId')
-    eraseLine.addPoint(point)
-
-    // this.erase(coord.x, coord.y, event)
+    this.previousPoint = point
     // context.clearRect(event.clientX - 5 + document.body.scrollLeft, event.clientY - 5 + document.body.scrollTop, 15, 15) //verificar se está a apagar (não é um algoritmo bonito)
   }
 
-  this.onUp = function () {
+  onPressUp () {
     this.onOut()
   }
 
-  this.onOut = function () {
-    this.erasing = false
-    if (movingEraser) {
-      movingEraser = false
+  onOut () {
+    // TODO(peddavid): simplify this logic? (this.movingEraser = false) or (this.movingEraser = !this.movingEraser)
+    if (this.movingEraser) {
+      this.movingEraser = false
     }
-    eraseLine = null
+    this.eraseLine = null
+    this.previousPoint = null
   }
 
-  const erase = function (x, y, currScale) {
+  erase (x, y, currScale, canvas) {
+    const grid = this.grid
     // calcular limites da area a apagar
-    const lix = x / currScale - currentEraserSize / 2
-    const liy = y / currScale - currentEraserSize / 2
-    const lsx = x / currScale + currentEraserSize / 2
-    const lsy = y / currScale + currentEraserSize / 2
+    const lix = x / currScale - this.width / 2
+    const liy = y / currScale - this.width / 2
+    const lsx = x / currScale + this.width / 2
+    const lsy = y / currScale + this.width / 2
 
-    // const figures = grid.getFigures()
-    // obter apenas as figuras que estão próximas da borracha
     const figures = grid
         .getNearestFigures(x / currScale, y / currScale)
         .sort((fig1, fig2) => fig2.id - fig1.id) // inverse order to remove the newest first
@@ -85,12 +88,14 @@ export function CanvasEraser (grid, canvasContext, items) {
         prev.y = prev.y * currScale
         currPoint.x = currPoint.x * currScale
         currPoint.y = currPoint.y * currScale
+        // TODO(peddavid, simaovii): width shadowed?
         const width = currPoint.getStyleOf(figure.id).width
+        const canvasContext = canvas.getContext('2d')
         const rect = new Rect(prev, currPoint, width, canvasContext)
         // const rect = myContext.getRect(prev, currPoint, width)
-        if (movingEraser) {
+        if (this.movingEraser) {
           // TODO(simaovii): não verifica se toda a área da borracha interseta a linha desenhada
-          if (intersectsLine(eraseLine, prev, currPoint)) {
+          if (this.intersectsLine(this.eraseLine, prev, currPoint)) {
             grid.removeFigure(figure, canvasContext, currScale)
             return
           }
@@ -111,7 +116,7 @@ export function CanvasEraser (grid, canvasContext, items) {
   }
 
   // TODO(simaovii): por esta função em Figure para não ter que passar eraseLine
-  const intersectsLine = function (eraseLine, lineP1, lineP2) {
+  intersectsLine (eraseLine, lineP1, lineP2) {
     // Por agora, este método apenas verifica se a linha da borracha intersecta a linha da figura.
     // É de ter em conta que esta linha não conta com a espessura. Se for necessário tem de se alterar este método para verificar se a linha
     // da borracha intersecta alguma linha do rectângulo
@@ -126,16 +131,13 @@ export function CanvasEraser (grid, canvasContext, items) {
       auxLineP2.x = auxLineP2.x - 1
       figLineB = auxLineP2.x - lineP1.x
     }
-    let figLineM = figLineA / figLineB
+    const figLineM = figLineA / figLineB
     const figLineC = auxLineP2.x * lineP1.y - lineP1.x * auxLineP2.y
-    let figLineN = figLineC / figLineB
+    const figLineN = figLineC / figLineB
 
-    const points = eraseLine.points
+    const prev = eraseLine.start
+    const currPoint = eraseLine.end
 
-    var prev = points[0]
-    const currPoint = points[1]
-
-    let pointBelongsToFirstLine = false
     // TODO(simaovii): guardar em cache a equação da reta da borracha pois vai ser a mesma para os restantes pontos da figura assim como para as restantes figuras do canvas
     // calculate part of erase line equation => y=mx+n
     const eraseLineA = currPoint.y - prev.y
@@ -173,9 +175,7 @@ export function CanvasEraser (grid, canvasContext, items) {
     if (auxLineP2.y < lineP1.y) { auxLineP1.y = auxLineP2.y; auxLineP2.y = lineP1.y }
 
     // check if intersection point is inside segment interval of figure line
-    if (intersectX <= auxLineP2.x && intersectX >= auxLineP1.x && intersectY <= auxLineP2.y && intersectY >= auxLineP1.y) {
-      pointBelongsToFirstLine = true
-    } else {
+    if (!(intersectX <= auxLineP2.x && intersectX >= auxLineP1.x && intersectY <= auxLineP2.y && intersectY >= auxLineP1.y)) {
       return false
     }
 
@@ -189,9 +189,7 @@ export function CanvasEraser (grid, canvasContext, items) {
 
     // check if intersection point is inside segment interval of erase line
     if (intersectX <= auxCurrPoint.x && intersectX >= auxprevPoint.x && intersectY <= auxCurrPoint.y && intersectY >= auxprevPoint.y) {
-      if (pointBelongsToFirstLine) {
-        return true
-      }
+      return true
     }
     return false
   }

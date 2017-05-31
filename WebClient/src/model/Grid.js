@@ -1,4 +1,4 @@
-import findNearest from './../util/Math'
+import { findNearest } from './../util/Math'
 import { Point, PointStyle } from './Point'
 import { Figure, FigureStyle } from './Figure'
 
@@ -212,13 +212,14 @@ export default function Grid (initialFigures, _canvasWidth, _canvasHeight, currI
     const x = Math.round(pointX)
     const y = Math.round(pointY)
     let figuresToRet = new Set()
+    // BUG(peddavid): throws error if grid is empty
     const minX = findNearest(grid, x - maxLinePart, arrayNode => arrayNode.val)
     if (grid[minX].val < x - maxLinePart * 2) { // margin
       return []
     }
     const maxX = findNearest(grid, x + maxLinePart, arrayNode => arrayNode.val)
     for (let widthNode = grid[minX], widthIdx = minX; widthIdx < grid.length && widthIdx <= maxX; widthNode = grid[++widthIdx]) {
-      const minY = findNearest(widthNode.height, arrayNode => arrayNode.y, y - maxLinePart)
+      const minY = findNearest(widthNode.height, y - maxLinePart, arrayNode => arrayNode.y)
       if (widthNode.height[minY].y < y - maxLinePart * 2) {
         continue
       }
