@@ -1,7 +1,7 @@
 const { resolve } = require('path')
 
 module.exports = {
-  entry: './src/index.js',
+  entry: './app/index.js',
   output: {
     filename: 'bundle.js',
     path: resolve(__dirname, 'dist')
@@ -14,6 +14,7 @@ module.exports = {
       {
         enforce: 'pre',
         test: /\.jsx?$/,
+        exclude: /node_modules/,
         loader: 'standard-loader'
       },
       {
@@ -22,6 +23,14 @@ module.exports = {
         use: {
           loader: 'babel-loader'
         }
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader']
+      },
+      {
+        test: /\.(png|ttf|eot|svg|woff2?)$/,
+        loader: 'url-loader?publicPath=dist/'
       }
     ]
   },

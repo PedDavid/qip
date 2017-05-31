@@ -1,9 +1,11 @@
 // @flow
 
+import 'semantic-ui-css/semantic.min.css'
+
 import React from 'react'
 import { render } from 'react-dom'
 
-import Canvas from './components/Canvas'
+import Canvas from './scene/Board/components/Canvas'
 
 import Pen from './model/tools/Pen'
 import Eraser from './model/tools/Eraser'
