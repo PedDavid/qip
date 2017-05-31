@@ -8,6 +8,9 @@ export function findNearest<T> (array: Array<T>, value: number, mapper: (T) => n
   let right = array.length - 1
 
   // Check out of bounds
+  if (right < 1) {
+    return 0
+  }
   if (value < mapper(array[left])) {
     return left
   }
