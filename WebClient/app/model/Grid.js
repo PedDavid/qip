@@ -1,20 +1,10 @@
 import { findNearest } from './../util/Math'
 import { Point } from './Point'
 
-export default function Grid (initialFigures, _canvasWidth, _canvasHeight, currIdx) {
+export default function Grid (initialFigures, currIdx) {
   let figures = initialFigures    // TODO(simaovii): Change to hashmap
-  let canvasWidth = _canvasWidth
-  let canvasHeight = _canvasHeight
-
-  this.setCanvasWidth = function (newWidth) {
-    canvasWidth = newWidth
-  }
-
-  this.setCanvasHeight = function (newHeight) {
-    canvasHeight = newHeight
-  }
-
   let currFigureId = currIdx
+
   // return the new figure idx. If there is already the next idx, return the idx plus 0.1. This is because the concurrency
   this.getNewFigureIdx = function () {
     let toRet = currFigureId + 1
@@ -134,10 +124,11 @@ export default function Grid (initialFigures, _canvasWidth, _canvasHeight, currI
   }
 
   this.clean = function (context) {
+    const { width, height } = context.canvas
     figures = {}
     currFigureId = 0
     grid = []
-    context.clearRect(0, 0, canvasWidth, canvasHeight)
+    context.clearRect(0, 0, width, height)
   }
 
   this.addFigure = function (figure) {
@@ -167,23 +158,14 @@ export default function Grid (initialFigures, _canvasWidth, _canvasHeight, currI
   }
 
   this.draw = function (context, currScale) {
-    context.clearRect(0, 0, canvasWidth, canvasHeight)
+    const { width, height } = context.canvas
+    context.clearRect(0, 0, width, height)
 
     Object.entries(figures) // devolve um array (length = soma de todas as propriedades do objeto) de arrays de [key, value].
                             // Cada array [key, value] tem a chave do atributo assim como o valor guardado nesse atributo
                             // nota: não usar localecompare. não tem o efeito desejado
         .sort(([K1], [K2]) => K1 - K2) // são passados à função sort o 1º e 2º índices do array, que por sua vez, são arrays. Ao usar destructors, apenas são obtidos as chaves de cada array
         .forEach(([id, f]) => f.draw(context, currScale))
-  }
-
-  this.getWidth = function () {
-    // return grid.length;
-    return canvasWidth
-  }
-
-  this.getHeight = function () {  // TODO(simaovii): ver se vale a pena receber a coluna como parametro
-    // return grid[0].length;
-    return canvasHeight
   }
 
   this.getFigures = function () {

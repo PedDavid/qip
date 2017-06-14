@@ -17,16 +17,11 @@ export default class Eraser implements Tool {
 
   onPress (event, currScale) {
     const coord = { x: event.offsetX, y: event.offsetY }
-    // event.clientX - 5 + document.body.scrollLeft, event.clientY - 5 + document.body.scrollTop
 
     this.erase(coord.x, coord.y, currScale, event.target)
 
     const point = new Point(Math.round(coord.x), Math.round(coord.y))
     this.previousPoint = point
-
-    // if (event.button == 5) {
-    // this.erasedByStylus = true
-    // changeStyle(document.getElementById("eraser"))
   }
 
   onSwipe (event, currScale) {
@@ -43,7 +38,6 @@ export default class Eraser implements Tool {
     this.erase(coord.x, coord.y, currScale, event.target)
 
     this.previousPoint = point
-    // context.clearRect(event.clientX - 5 + document.body.scrollLeft, event.clientY - 5 + document.body.scrollTop, 15, 15) //verificar se está a apagar (não é um algoritmo bonito)
   }
 
   onPressUp () {
@@ -51,10 +45,7 @@ export default class Eraser implements Tool {
   }
 
   onOut () {
-    // TODO(peddavid): simplify this logic? (this.movingEraser = false) or (this.movingEraser = !this.movingEraser)
-    if (this.movingEraser) {
-      this.movingEraser = false
-    }
+    this.movingEraser = false
     this.eraseLine = null
     this.previousPoint = null
   }

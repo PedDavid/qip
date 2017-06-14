@@ -3,8 +3,8 @@ import { Figure, FigureStyle } from './../Figure'
 import Tool from './Tool'
 
 export default class Pen implements Tool {
-  constructor (grid, name, width) {
-    this.name = name
+  constructor (grid, color, width) {
+    this.color = color
     this.width = width
 
     this.grid = grid
@@ -16,9 +16,9 @@ export default class Pen implements Tool {
     const x = event.offsetX
     const y = event.offsetY
 
-    const figStyle = new FigureStyle(this.name, scale)
+    const figStyle = new FigureStyle(this.color, scale)
     // Create a new Figure
-    this.currentFigure = new Figure(null, null, figStyle)
+    this.currentFigure = new Figure(figStyle)
 
     const press = event.pressure * this.width
     this.currentFigure.addPoint({x, y, style: { press }})
@@ -26,10 +26,10 @@ export default class Pen implements Tool {
     const canvasContext = event.target.getContext('2d')
     canvasContext.beginPath()
     canvasContext.arc(x, y, press / 4, 0, 2 * Math.PI, false)
-    canvasContext.fillStyle = this.name
+    canvasContext.fillStyle = this.color
     canvasContext.fill()
     canvasContext.lineWidth = press / 2
-    canvasContext.strokeStyle = this.name
+    canvasContext.strokeStyle = this.color
     canvasContext.stroke()
   }
 
@@ -76,7 +76,7 @@ export default class Pen implements Tool {
 
     // fazer reset à figura para que não continue a desenhar se o utilizador sair da área do canvas
     // Desta forma, se o utilizador voltar à área do canvas com o ponteiro premido, irá desenhar uma nova figura
-    const figStyle = new FigureStyle(this.name)
-    this.currentFigure = new Figure(null, null, figStyle)
+    const figStyle = new FigureStyle(this.color)
+    this.currentFigure = new Figure(figStyle)
   }
 }

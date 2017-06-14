@@ -1,5 +1,5 @@
 // Figure: function (id, isClosedForm = false) {
-export function Figure (id, isClosedForm, figureStyle) {
+export function Figure (figureStyle, id = null) {
   this.id = id
   this.subFigureLevel = 0   // subnivel da figura -> indica quantas subfiguras já gerou
   this.points = []
@@ -46,7 +46,7 @@ export function Figure (id, isClosedForm, figureStyle) {
       this.points = pts.slice(0, idxToRem)          // a figura atual fica com os pontos até o idx de remoção (não incluindo o ponto de remoção)
       this.subFigureLevel++                         // aumenta o subnivel de figura em que está
 
-      const newFig = new Figure(newSubId(this.id))  // cria uma nova figura
+      const newFig = new Figure(this.figureStyle, newSubId(this.id))  // cria uma nova figura
       newFig.points = pts.slice(idxToRem)           // que fica com o resto dos pontos
       newFig.subFigureLevel = this.subFigureLevel   // o subnivel fica igual ao da sua figura mãe
 
