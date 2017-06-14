@@ -11,7 +11,7 @@ export function Figure (id, isClosedForm, figureStyle) {
   }
 
   this.addPoint = function (point) {
-    this.points.push(point)
+    this.points.push(point) // new Point { x, y, this.id }
   }
 
   this.addPoints = function (points) {

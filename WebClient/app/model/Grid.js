@@ -1,6 +1,5 @@
 import { findNearest } from './../util/Math'
-import { Point, PointStyle } from './Point'
-import { Figure, FigureStyle } from './Figure'
+import { Point } from './Point'
 
 export default function Grid (initialFigures, _canvasWidth, _canvasHeight, currIdx) {
   let figures = initialFigures    // TODO(simaovii): Change to hashmap
@@ -43,6 +42,7 @@ export default function Grid (initialFigures, _canvasWidth, _canvasHeight, currI
   }
 
   this.updateMaxLinePart = function (point1, point2, currentFigure, pointStyle) {
+    if (point1 === null || point2 === null) { return }
     const distance = Math.sqrt(Math.pow((point1.x - point2.x), 2) + Math.pow((point1.y - point2.y), 2))
 
     // if distance between points is more than threshold, create some more points and add them to the grid and the figure
@@ -50,9 +50,8 @@ export default function Grid (initialFigures, _canvasWidth, _canvasHeight, currI
       if (maxLinePart === 0) {
         maxLinePart = maxLinePartThreshold
       }
-      let newPoints = this.splitLine(point1, point2, maxLinePart)
-
-      newPoints = newPoints.map(point => this.getOrCreatePoint(point.x, point.y))
+      const newPoints = this.splitLine(point1, point2, maxLinePart)
+        .map(point => this.getOrCreatePoint(point.x, point.y))
 
       newPoints.forEach(point => point.addFigure(currentFigure.id, pointStyle))
       currentFigure.addPoints(newPoints)
@@ -142,6 +141,17 @@ export default function Grid (initialFigures, _canvasWidth, _canvasHeight, currI
   }
 
   this.addFigure = function (figure) {
+    if (figure.id === null) {
+      figure.id = this.getNewFigureIdx()
+    }
+    let prev = null
+    figure.points = figure.points.map(point => {
+      const gridPoint = this.getOrCreatePoint(point.x, point.y)
+      gridPoint.addFigure(figure.id, point.style)
+      this.updateMaxLinePart(prev, gridPoint, figure.id, point.style)
+      prev = gridPoint
+      return gridPoint
+    })
     figures[figure.id] = figure
   }
 
@@ -164,30 +174,6 @@ export default function Grid (initialFigures, _canvasWidth, _canvasHeight, currI
                             // nota: não usar localecompare. não tem o efeito desejado
         .sort(([K1], [K2]) => K1 - K2) // são passados à função sort o 1º e 2º índices do array, que por sua vez, são arrays. Ao usar destructors, apenas são obtidos as chaves de cada array
         .forEach(([id, f]) => f.draw(context, currScale))
-  }
-
-  // this function draws all figures and insert it's points into grid. This avoids a second iteration of all figures, just to insert grid's points
-  this.initialDraw = function (context) {
-    context.clearRect(0, 0, canvasWidth, canvasHeight)
-
-    let figsObj = {}
-
-    // TODO(peddavid): clean this
-    figures
-      .sort((f1, f2) => f1.id - f2.id)
-      .map(figure => {
-        let newFigure = new Figure(figure.id, false, new FigureStyle(figure.figureStyle.color))
-        for (const pname in figure.points) {
-          const point = figure.points[pname]
-          let npoint = this.getOrCreatePoint(point.x, point.y)
-          npoint.addFigure(newFigure.id, new PointStyle(point.pointStyle.width))
-          newFigure.addPoint(npoint)
-        }
-        newFigure.draw(context)
-        figsObj[newFigure.id] = newFigure
-        return newFigure
-      })
-    figures = figsObj
   }
 
   this.getWidth = function () {
