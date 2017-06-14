@@ -83,6 +83,8 @@ export default class Eraser implements Tool {
         const width = currPoint.getStyleOf(figure.id).width
         const canvasContext = canvas.getContext('2d')
         const rect = new Rect(prev, currPoint, width, canvasContext)
+        const canvasWidth = canvasContext.canvas.width 
+        const canvasHeight = canvasContext.canvas.height        
         // const rect = myContext.getRect(prev, currPoint, width)
         if (this.movingEraser) {
           // TODO(simaovii): não verifica se toda a área da borracha interseta a linha desenhada
@@ -92,8 +94,8 @@ export default class Eraser implements Tool {
           }
         } else {
           // TODO(simaovii): ver se nao basta iterar sobre os 4 pontos maximos da borracha
-          for (let c = lix > 0 ? lix : 0; c < grid.getWidth() && c < lsx; ++c) {
-            for (let l = liy > 0 ? liy : 0; l < grid.getHeight() && l < lsy; ++l) {
+          for (let c = lix > 0 ? lix : 0; c < canvasWidth && c < lsx; ++c) {
+            for (let l = liy > 0 ? liy : 0; l < canvasHeight && l < lsy; ++l) {
               if (rect.contains({ x: c, y: l })) {
                 grid.removeFigure(figure, canvasContext, currScale)
                 return
