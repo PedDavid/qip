@@ -21,8 +21,9 @@ export default class Eraser implements Tool {
   }
 
   onSwipe (event, currScale) {
-    if (event.buttons <= 0)
+    if (event.buttons <= 0) {
       return
+    }
 
     const coord = { x: event.offsetX, y: event.offsetY }
     const previousPoint = this.eraseLine.end
@@ -41,7 +42,7 @@ export default class Eraser implements Tool {
   }
 
   onOut () {
-    this.eraseLine = null //todo: this will throw error if user draws back in the canvas. insert a check in onSwipe
+    this.eraseLine = null // TODO(simaovii): this will throw error if user draws back in the canvas. insert a check in onSwipe
   }
 
   erase (x, y, currScale, canvas) {
@@ -77,10 +78,9 @@ export default class Eraser implements Tool {
         const width = currPoint.getStyleOf(figure.id).width
         const canvasContext = canvas.getContext('2d')
         const rect = new Rect(prev, currPoint, width, canvasContext)
-        const canvasWidth = canvasContext.canvas.width 
-        const canvasHeight = canvasContext.canvas.height        
+        const { canvasWidth, canvasHeight } = canvasContext.canvas
         // const rect = myContext.getRect(prev, currPoint, width)
-        if (this.eraseLine!=null) {
+        if (this.eraseLine !== null) {
           // TODO(simaovii): não verifica se toda a área da borracha interseta a linha desenhada
           if (this.intersectsLine(this.eraseLine, prev, currPoint)) {
             grid.removeFigure(figure, canvasContext, currScale)
