@@ -1,21 +1,10 @@
 import { findNearest } from './../util/Math'
 import { Point, PointStyle } from './Point'
-import { Figure, FigureStyle } from './Figure'
 
-export default function Grid (initialFigures, _canvasWidth, _canvasHeight, currIdx) {
+export default function Grid (initialFigures, currIdx) {
   let figures = initialFigures    // TODO(simaovii): Change to hashmap
-  let canvasWidth = _canvasWidth
-  let canvasHeight = _canvasHeight
-
-  this.setCanvasWidth = function (newWidth) {
-    canvasWidth = newWidth
-  }
-
-  this.setCanvasHeight = function (newHeight) {
-    canvasHeight = newHeight
-  }
-
   let currFigureId = currIdx
+
   // return the new figure idx. If there is already the next idx, return the idx plus 0.1. This is because the concurrency
   this.getNewFigureIdx = function () {
     let toRet = currFigureId + 1
@@ -43,6 +32,7 @@ export default function Grid (initialFigures, _canvasWidth, _canvasHeight, currI
   }
 
   this.updateMaxLinePart = function (point1, point2, currentFigure, pointStyle) {
+    if (point1 === null || point2 === null) { return }
     const distance = Math.sqrt(Math.pow((point1.x - point2.x), 2) + Math.pow((point1.y - point2.y), 2))
 
     // if distance between points is more than threshold, create some more points and add them to the grid and the figure
@@ -51,11 +41,12 @@ export default function Grid (initialFigures, _canvasWidth, _canvasHeight, currI
         maxLinePart = maxLinePartThreshold
       }
       let newPoints = this.splitLine(point1, point2, maxLinePart)
-
       newPoints = newPoints.map(point => this.getOrCreatePoint(point.x, point.y))
 
-      newPoints.forEach(point => point.addFigure(currentFigure.id, pointStyle))
-      currentFigure.addPoints(newPoints)
+      newPoints.forEach(point => {
+        point.addFigure(currentFigure.id, pointStyle)
+        currentFigure.addPoint(point)
+      })
       return
     }
 
@@ -135,13 +126,30 @@ export default function Grid (initialFigures, _canvasWidth, _canvasHeight, currI
   }
 
   this.clean = function (context) {
+    const { width, height } = context.canvas
     figures = {}
     currFigureId = 0
     grid = []
-    context.clearRect(0, 0, canvasWidth, canvasHeight)
+    context.clearRect(0, 0, width, height)
   }
 
   this.addFigure = function (figure) {
+    if (figure.id === null) {
+      figure.id = this.getNewFigureIdx()
+    }
+    let prev = null
+    const auxPoints = figure.points
+    figure.points = [] // must be that way because in forEach updateMaxLinePart is also adding points to figure
+    // TODO(peddavid): FlatMap then? Instead of this auxPoints and mutation in points?
+    auxPoints.forEach(point => {
+      const gridPoint = this.getOrCreatePoint(point.x, point.y)
+      // gridPoint.addFigure(figure.id, point.style)
+      figure.addPoint(gridPoint)
+      const pointStyle = new PointStyle(point.style.press) // TODO(simaovii): isto pode sair daqui quando o dto Ponto tiver o style como PointStyle
+      gridPoint.addFigure(figure.id, pointStyle)
+      this.updateMaxLinePart(prev, gridPoint, figure, pointStyle)
+      prev = gridPoint
+    })
     figures[figure.id] = figure
   }
 
@@ -157,47 +165,14 @@ export default function Grid (initialFigures, _canvasWidth, _canvasHeight, currI
   }
 
   this.draw = function (context, currScale) {
-    context.clearRect(0, 0, canvasWidth, canvasHeight)
+    const { width, height } = context.canvas
+    context.clearRect(0, 0, width, height)
 
     Object.entries(figures) // devolve um array (length = soma de todas as propriedades do objeto) de arrays de [key, value].
                             // Cada array [key, value] tem a chave do atributo assim como o valor guardado nesse atributo
                             // nota: não usar localecompare. não tem o efeito desejado
         .sort(([K1], [K2]) => K1 - K2) // são passados à função sort o 1º e 2º índices do array, que por sua vez, são arrays. Ao usar destructors, apenas são obtidos as chaves de cada array
         .forEach(([id, f]) => f.draw(context, currScale))
-  }
-
-  // this function draws all figures and insert it's points into grid. This avoids a second iteration of all figures, just to insert grid's points
-  this.initialDraw = function (context) {
-    context.clearRect(0, 0, canvasWidth, canvasHeight)
-
-    let figsObj = {}
-
-    // TODO(peddavid): clean this
-    figures
-      .sort((f1, f2) => f1.id - f2.id)
-      .map(figure => {
-        let newFigure = new Figure(figure.id, false, new FigureStyle(figure.figureStyle.color))
-        for (const pname in figure.points) {
-          const point = figure.points[pname]
-          let npoint = this.getOrCreatePoint(point.x, point.y)
-          npoint.addFigure(newFigure.id, new PointStyle(point.pointStyle.width))
-          newFigure.addPoint(npoint)
-        }
-        newFigure.draw(context)
-        figsObj[newFigure.id] = newFigure
-        return newFigure
-      })
-    figures = figsObj
-  }
-
-  this.getWidth = function () {
-    // return grid.length;
-    return canvasWidth
-  }
-
-  this.getHeight = function () {  // TODO(simaovii): ver se vale a pena receber a coluna como parametro
-    // return grid[0].length;
-    return canvasHeight
   }
 
   this.getFigures = function () {
@@ -224,7 +199,9 @@ export default function Grid (initialFigures, _canvasWidth, _canvasHeight, currI
         continue
       }
       const maxY = findNearest(widthNode.height, y + maxLinePart, arrayNode => arrayNode.y)
-      for (let heightNode = widthNode.height[minY], heightIdx = minY; heightIdx < widthNode.height.length && heightIdx <= maxY; heightNode = widthNode.height[++heightIdx]) {
+      for (let heightNode = widthNode.height[minY], heightIdx = minY;
+              heightIdx < widthNode.height.length && heightIdx <= maxY;
+              heightNode = widthNode.height[++heightIdx]) {
         heightNode.getFigureIds().forEach(pointFigure => figuresToRet.add(pointFigure))
       }
     }

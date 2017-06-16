@@ -7,43 +7,34 @@ import Tool from './Tool'
 export default class Eraser implements Tool {
   constructor (grid, width) {
     this.width = width
-
     this.grid = grid
-
-    this.movingEraser = null
     this.eraseLine = null
-    this.previousPoint = null
   }
 
   onPress (event, currScale) {
     const coord = { x: event.offsetX, y: event.offsetY }
-    // event.clientX - 5 + document.body.scrollLeft, event.clientY - 5 + document.body.scrollTop
 
     this.erase(coord.x, coord.y, currScale, event.target)
 
     const point = new Point(Math.round(coord.x), Math.round(coord.y))
-    this.previousPoint = point
-
-    // if (event.button == 5) {
-    // this.erasedByStylus = true
-    // changeStyle(document.getElementById("eraser"))
+    this.eraseLine = new Line(null, point)
   }
 
   onSwipe (event, currScale) {
+    if (event.buttons <= 0) {
+      return
+    }
+
     const coord = { x: event.offsetX, y: event.offsetY }
-    const previousPoint = this.previousPoint
+    const previousPoint = this.eraseLine.end
     // Ignore if swiped to last coordinates
     if (previousPoint === null || (previousPoint.x === coord.x && previousPoint.y === coord.y)) {
       return
     }
 
     const point = new Point(Math.round(coord.x), Math.round(coord.y))
-    this.eraseLine = new Line(this.previousPoint, point)
-    this.movingEraser = true
+    this.eraseLine = new Line(previousPoint, point)
     this.erase(coord.x, coord.y, currScale, event.target)
-
-    this.previousPoint = point
-    // context.clearRect(event.clientX - 5 + document.body.scrollLeft, event.clientY - 5 + document.body.scrollTop, 15, 15) //verificar se está a apagar (não é um algoritmo bonito)
   }
 
   onPressUp () {
@@ -51,12 +42,7 @@ export default class Eraser implements Tool {
   }
 
   onOut () {
-    // TODO(peddavid): simplify this logic? (this.movingEraser = false) or (this.movingEraser = !this.movingEraser)
-    if (this.movingEraser) {
-      this.movingEraser = false
-    }
-    this.eraseLine = null
-    this.previousPoint = null
+    this.eraseLine = null // TODO(simaovii): this will throw error if user draws back in the canvas. insert a check in onSwipe
   }
 
   erase (x, y, currScale, canvas) {
@@ -92,8 +78,9 @@ export default class Eraser implements Tool {
         const width = currPoint.getStyleOf(figure.id).width
         const canvasContext = canvas.getContext('2d')
         const rect = new Rect(prev, currPoint, width, canvasContext)
+        const { canvasWidth, canvasHeight } = canvasContext.canvas
         // const rect = myContext.getRect(prev, currPoint, width)
-        if (this.movingEraser) {
+        if (this.eraseLine !== null) {
           // TODO(simaovii): não verifica se toda a área da borracha interseta a linha desenhada
           if (this.intersectsLine(this.eraseLine, prev, currPoint)) {
             grid.removeFigure(figure, canvasContext, currScale)
@@ -101,8 +88,8 @@ export default class Eraser implements Tool {
           }
         } else {
           // TODO(simaovii): ver se nao basta iterar sobre os 4 pontos maximos da borracha
-          for (let c = lix > 0 ? lix : 0; c < grid.getWidth() && c < lsx; ++c) {
-            for (let l = liy > 0 ? liy : 0; l < grid.getHeight() && l < lsy; ++l) {
+          for (let c = lix > 0 ? lix : 0; c < canvasWidth && c < lsx; ++c) {
+            for (let l = liy > 0 ? liy : 0; l < canvasHeight && l < lsy; ++l) {
               if (rect.contains({ x: c, y: l })) {
                 grid.removeFigure(figure, canvasContext, currScale)
                 return

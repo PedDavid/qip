@@ -6,11 +6,11 @@ export function Point (x, y) {
   const figures = new Map() // map(key = figure ids, value = point style)
 
   this.getX = function () {
-    return x
+    return this.x
   }
 
   this.getY = function () {
-    return y
+    return this.y
   }
 
   this.addFigure = function (figureId, pointStyle) {

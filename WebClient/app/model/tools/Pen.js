@@ -1,11 +1,10 @@
-import { PointStyle } from './../Point'
 import { Figure, FigureStyle } from './../Figure'
 
 import Tool from './Tool'
 
 export default class Pen implements Tool {
-  constructor (grid, name, width) {
-    this.name = name
+  constructor (grid, color, width) {
+    this.color = color
     this.width = width
 
     this.grid = grid
@@ -17,26 +16,20 @@ export default class Pen implements Tool {
     const x = event.offsetX
     const y = event.offsetY
 
-    const figStyle = new FigureStyle(this.name, scale)
+    const figStyle = new FigureStyle(this.color, scale)
     // Create a new Figure
-    this.currentFigure = new Figure(this.grid.getNewFigureIdx(), null, figStyle)
+    this.currentFigure = new Figure(figStyle)
 
-    let press = event.pressure * this.width
-    const pointStyle = new PointStyle(press)
-    // Get the point
-    const point = this.grid.getOrCreatePoint(x, y)
-    // Add point to the Figure
-    this.currentFigure.addPoint(point)
-    // Add Figure to the point
-    point.addFigure(this.currentFigure.id, pointStyle)
+    const press = event.pressure * this.width
+    this.currentFigure.addPoint({x, y, style: { press }})
 
     const canvasContext = event.target.getContext('2d')
     canvasContext.beginPath()
     canvasContext.arc(x, y, press / 4, 0, 2 * Math.PI, false)
-    canvasContext.fillStyle = this.name
+    canvasContext.fillStyle = this.color
     canvasContext.fill()
     canvasContext.lineWidth = press / 2
-    canvasContext.strokeStyle = this.name
+    canvasContext.strokeStyle = this.color
     canvasContext.stroke()
   }
 
@@ -50,36 +43,20 @@ export default class Pen implements Tool {
       }
 
       const press = event.pressure * this.width
-      const pointStyle = new PointStyle(press)
+      const last = this.currentFigure.points[this.currentFigure.points.length - 1]
+      // Ignore if swiped to last coordinates
+      if (last.x === x && last.y === y) {
+        return
+      }
+      this.currentFigure.addPoint({x, y, style: { press }})
 
       const canvasContext = event.target.getContext('2d')
       canvasContext.beginPath() // também tem de estar aqui para dar para fazer pressure sensitive
 
-      const point = this.grid.getOrCreatePoint(x, y)
-
-      // esta situação pode acontecer quando o utilizador sai fora dos limites do canvas
-      // caso aconteça, acrescentar o primeiro ponto
-      if (this.currentFigure.points.length === 0) {
-        point.addFigure(this.currentFigure.id, pointStyle)
-        this.currentFigure.addPoint(point)
-        return
-      }
-
-      const last = this.currentFigure.points[this.currentFigure.points.length - 1]
-      // Ignore if swiped to last coordinates
-      if (last.x === point.x && last.y === point.y) {
-        return
-      }
-      point.addFigure(this.currentFigure.id, pointStyle)
-      this.currentFigure.addPoint(point)
-
-      this.grid.updateMaxLinePart(last, point, this.currentFigure, pointStyle) // atualizar a variável que guarda o valor máximo entre pontos intermédios de retas
-      const width = event.pressure * this.width
-
       canvasContext.moveTo(last.x, last.y)
-      canvasContext.lineTo(point.x, point.y)
+      canvasContext.lineTo(x, y)
 
-      canvasContext.lineWidth = width
+      canvasContext.lineWidth = press
       canvasContext.lineJoin = canvasContext.lineCap = 'round'
       canvasContext.stroke()
     }
@@ -99,7 +76,7 @@ export default class Pen implements Tool {
 
     // fazer reset à figura para que não continue a desenhar se o utilizador sair da área do canvas
     // Desta forma, se o utilizador voltar à área do canvas com o ponteiro premido, irá desenhar uma nova figura
-    const figStyle = new FigureStyle(this.name)
-    this.currentFigure = new Figure(grid.getNewFigureIdx(), null, figStyle)
+    const figStyle = new FigureStyle(this.color)
+    this.currentFigure = new Figure(figStyle)
   }
 }
