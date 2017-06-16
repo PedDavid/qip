@@ -25,7 +25,7 @@ module.exports = {
         }
       },
       {
-        test: /\.css$/,
+        test: /\.s?css$/,
         use: [{
           loader: 'style-loader'
         }, {
@@ -33,6 +33,8 @@ module.exports = {
           options: {
             modules: true
           }
+        }, {
+          loader: 'sass-loader'
         }]
       }
     ]

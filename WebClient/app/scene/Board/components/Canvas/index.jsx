@@ -1,7 +1,7 @@
 // @flow
 
 import React from 'react'
-import styles from './styles.css'
+import styles from './styles.scss'
 
 type PointerEvents = {
   onDown?: any => void,
