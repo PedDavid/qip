@@ -1,6 +1,5 @@
 import { findNearest } from './../util/Math'
-import { Point } from './Point'
-import { PointStyle } from './Point'
+import { Point, PointStyle } from './Point'
 
 export default function Grid (initialFigures, currIdx) {
   let figures = initialFigures    // TODO(simaovii): Change to hashmap
@@ -46,7 +45,7 @@ export default function Grid (initialFigures, currIdx) {
 
       newPoints.forEach(point => {
         point.addFigure(currentFigure.id, pointStyle)
-        currentFigure.addPoint(point)      
+        currentFigure.addPoint(point)
       })
       return
     }
@@ -140,12 +139,12 @@ export default function Grid (initialFigures, currIdx) {
     }
     let prev = null
     const auxPoints = figure.points
-    figure.points=[] //must be that way because in forEach updateMaxLinePart is also adding points to figure
+    figure.points = []// must be that way because in forEach updateMaxLinePart is also adding points to figure
     auxPoints.forEach(point => {
       const gridPoint = this.getOrCreatePoint(point.x, point.y)
-      //gridPoint.addFigure(figure.id, point.style)
+      // gridPoint.addFigure(figure.id, point.style)
       figure.addPoint(gridPoint)
-      const pointStyle = new PointStyle(point.style.press) //todo: isto pode sair daqui quando o dto Ponto tiver o style como PointStyle
+      const pointStyle = new PointStyle(point.style.press) // todo: isto pode sair daqui quando o dto Ponto tiver o style como PointStyle
       gridPoint.addFigure(figure.id, pointStyle)
       this.updateMaxLinePart(prev, gridPoint, figure, pointStyle)
       prev = gridPoint
@@ -164,6 +163,33 @@ export default function Grid (initialFigures, currIdx) {
     figure.points.forEach(point => point.removeFigure(figure.id))
   }
 
+  this.moveImage = function (img, newSrcPoint, context, currScale) {
+    img.setSrcPoint(newSrcPoint)
+    this.draw(context, currScale)
+  }
+
+  this.moveFigure = function (figure, destPoint, context, scale) {
+    const destPointOffsetX = destPoint.x
+    const destPointOffsetY = destPoint.y
+    // criar todos os novos pontos novamente, com as novas posições
+    let pointsClone = figure.points.map(point => {
+      return {x: point.x, y: point.y, style: point.getStyleOf(figure.id)}
+    })
+
+    // nota: não tentar otimizar sem ver os problemas - é necessário estas variáveis e ordem de operações
+    // é necessário este forEach adicional pois as figuras são removidas dos pontos anteriores. Estava a haver conflitos com os pontos criados, que estavam a remover a figura do ponto anterior (mas esse ponto já estava a ser usado na nova figura)
+    figure.points.forEach(point => point.removeFigure(figure.id)) // remover figura de todos os seus pontos
+
+    pointsClone = pointsClone.map(point => {
+      const newPoint = this.getOrCreatePoint(point.x + destPointOffsetX, point.y + destPointOffsetY)
+      newPoint.addFigure(figure.id, point.style)
+      return newPoint
+    })
+
+    figure.points = pointsClone // reset points from figure
+    this.draw(context, scale)
+  }
+
   this.draw = function (context, currScale) {
     const { width, height } = context.canvas
     context.clearRect(0, 0, width, height)
@@ -177,6 +203,12 @@ export default function Grid (initialFigures, currIdx) {
 
   this.getFigures = function () {
     return figures
+  }
+
+  this.getImageFigures = function () {
+    /* Object.entries(figures)
+      .map(([figId, fig]) => fig)
+      .filter(fig => fig instanceof FigureImage) */
   }
 
   this.hasFigure = function (figureId) {
@@ -199,8 +231,8 @@ export default function Grid (initialFigures, currIdx) {
         continue
       }
       const maxY = findNearest(widthNode.height, y + maxLinePart, arrayNode => arrayNode.y)
-      for (let heightNode = widthNode.height[minY], heightIdx = minY; 
-              heightIdx < widthNode.height.length && heightIdx <= maxY; 
+      for (let heightNode = widthNode.height[minY], heightIdx = minY;
+              heightIdx < widthNode.height.length && heightIdx <= maxY;
               heightNode = widthNode.height[++heightIdx]) {
         heightNode.getFigureIds().forEach(pointFigure => figuresToRet.add(pointFigure))
       }
