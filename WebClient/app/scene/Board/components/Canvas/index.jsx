@@ -1,6 +1,7 @@
 // @flow
 
 import React from 'react'
+import styles from './styles.scss'
 
 type PointerEvents = {
   onDown?: any => void,
@@ -34,7 +35,6 @@ export default class Canvas extends React.Component {
 
   render () {
     const { onDown, onUp, onMove, onOut, ...props } = this.props
-    const style = { border: '1px solid #000000' } // TODO(PedDavid): Delete this, used only for debug purposes
-    return <canvas ref={canvas => { this.canvas = canvas }} {...props} style={style} />
+    return <canvas ref={canvas => { this.canvas = canvas }} className={styles.debug} {...props} />
   }
 }
