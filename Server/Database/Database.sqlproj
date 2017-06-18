@@ -63,12 +63,9 @@
     <Folder Include="dbo\Stored Procedures\" />
     <Folder Include="dbo\Views\" />
     <Folder Include="dbo\User Defined Types\" />
+    <Folder Include="tests" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="dbo\Tables\AppAuth.sql" />
-    <Build Include="dbo\Tables\Auth_Facebook.sql" />
-    <Build Include="dbo\Tables\Auth_GitHub.sql" />
-    <Build Include="dbo\Tables\Auth_Google.sql" />
     <Build Include="dbo\Tables\Board.sql" />
     <Build Include="dbo\Tables\Figure.sql" />
     <Build Include="dbo\Tables\Image.sql" />
@@ -93,5 +90,8 @@
     <Build Include="dbo\Stored Procedures\UpdateLine.sql" />
     <Build Include="dbo\Views\Full_User_Board.sql" />
     <Build Include="dbo\User Defined Types\Points.sql" />
+    <None Include="tests\FigureTestsScript.sql" />
+    <None Include="tests\ImageTestsScript.sql" />
+    <None Include="tests\LineTestsScript.sql" />
   </ItemGroup>
 </Project>
