@@ -1,0 +1,2 @@
+Criar excepções especificas para o caso de os Ids virem a null quando deviam vir com valor e outros casos que possam gerar excepções
+E para outros casos como virem campos a null na criação/actualização e estes não poderem ser null
