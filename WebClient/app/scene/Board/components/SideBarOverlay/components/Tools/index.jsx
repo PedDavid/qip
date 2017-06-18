@@ -13,6 +13,13 @@ import {
 
 const halfbtnSize = 20 
 
+const defaultTools = [
+  {type: 'pencil', content: [{value: 'black', size: 'large'}, {value: 'green', size: 'large'}, {value: 'blue', size: 'large'}, {value: 'red', size: 'large'},
+    {value: 'yellow', size: 'large'}, {value: 'pink', size: 'large'}, {value: 'grey', size: 'large'}]},
+  {type: 'selected radio', content: [{value: '5', size: 'mini'}, {value: '10', size: 'tiny'}, {value: '15', size: 'small'}, {value: '20', size: 'large'}]},    
+  {type: 'eraser', content: [{value: '5', size: 'mini'}, {value: '10', size: 'tiny'}, {value: '15', size: 'small'}, {value: '20', size: 'large'}]},  
+]
+
 export default class Tools extends React.Component {
   state = {
     visible: false,
@@ -35,10 +42,11 @@ export default class Tools extends React.Component {
         {/*Plus Button to Open Tools*/}
         <Button circular icon='plus' className={styles.plusMenu} style={{top: this.state.top, left: this.state.left}} onClick={this.toggleTools}/>
         <Grid divided textAlign='center' className={styles.plusMenu} style={gridDyamicStyle}>
-            {this.props.defaultTools.map(tool => (
+            {/* tool example = {type: pen, content:['black', 'red']*/}
+            {defaultTools.map(tool => (
               <Grid.Row columns={1} className={styles.toolRow} style={{padding:'0px'}}>
                 <Grid.Column style={{padding:'0px'}}>
-                  <Tool tool={tool}/>
+                  <Tool currTool={this.props.currTool} grid={this.props.grid} tool={tool} changeCurrentTool={this.props.changeCurrentTool} />
                 </Grid.Column>
               </Grid.Row>
             ))}
