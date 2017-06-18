@@ -1,0 +1,18 @@
+.plusMenu {
+  height: 40px;
+  width: 40px;
+  position: fixed;
+  right: 300px;
+  padding: 0px;
+  margin: 0px;
+}
+
+.toolRow {
+  height: 40px;
+  max-width: 40px;
+  border: 1px solid #000000;
+  text-align: center;
+  & :hover {
+    background-color: gray;
+  }
+}
