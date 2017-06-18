@@ -15,7 +15,7 @@ export default class Modalx extends React.Component {
         </Modal.Content>
         <Modal.Actions>
           <Button onClick={this.props.cleanCanvas} positive content='Yes' />
-          <Button onClick={this.props.closeModal} negative content='No'/>
+          <Button onClick={this.props.closeModal} negative content='No' />
         </Modal.Actions>
       </Modal>
     )

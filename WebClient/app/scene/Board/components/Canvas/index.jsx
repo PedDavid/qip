@@ -16,10 +16,10 @@ export default class Canvas extends React.Component {
 
   cleanCanvas () {
     console.log(this.props)
-    this.props.grid.clean(this.canvas.getContext("2d"))
+    this.props.grid.clean(this.canvas.getContext('2d'))
   }
 
-  componentDidMount () {  
+  componentDidMount () {
     this.componentDidUpdate()
   }
 
@@ -44,6 +44,6 @@ export default class Canvas extends React.Component {
   }
 
   render () {
-    return <canvas ref={(canvas) => {this.canvas = canvas} } className={styles.debug} width={this.props.width} height={this.props.height}/>
+    return <canvas ref={(canvas) => { this.canvas = canvas }} className={styles.debug} width={this.props.width} height={this.props.height} />
   }
 }

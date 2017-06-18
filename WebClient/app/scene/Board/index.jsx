@@ -34,7 +34,7 @@ export default class Board extends React.Component {
     onOut: event => this.state.currTool.onOut(event)
   }
   addFavorite (tool) {
-    this.setState(()=>this.state.favorites.push(tool)) // not needed to change prevState
+    this.setState(() => this.state.favorites.push(tool)) // not needed to change prevState
   }
 
   onPaste = (event) => {
@@ -54,22 +54,22 @@ export default class Board extends React.Component {
     this.closeModal()
   }
   openModal () {
-    this.setState({showModal: true})    
+    this.setState({showModal: true})
   }
   closeModal () {
-    this.setState({showModal: false})    
+    this.setState({showModal: false})
   }
   render () {
     return (
       <div onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.xpto}>
         {/* todo: why cant i send {...listeners} instead of listeners={listeners} ??? */}
-        <SideBarOverlay grid={grid} changeCurrentTool={this.changeCurrentTool.bind(this)} favorites={this.state.favorites} defaultTools={defaultTools} 
-                        currTool={this.state.currTool} cleanCanvas={this.openModal.bind(this)} addFavorite={this.addFavorite.bind(this)}>
-          <Canvas ref="canvas" grid={grid} width={1200} height={800} listeners={this.listeners}>
+        <SideBarOverlay grid={grid} changeCurrentTool={this.changeCurrentTool.bind(this)} favorites={this.state.favorites} defaultTools={defaultTools}
+          currTool={this.state.currTool} cleanCanvas={this.openModal.bind(this)} addFavorite={this.addFavorite.bind(this)}>
+          <Canvas ref='canvas' grid={grid} width={1200} height={800} listeners={this.listeners}>
             HTML5 Canvas not supported
           </Canvas>
         </SideBarOverlay>
-        <Modalx cleanCanvas={this.cleanCanvas.bind(this)} closeModal={this.closeModal.bind(this)} visible={this.state.showModal}/>
+        <Modalx cleanCanvas={this.cleanCanvas.bind(this)} closeModal={this.closeModal.bind(this)} visible={this.state.showModal} />
       </div>
     )
   }
