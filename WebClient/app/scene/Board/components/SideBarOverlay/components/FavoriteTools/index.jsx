@@ -3,10 +3,22 @@
 import React from 'react'
 import Favorite from './components/Favorite'
 import styles from './styles.scss'
+import Pen from './../../../../../../model/tools/Pen'
+import Eraser from './../../../../../../model/tools/Eraser'
 
 import { Grid, Button } from 'semantic-ui-react'
 
 export default class FavoriteTools extends React.Component {
+  addFavorite () {
+    const currTool = this.props.currTool
+    const favorites = this.props.favorites
+    if(currTool instanceof Pen && favorites.some(tool => tool.width == currTool.width && tool.color == currTool.color) || 
+      currTool instanceof Eraser && favorites.some(tool => tool.width == currTool.width))
+      alert('Sorry but this tool is already a favorite. Cannot insert duplicates!')
+    else
+      this.props.addFavorite(this.props.currTool)
+  }
+
   render () {
     return (
       <div className={styles.quickBtnsContainer}>
@@ -21,15 +33,14 @@ export default class FavoriteTools extends React.Component {
             {this.props.favorites.map(favorite => (
               <Grid.Row columns={1} className={styles.rows} style={{padding:'7px'}}>
                 <Grid.Column>
-                  <Favorite fav={favorite}/>
+                  <Favorite changeCurrentTool={this.props.changeCurrentTool} fav={favorite}/>
                 </Grid.Column>
               </Grid.Row>
             ))}
+            {/* Add Favorite Button */}
             <Grid.Row columns={1} className={styles.rows} style={{padding:'7px'}}>
               <Grid.Column>
-                <Button circular icon='plus' >
-                  
-                </Button>
+                <Button circular icon='plus' onClick={this.addFavorite.bind(this)}/>
               </Grid.Column>
             </Grid.Row>
         </Grid>
