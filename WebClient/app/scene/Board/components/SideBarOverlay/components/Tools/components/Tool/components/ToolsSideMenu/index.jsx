@@ -11,6 +11,7 @@ import {
 
 export default class ToolsSideMenu extends React.Component {
   changeCurrentTool (toolInstance) {
+    this.props.toggleSideMenu() // must be here to avoid a small user experience bug
     const toolInst = toolInstance[0]
     let tool = null
     if (this.props.tool.type === 'pencil') {
@@ -31,7 +32,7 @@ export default class ToolsSideMenu extends React.Component {
     const colorPicker = toolType === 'pencil' ? toolInstance => toolInstance.value : toolInstance => 'black'
 
     return (
-      <div className={styles.toolMenu} style={{width: 40 * toolContentSize, visibility}}>
+      <div onMouseLeave={this.props.toggleSideMenu} className={styles.toolMenu} style={{width: 40 * toolContentSize, visibility}}>
         {toolContent.map((toolInstance, idx) => (
           <div key={'toolInstance' + idx} className={styles.block} onClick={this.changeCurrentTool.bind(this, [toolInstance])}>
             <span>

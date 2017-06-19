@@ -14,11 +14,11 @@ export default class Tool extends React.Component {
 
   render () {
     const tool = this.props.tool
-
+    const opened = this.props.visibility === 'visible' ? this.state.sideMenuOpened : false // if plus button is not opened, close all the sub menus
     return (
       <div onClick={this.toggleSideMenu} style={{width: '38px', height: '38px'}}>
         <Icon name={tool.type} size='large' style={{paddingTop: '5px', width: '38px', height: '38px'}} />
-        <ToolsSideMenu {...this.props} opened={this.state.sideMenuOpened} />
+        <ToolsSideMenu {...this.props} toggleSideMenu={this.toggleSideMenu} opened={opened} />
       </div>
     )
   }
