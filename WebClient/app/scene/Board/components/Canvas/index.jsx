@@ -11,30 +11,40 @@ type PointerEvents = {
 }
 
 export default class Canvas extends React.Component {
-  props: PointerEvents
+  listeners: PointerEvents
   canvas: window.EventListener
 
+  cleanCanvas () {
+    console.log(this.props)
+    this.props.grid.clean(this.canvas.getContext('2d'))
+  }
+
   componentDidMount () {
-    if (this.props.onDown !== null) {
-      this.canvas.addEventListener('pointerdown', this.props.onDown, false)
+    this.componentDidUpdate()
+  }
+
+  componentDidUpdate () {
+    this.listeners = this.props.listeners
+    if (this.listeners == null) { return }
+    if (this.listeners.onDown !== null) {
+      this.canvas.addEventListener('pointerdown', this.listeners.onDown, false)
     }
-    if (this.props.onUp !== null) {
-      this.canvas.addEventListener('pointerup', this.props.onUp, false)
+    if (this.listeners.onUp !== null) {
+      this.canvas.addEventListener('pointerup', this.listeners.onUp, false)
     }
-    if (this.props.onMove !== null) {
-      this.canvas.addEventListener('pointermove', this.props.onMove, false)
+    if (this.listeners.onMove !== null) {
+      this.canvas.addEventListener('pointermove', this.listeners.onMove, false)
     }
-    if (this.props.onOut !== null) {
-      this.canvas.addEventListener('pointerout', this.props.onOut, false)
+    if (this.listeners.onOut !== null) {
+      this.canvas.addEventListener('pointerout', this.listeners.onOut, false)
     }
   }
 
-  shouldComponentUpdate () {
-    return false
+  shouldComponentUpdate (nexProps) {
+    return nexProps.listeners === this.listeners
   }
 
   render () {
-    const { onDown, onUp, onMove, onOut, ...props } = this.props
-    return <canvas ref={canvas => { this.canvas = canvas }} className={styles.debug} {...props} />
+    return <canvas ref={(canvas) => { this.canvas = canvas }} className={styles.debug} width={this.props.width} height={this.props.height} />
   }
 }
