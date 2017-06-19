@@ -7,6 +7,7 @@ import Canvas from './scene/Board/components/Canvas'
 
 import Pen from './model/tools/Pen'
 import Eraser from './model/tools/Eraser'
+import Move from './model/tools/Move'
 import Grid from './model/Grid'
 
 function Hello ({name}: {name: string}) {
@@ -16,12 +17,19 @@ function Hello ({name}: {name: string}) {
 const grid = new Grid([], 300, 300, 0)
 const pen = new Pen(grid, 'black', 4)
 const eraser = new Eraser(grid, 20)
+const move = new Move(grid)
 let tool = pen
+let toggleIdx = 0
 const toggleTool = () => {
-  if (tool === pen) {
-    tool = eraser
-  } else {
+  if (toggleIdx === 2) {
     tool = pen
+    toggleIdx = 0
+  } else if (toggleIdx === 0) {
+    tool = eraser
+    toggleIdx = 1
+  } else {
+    tool = move
+    toggleIdx = 2
   }
 }
 
