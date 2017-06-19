@@ -18,7 +18,7 @@ export default class Tool extends React.Component {
     return (
       <div onClick={this.toggleSideMenu} style={{width: '38px', height: '38px'}}>
         <Icon name={tool.type} size='large' style={{paddingTop: '5px', width: '38px', height: '38px'}} />
-        <ToolsSideMenu {...this.props} toggleSideMenu={this.toggleSideMenu} opened={opened} />
+        <ToolsSideMenu defaultTools={this.props.defaultTools} {...this.props} toggleSideMenu={this.toggleSideMenu} opened={opened} />
       </div>
     )
   }
