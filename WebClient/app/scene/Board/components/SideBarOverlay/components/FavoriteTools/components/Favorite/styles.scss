@@ -1,9 +1,8 @@
 .fav {
     width: 36px;
-    color: red;
-    &:hover {
-      -webkit-transform: rotate(360deg) translate(0px, 0px);
-      transform: rotate(360deg) translate( 0px, 0px);
-      transition: 0.5s;
-    }
+}
+.fav:hover {
+  -webkit-transform: rotate(360deg) translate(0px, 0px);
+  transform: rotate(360deg) translate( 0px, 0px);
+  transition: 0.5s;
 }

@@ -9,7 +9,7 @@ import Eraser from './../../../../../../model/tools/Eraser'
 import { Grid, Button } from 'semantic-ui-react'
 
 export default class FavoriteTools extends React.Component {
-  addFavorite () {
+  addFavorite = () => {
     const currTool = this.props.currTool
     const favorites = this.props.favorites
     if ((currTool instanceof Pen && favorites.some(tool => tool.width === currTool.width && tool.color === currTool.color)) ||
@@ -26,7 +26,7 @@ export default class FavoriteTools extends React.Component {
         <Grid divided textAlign='center'>
           <Grid.Row columns={1} className={styles.rows} style={{padding: '7px'}}> {/* todo: (simaovii) I don't understand why padding in className is not working... */}
             <Grid.Column>
-              <Button circular icon='list layout' onClick={this.props.toggleSideBar.bind(this)} />
+              <Button circular icon='list layout' onClick={this.props.toggleSideBar} />
             </Grid.Column>
           </Grid.Row>
           {this.props.favorites.map((favorite, idx) => (
@@ -39,7 +39,7 @@ export default class FavoriteTools extends React.Component {
           {/* Add Favorite Button */}
           <Grid.Row columns={1} className={styles.rows} style={{padding: '7px'}}>
             <Grid.Column>
-              <Button circular icon='plus' onClick={this.addFavorite.bind(this)} />
+              <Button circular icon='plus' onClick={this.addFavorite} />
             </Grid.Column>
           </Grid.Row>
         </Grid>
