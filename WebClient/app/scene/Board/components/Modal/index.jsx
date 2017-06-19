@@ -6,7 +6,7 @@ import { Modal, Button } from 'semantic-ui-react'
 export default class Modalx extends React.Component {
   render () {
     return (
-      <Modal size='small' open={this.props.visible} onClose={this.close}>
+      <Modal size='small' open={this.props.visible}>
         <Modal.Header>
           Clear All Board
         </Modal.Header>
