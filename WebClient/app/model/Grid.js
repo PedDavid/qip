@@ -139,12 +139,13 @@ export default function Grid (initialFigures, currIdx) {
     }
     let prev = null
     const auxPoints = figure.points
-    figure.points = []// must be that way because in forEach updateMaxLinePart is also adding points to figure
+    figure.points = [] // must be that way because in forEach updateMaxLinePart is also adding points to figure
+    // TODO(peddavid): FlatMap then? Instead of this auxPoints and mutation in points?
     auxPoints.forEach(point => {
       const gridPoint = this.getOrCreatePoint(point.x, point.y)
       // gridPoint.addFigure(figure.id, point.style)
       figure.addPoint(gridPoint)
-      const pointStyle = new PointStyle(point.style.press) // todo: isto pode sair daqui quando o dto Ponto tiver o style como PointStyle
+      const pointStyle = new PointStyle(point.style.press) // TODO(simaovii): isto pode sair daqui quando o dto Ponto tiver o style como PointStyle
       gridPoint.addFigure(figure.id, pointStyle)
       this.updateMaxLinePart(prev, gridPoint, figure, pointStyle)
       prev = gridPoint

@@ -25,12 +25,17 @@ module.exports = {
         }
       },
       {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader']
-      },
-      {
-        test: /\.(png|ttf|eot|svg|woff2?)$/,
-        loader: 'url-loader?publicPath=dist/'
+        test: /\.s?css$/,
+        use: [{
+          loader: 'style-loader'
+        }, {
+          loader: 'css-loader',
+          options: {
+            modules: true
+          }
+        }, {
+          loader: 'sass-loader'
+        }]
       }
     ]
   },
