@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using API.Models.IRepositories;
 using API.Models.Repositories;
+using API.WebSockets;
 
 namespace API {
     public class Startup {
@@ -30,7 +31,7 @@ namespace API {
             services.AddCors(options => {
                 options.AddPolicy("AllowSpecificOrigin",
                     builder => builder//TODO config
-                                .WithOrigins("http://example.com")
+                                .WithOrigins("http://localhost:51018")
                                 .AllowAnyMethod()
                                 .AllowAnyHeader()
                 );
@@ -43,6 +44,9 @@ namespace API {
             services.AddSingleton(new SqlServerTemplate(Configuration));
 
             services.AddSingleton<IConfiguration>(Configuration);
+
+            services.AddSingleton(typeof(StringWSSessionsManager));
+            services.AddSingleton(typeof(WSBoardOperationsFactory));
 
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IBoardRepository, BoardRepository>();
@@ -60,6 +64,13 @@ namespace API {
 
             // Shows UseCors with named policy.
             app.UseCors("AllowSpecificOrigin");
+
+
+            var webSocketOptions = new WebSocketOptions() {
+                KeepAliveInterval = TimeSpan.FromSeconds(120),
+                ReceiveBufferSize = 4 * 1024
+            };
+            app.UseWebSockets(webSocketOptions);
 
             app.UseMvc();
         }
