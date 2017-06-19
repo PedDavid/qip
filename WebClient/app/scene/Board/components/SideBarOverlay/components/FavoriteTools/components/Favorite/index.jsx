@@ -33,9 +33,15 @@ export default class Favorite extends React.Component {
     } else if (fav instanceof Eraser) {
       name = 'eraser'
     }
+    let style = null
+    if (this.props.currTool === fav) {
+      style = {
+        backgroundColor: 'gray'
+      }
+    }
     return (
       <div onContextMenu={this.toggleFavMenu}>
-        <Button circular className={styles.fav} onClick={this.changeCurrentTool}>
+        <Button circular className={styles.fav} style={style} onClick={this.changeCurrentTool}>
           {/* it could be color:red instead of style:{color:'red'}} but the first one does not support rgba */}
           <Icon className={styles.iconStyle + ' large'} name={name} style={{color: color}} />
           <font className={styles.fontStyle} size='1'> {fav.width} </font>

@@ -32,7 +32,7 @@ export default class FavoriteTools extends React.Component {
           {this.props.favorites.map((favorite, idx) => (
             <Grid.Row key={'favorite' + idx} columns='1' className={styles.rows} style={{padding: '4px'}}>
               <Grid.Column>
-                <Favorite changeCurrentTool={this.props.changeCurrentTool} removeFavorite={this.props.removeFavorite} fav={favorite} />
+                <Favorite currTool={this.props.currTool} changeCurrentTool={this.props.changeCurrentTool} removeFavorite={this.props.removeFavorite} fav={favorite} />
               </Grid.Column>
             </Grid.Row>
           ))}

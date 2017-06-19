@@ -22,7 +22,7 @@ export default class ToolsSideMenu extends React.Component {
       tool = new Eraser(this.props.grid, toolInst.value)
     } else if (this.props.tool.type === 'selected radio') {
       const lastPen = defaultTools[0].lastValue
-      tool = new Pen(this.props.grid, lastPen != null ? lastPen.value : 'black', toolInst.value)
+      tool = new Pen(this.props.grid, lastPen == null ? 'black' : lastPen.value, toolInst.value)
     }
     this.props.changeCurrentTool(tool)
   }
