@@ -15,7 +15,6 @@ export default class Canvas extends React.Component {
   canvas: window.EventListener
 
   cleanCanvas () {
-    console.log(this.props)
     this.props.grid.clean(this.canvas.getContext('2d'))
   }
 

@@ -51,25 +51,22 @@ export default class Board extends React.Component {
   }
   cleanCanvas () {
     this.refs.canvas.cleanCanvas()
-    this.closeModal()
+    this.toggleModal()
   }
-  openModal () {
-    this.setState({showModal: true})
-  }
-  closeModal () {
-    this.setState({showModal: false})
+  toggleModal () {
+    this.setState(prevState => { return { showModal: !prevState.showModal } })
   }
   render () {
     return (
       <div onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.xpto}>
         {/* todo: why cant i send {...listeners} instead of listeners={listeners} ??? */}
         <SideBarOverlay grid={grid} changeCurrentTool={this.changeCurrentTool.bind(this)} favorites={this.state.favorites} defaultTools={defaultTools}
-          currTool={this.state.currTool} cleanCanvas={this.openModal.bind(this)} addFavorite={this.addFavorite.bind(this)}>
+          currTool={this.state.currTool} cleanCanvas={this.toggleModal.bind(this)} addFavorite={this.addFavorite.bind(this)}>
           <Canvas ref='canvas' grid={grid} width={1200} height={800} listeners={this.listeners}>
             HTML5 Canvas not supported
           </Canvas>
         </SideBarOverlay>
-        <Modalx cleanCanvas={this.cleanCanvas.bind(this)} closeModal={this.closeModal.bind(this)} visible={this.state.showModal} />
+        <Modalx cleanCanvas={this.cleanCanvas.bind(this)} closeModal={this.toggleModal.bind(this)} visible={this.state.showModal} />
       </div>
     )
   }

@@ -17,7 +17,8 @@ const defaultTools = [
     content: [{value: 'black', size: 'large'}, {value: 'green', size: 'large'}, {value: 'blue', size: 'large'}, {value: 'red', size: 'large'},
       {value: 'yellow', size: 'large'}, {value: 'pink', size: 'large'}, {value: 'grey', size: 'large'}]},
   {type: 'selected radio', content: [{value: '5', size: 'mini'}, {value: '10', size: 'tiny'}, {value: '15', size: 'small'}, {value: '20', size: 'large'}]},
-  {type: 'eraser', content: [{value: '5', size: 'mini'}, {value: '10', size: 'tiny'}, {value: '15', size: 'small'}, {value: '20', size: 'large'}]}
+  {type: 'eraser', content: [{value: '5', size: 'mini'}, {value: '10', size: 'tiny'}, {value: '15', size: 'small'}, {value: '20', size: 'large'}]},
+  {type: 'move', content: []}
 ]
 
 export default class Tools extends React.Component {
