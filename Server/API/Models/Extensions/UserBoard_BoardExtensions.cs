@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Models.Extensions;
+using API.Domain;
 
 namespace API.Models.Extensions {
     public static class UserBoard_BoardExtensions {
