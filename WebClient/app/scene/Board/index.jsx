@@ -7,23 +7,20 @@ import styles from './styles.scss'
 import Pen from './../../model/tools/Pen'
 import Eraser from './../../model/tools/Eraser'
 import Grid from './../../model/Grid'
+import ToolsConfig from './../../model/ToolsConfig'
+import defaultToolsConfig from './../../public/configFiles/defaultTools'
 
 const grid = new Grid([], 300, 300, 0)
-const pen = new Pen(grid, 'black', 5)
+const pen = new Pen(grid, 'black', 5) // obtain current tools from server
 const eraser = new Eraser(grid, 20)
-
-const defaultTools = [
-  new Pen(grid, 'black', 4),
-  new Pen(grid, 'red', 4),
-  new Eraser(grid, 10)
-]
 
 export default class Board extends React.Component {
   state = {
     showModal: false,
     currTool: pen,
-    favorites: [pen, eraser]
+    favorites: [pen, eraser] // obtain favorites from server
   }
+  toolsConfig = new ToolsConfig(defaultToolsConfig)
 
   listeners = {
     onDown: event => this.state.currTool.onPress(event, 1),
@@ -31,6 +28,12 @@ export default class Board extends React.Component {
     onMove: event => this.state.currTool.onSwipe(event, 1),
     onOut: event => this.state.currTool.onOut(event)
   }
+
+  componentWillMount () {
+    this.toolsConfig.updatePrevTool(eraser)
+    this.toolsConfig.updatePrevTool(pen)
+  }
+
   addFavorite (tool) {
     this.setState(() => this.state.favorites.push(tool)) // not needed to change prevState
   }
@@ -51,6 +54,7 @@ export default class Board extends React.Component {
     console.log(event)
   }
   changeCurrentTool (tool) {
+    this.toolsConfig.updatePrevTool(this.state.currTool)
     this.setState({currTool: tool})
   }
   cleanCanvas () {
@@ -68,7 +72,7 @@ export default class Board extends React.Component {
   render () {
     return (
       <div onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.xpto}>
-        <SideBarOverlay grid={grid} changeCurrentTool={this.changeCurrentTool.bind(this)} favorites={this.state.favorites} defaultTools={defaultTools}
+        <SideBarOverlay grid={grid} changeCurrentTool={this.changeCurrentTool.bind(this)} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
           currTool={this.state.currTool} cleanCanvas={this.toggleModal.bind(this)} addFavorite={this.addFavorite.bind(this)}
           removeFavorite={this.removeFavorite.bind(this)}>
           <Canvas ref={this.refCallback} width={1200} height={800} {...this.listeners}>
