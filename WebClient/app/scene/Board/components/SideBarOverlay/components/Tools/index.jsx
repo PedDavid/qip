@@ -9,7 +9,8 @@ import Eraser from './../../../../../../model/tools/Eraser'
 
 import {
   Button,
-  Grid
+  Grid,
+  Icon
 } from 'semantic-ui-react'
 
 const halfbtnSize = 20
@@ -59,11 +60,27 @@ export default class Tools extends React.Component {
       left: left,
       margin: '0px' // todo: would be nice if this was in styles.toolRow but doesnt work, strangely
     }
-
+    const btnStyle = !this.state.visible
+    ? {
+      top: this.state.top,
+      left: this.state.left,
+      padding: '0px',
+      width: '40px'
+    }
+    : {
+      top: this.state.top,
+      left: this.state.left,
+      borderRadius: '50px 50px 0px 0px',
+      padding: '0px',
+      width: '40px',
+      border: '1px solid #000000'
+    }
     return (
       <div>
         {/* Plus Button to Open Tools */}
-        <Button circular icon='plus' className={styles.plusMenu} style={{top: this.state.top, left: this.state.left}} onClick={this.toggleTools} />
+        <Button circular className={styles.plusMenu} style={btnStyle} onClick={this.toggleTools}>
+          <Icon className='plus' style={{position: 'absolute', top: '14px', right: '13px', margin: '0px'}} />
+        </Button>
         <Grid divided textAlign='center' className={styles.plusMenu} style={gridDyamicStyle}>
           {/* tool example = {type: pen, content:['black', 'red'] */}
           {defaultTools.map((tool, idx) => (

@@ -1,5 +1,6 @@
 import React from 'react'
 import ToolsSideMenu from './components/ToolsSideMenu'
+import Move from './../../../../../../../../model/tools/Move'
 
 import {
   Icon
@@ -9,7 +10,12 @@ export default class Tool extends React.Component {
   state = {sideMenuOpened: false}
 
   toggleSideMenu = () => {
-    this.setState(lastState => { return {sideMenuOpened: !lastState.sideMenuOpened} })
+    if (this.props.tool.type === 'move') {
+      const tool = new Move(this.props.grid)
+      this.props.changeCurrentTool(tool)
+    } else {
+      this.setState(lastState => { return {sideMenuOpened: !lastState.sideMenuOpened} })
+    }
   }
 
   render () {
