@@ -22,13 +22,13 @@ export default class SideBarOverlay extends React.Component {
       <div>
         <Sidebar.Pushable as={Segment} className={styles.sidebar}>
           <Sidebar as={Menu} animation='push' direction='left' width='thin' icon='labeled' visible={visible} vertical inverted>
-            <a className='item'>
-              <Icon name='home' />
-              Home
+            <a onClick={this.props.toggleUserModal} className='item'>
+              <Icon name='sign in' />
+              Login
             </a>
             <a className='item'>
-              <Icon name='block layout' />
-              Other Icon
+              <Icon name='share' />
+              Share board
             </a>
           </Sidebar>
           <Sidebar.Pusher>

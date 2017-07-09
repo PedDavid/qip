@@ -29,6 +29,7 @@ export default class Tools extends React.Component {
       left: left,
       margin: '0px' // todo: would be nice if this was in styles.toolRow but doesnt work, strangely
     }
+    // todo: change the way this is done
     const btnStyle = !this.state.visible
     ? {
       top: this.state.top,

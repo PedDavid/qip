@@ -1,7 +1,8 @@
 import React from 'react'
 import SideBarOverlay from './components/SideBarOverlay'
 import Canvas from './components/Canvas'
-import Modalx from './components/Modal'
+import CleanBoardModal from './components/Modals/CleanBoardModal'
+import EnterUserModal from './components/Modals/EnterUserModal'
 import styles from './styles.scss'
 
 import Pen from './../../model/tools/Pen'
@@ -16,7 +17,8 @@ const eraser = new Eraser(grid, 20)
 
 export default class Board extends React.Component {
   state = {
-    showModal: false,
+    showCleanModal: false,
+    showUserModal: false,
     currTool: pen,
     favorites: [pen, eraser] // obtain favorites from server
   }
@@ -62,7 +64,11 @@ export default class Board extends React.Component {
     this.toggleModal()
   }
   toggleModal () {
-    this.setState(prevState => { return { showModal: !prevState.showModal } })
+    this.setState(prevState => { return { showCleanModal: !prevState.showCleanModal } })
+  }
+
+  toggleUserModal = () => {
+    this.setState(prevState => { return { showUserModal: !prevState.showUserModal } })
   }
 
   refCallback = (ref) => {
@@ -74,12 +80,13 @@ export default class Board extends React.Component {
       <div onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.xpto}>
         <SideBarOverlay grid={grid} changeCurrentTool={this.changeCurrentTool.bind(this)} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
           currTool={this.state.currTool} cleanCanvas={this.toggleModal.bind(this)} addFavorite={this.addFavorite.bind(this)}
-          removeFavorite={this.removeFavorite.bind(this)}>
+          removeFavorite={this.removeFavorite.bind(this)} toggleUserModal={this.toggleUserModal}>
           <Canvas ref={this.refCallback} width={1200} height={800} {...this.listeners}>
             HTML5 Canvas not supported
           </Canvas>
         </SideBarOverlay>
-        <Modalx cleanCanvas={this.cleanCanvas.bind(this)} closeModal={this.toggleModal.bind(this)} visible={this.state.showModal} />
+        <CleanBoardModal cleanCanvas={this.cleanCanvas.bind(this)} closeModal={this.toggleModal.bind(this)} visible={this.state.showCleanModal} />
+        <EnterUserModal visible={this.state.showUserModal} toggleUserModal={this.toggleUserModal} />
       </div>
     )
   }
