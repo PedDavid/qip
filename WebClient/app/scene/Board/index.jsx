@@ -16,6 +16,7 @@ import Eraser from './../../model/tools/Eraser'
 import Grid from './../../model/Grid'
 import ToolsConfig from './../../model/ToolsConfig'
 import defaultToolsConfig from './../../public/configFiles/defaultTools'
+import {Figure, FigureStyle} from './../../model/Figure'
 
 const grid = new Grid([], 300, 300, 0)
 const pen = new Pen(grid, 'black', 5) // obtain current tools from server
