@@ -91,8 +91,6 @@ export default class Board extends React.Component {
           </SideBarOverlay>
           <CleanBoardModal cleanCanvas={this.cleanCanvas} closeModal={this.toggleCleanModal} visible={this.state.showCleanModal} />
           <Route path='/signin' component={EnterUserModal} />
-          {/* Not matching Route */}
-          <Route component={EnterUserModal} />
         </div>
       </Router>
     )
