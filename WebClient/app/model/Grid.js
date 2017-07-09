@@ -164,6 +164,33 @@ export default function Grid (initialFigures, currIdx) {
     figure.points.forEach(point => point.removeFigure(figure.id))
   }
 
+  this.moveImage = function (img, newSrcPoint, context, currScale) {
+    img.setSrcPoint(newSrcPoint)
+    this.draw(context, currScale)
+  }
+
+  this.moveFigure = function (figure, destPoint, context, scale) {
+    const destPointOffsetX = destPoint.x
+    const destPointOffsetY = destPoint.y
+    // criar todos os novos pontos novamente, com as novas posições
+    let pointsClone = figure.points.map(point => {
+      return {x: point.x, y: point.y, style: point.getStyleOf(figure.id)}
+    })
+
+    // nota: não tentar otimizar sem ver os problemas - é necessário estas variáveis e ordem de operações
+    // é necessário este forEach adicional pois as figuras são removidas dos pontos anteriores. Estava a haver conflitos com os pontos criados, que estavam a remover a figura do ponto anterior (mas esse ponto já estava a ser usado na nova figura)
+    figure.points.forEach(point => point.removeFigure(figure.id)) // remover figura de todos os seus pontos
+
+    pointsClone = pointsClone.map(point => {
+      const newPoint = this.getOrCreatePoint(point.x + destPointOffsetX, point.y + destPointOffsetY)
+      newPoint.addFigure(figure.id, point.style)
+      return newPoint
+    })
+
+    figure.points = pointsClone // reset points from figure
+    this.draw(context, scale)
+  }
+
   this.draw = function (context, currScale) {
     const { width, height } = context.canvas
     context.clearRect(0, 0, width, height)
@@ -177,6 +204,12 @@ export default function Grid (initialFigures, currIdx) {
 
   this.getFigures = function () {
     return figures
+  }
+
+  this.getImageFigures = function () {
+    /* Object.entries(figures)
+      .map(([figId, fig]) => fig)
+      .filter(fig => fig instanceof FigureImage) */
   }
 
   this.hasFigure = function (figureId) {
