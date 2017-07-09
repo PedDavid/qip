@@ -6,8 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using API.Models;
 using API.Models.Output;
 using API.Models.Input;
-using API.Models.IRepositories;
 using API.Models.Extensions;
+using API.Interfaces.IRepositories;
+using API.Domain;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 

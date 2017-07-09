@@ -21,6 +21,15 @@ const grid = new Grid([], 300, 300, 0)
 const pen = new Pen(grid, 'black', 5) // obtain current tools from server
 const eraser = new Eraser(grid, 20)
 
+const scheme = document.location.protocol === 'https:' ? 'wss' : 'ws'
+const port = document.location.port ? (':' + 53379) : ''
+const connectionUrl = scheme + '://' + document.location.hostname + port + '/ws' + '?id=0'
+const socket = new WebSocket(connectionUrl)
+
+socket.onopen = (event) => {
+  console.log('DONE')
+}
+
 export default class Board extends React.Component {
   state = {
     showCleanModal: false,
@@ -30,11 +39,27 @@ export default class Board extends React.Component {
   }
   toolsConfig = new ToolsConfig(defaultToolsConfig)
 
+  componentDidMount () {
+    socket.onmessage = (event) => {
+      console.log(event.data)
+      const {type, payload} = JSON.parse(event.data)
+      console.log(payload)
+      switch (type) {
+        case 'INSERT_FIGURE':
+          const figStyle = new FigureStyle(payload.figureStyle.color, 1)
+          const newFigure = new Figure(figStyle, payload.id)
+          newFigure.points = payload.points.map(point => { return { x: point.x, y: point.y, style: {press: 3} } })
+          grid.addFigure(newFigure)
+          grid.draw(this.refs.canvas.canvas.getContext('2d'), 1)
+      }
+    }
+  }
+
   listeners = {
     onDown: event => this.state.currTool.onPress(event, 1),
-    onUp: event => this.state.currTool.onPressUp(event),
+    onUp: event => this.state.currTool.onPressUp(event, socket),
     onMove: event => this.state.currTool.onSwipe(event, 1),
-    onOut: event => this.state.currTool.onOut(event)
+    onOut: event => this.state.currTool.onOut(event, socket)
   }
 
   componentWillMount () {
