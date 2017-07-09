@@ -1,23 +1,25 @@
 import React from 'react'
+
+import {
+  BrowserRouter as Router,
+  Route
+} from 'react-router-dom'
+
 import SideBarOverlay from './components/SideBarOverlay'
 import Canvas from './components/Canvas'
-import Modalx from './components/Modal'
+import CleanBoardModal from './components/Modals/CleanBoardModal'
+import EnterUserModal from './components/Modals/EnterUserModal'
 import styles from './styles.scss'
 
 import Pen from './../../model/tools/Pen'
 import Eraser from './../../model/tools/Eraser'
 import Grid from './../../model/Grid'
-import {Figure, FigureStyle} from './../../model/Figure'
+import ToolsConfig from './../../model/ToolsConfig'
+import defaultToolsConfig from './../../public/configFiles/defaultTools'
 
 const grid = new Grid([], 300, 300, 0)
-const pen = new Pen(grid, 'black', 5)
+const pen = new Pen(grid, 'black', 5) // obtain current tools from server
 const eraser = new Eraser(grid, 20)
-
-const defaultTools = [
-  new Pen(grid, 'black', 4),
-  new Pen(grid, 'red', 4),
-  new Eraser(grid, 10)
-]
 
 const scheme = document.location.protocol === 'https:' ? 'wss' : 'ws'
 const port = document.location.port ? (':' + 53379) : ''
@@ -30,10 +32,12 @@ socket.onopen = (event) => {
 
 export default class Board extends React.Component {
   state = {
-    showModal: false,
+    showCleanModal: false,
+    showUserModal: false,
     currTool: pen,
-    favorites: [pen, eraser]
+    favorites: [pen, eraser] // obtain favorites from server
   }
+  toolsConfig = new ToolsConfig(defaultToolsConfig)
 
   componentDidMount () {
     socket.onmessage = (event) => {
@@ -57,6 +61,12 @@ export default class Board extends React.Component {
     onMove: event => this.state.currTool.onSwipe(event, 1),
     onOut: event => this.state.currTool.onOut(event, socket)
   }
+
+  componentWillMount () {
+    this.toolsConfig.updatePrevTool(eraser)
+    this.toolsConfig.updatePrevTool(pen)
+  }
+
   addFavorite (tool) {
     this.setState(() => this.state.favorites.push(tool)) // not needed to change prevState
   }
@@ -77,14 +87,16 @@ export default class Board extends React.Component {
     console.log(event)
   }
   changeCurrentTool (tool) {
+    this.toolsConfig.updatePrevTool(this.state.currTool)
     this.setState({currTool: tool})
   }
-  cleanCanvas () {
+  cleanCanvas = () => {
     grid.clean(this.canvasContext)
-    this.toggleModal()
+    this.toggleCleanModal()
   }
-  toggleModal () {
-    this.setState(prevState => { return { showModal: !prevState.showModal } })
+  toggleCleanModal = () => {
+    window.alert(2)
+    this.setState(prevState => { return { showCleanModal: !prevState.showCleanModal } })
   }
 
   refCallback = (ref) => {
@@ -93,16 +105,19 @@ export default class Board extends React.Component {
 
   render () {
     return (
-      <div onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.xpto}>
-        <SideBarOverlay grid={grid} changeCurrentTool={this.changeCurrentTool.bind(this)} favorites={this.state.favorites} defaultTools={defaultTools}
-          currTool={this.state.currTool} cleanCanvas={this.toggleModal.bind(this)} addFavorite={this.addFavorite.bind(this)}
-          removeFavorite={this.removeFavorite.bind(this)}>
-          <Canvas ref={this.refCallback} width={1200} height={800} {...this.listeners}>
-            HTML5 Canvas not supported
-          </Canvas>
-        </SideBarOverlay>
-        <Modalx cleanCanvas={this.cleanCanvas.bind(this)} closeModal={this.toggleModal.bind(this)} visible={this.state.showModal} />
-      </div>
+      <Router>
+        <div onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.xpto}>
+          <SideBarOverlay grid={grid} changeCurrentTool={this.changeCurrentTool.bind(this)} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
+            currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite.bind(this)}
+            removeFavorite={this.removeFavorite.bind(this)} toggleUserModal={this.toggleUserModal}>
+            <Canvas ref={this.refCallback} width={1200} height={800} {...this.listeners}>
+              HTML5 Canvas not supported
+            </Canvas>
+          </SideBarOverlay>
+          <CleanBoardModal cleanCanvas={this.cleanCanvas} closeModal={this.toggleCleanModal} visible={this.state.showCleanModal} />
+          <Route path='/signin' component={EnterUserModal} />
+        </div>
+      </Router>
     )
   }
 }
