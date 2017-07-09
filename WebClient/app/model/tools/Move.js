@@ -68,14 +68,14 @@ export default class Move implements Tool {
   }
 
   onOut (event) {
-    const canvasContext = event.target.getContext('2d')
-    const scale = 1  // TODO(simaovii): eliminate this when using sockets
+    // const canvasContext = event.target.getContext('2d')
+    // const scale = 1  // TODO(simaovii): eliminate this when using sockets
     // if (this.lastPoint!=null && this.currentFigureMoving instanceof FigureImage) {
       // send by websockets currentFigureMoving(id), destPoint, scale?
     // }
     if (this.movingLine != null && this.currentFigureMoving instanceof Figure) {
-      const offsetPoint = new Point(this.movingLine.end.x - this.movingLine.start.x, this.movingLine.end.y - this.movingLine.start.y)
-      this.grid.moveFigure(this.currentFigureMoving, offsetPoint, canvasContext, scale) // TODO(simaovii): eliminate this when using sockets
+      // const offsetPoint = new Point(this.movingLine.end.x - this.movingLine.start.x, this.movingLine.end.y - this.movingLine.start.y)
+      // this.grid.moveFigure(this.currentFigureMoving, offsetPoint, canvasContext, scale) // TODO(simaovii): eliminate this when using sockets
       // send by websockets currentFigureMoving(id), offsetPoint, scale
     }
     this.movingLine = null

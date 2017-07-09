@@ -13,34 +13,34 @@ export default class ToolsSideMenu extends React.Component {
   changeCurrentTool (toolInstance) {
     this.props.toggleSideMenu() // must be here to avoid a small user experience bug
     const toolInst = toolInstance[0]
-    const defaultTools = this.props.defaultTools
+    const toolsConfig = this.props.toolsConfig
     let tool = null
-    if (this.props.tool.type === 'pencil') {
-      const lastPen = defaultTools[0].lastValue
-      tool = new Pen(this.props.grid, toolInst.value, lastPen != null ? lastPen.width : 5)
+
+    // check first if currentTool is type of Pen. Otherways, set it to last Pen used
+    const pen = this.props.currTool instanceof Pen ? this.props.currTool : toolsConfig[this.props.tool.type].lastValue
+    if (this.props.tool.type === 'pen') {
+      tool = new Pen(this.props.grid, toolInst.value, pen.width)
     } else if (this.props.tool.type === 'eraser') {
       tool = new Eraser(this.props.grid, toolInst.value)
-    } else if (this.props.tool.type === 'selected radio') {
-      const lastPen = defaultTools[0].lastValue
-      tool = new Pen(this.props.grid, lastPen == null ? 'black' : lastPen.value, toolInst.value)
+    } else if (this.props.tool.type === 'width') {
+      tool = new Pen(this.props.grid, pen.color, toolInst.value)
     }
     this.props.changeCurrentTool(tool)
   }
 
   render () {
-    const toolContent = this.props.tool.content
-    const toolType = this.props.tool.type
-    const toolContentSize = toolContent.length
+    const tool = this.props.tool
+    const {content, icon} = tool
+    const toolContentSize = content.length
     const visibility = this.props.opened ? 'visible' : 'hidden'
-    const colorPicker = toolType === 'pencil' ? toolInstance => toolInstance.value : toolInstance => 'black'
 
     return (
       <div onMouseLeave={this.props.toggleSideMenu} className={styles.toolMenu} style={{width: 40 * toolContentSize, visibility}}>
-        {toolContent.map((toolInstance, idx) => (
+        {content.map((toolInstance, idx) => (
           <div key={'toolInstance' + idx} className={styles.block} onClick={this.changeCurrentTool.bind(this, [toolInstance])}>
             <span>
               {/* it could be color:red instead of style:{color:'red'}} but the first one does not support rgba */}
-              <Icon name={toolType} size={toolInstance.size} style={{paddingTop: '5px', color: colorPicker(toolInstance)}} />
+              <Icon name={icon} size={toolInstance.size} style={{paddingTop: '5px', color: toolInstance.color}} />
             </span>
           </div>
         ))}
