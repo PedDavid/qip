@@ -18,14 +18,16 @@ export default class EnterUserModal extends React.Component {
     })
   }
 
-  render () {
-    const signInModal = this.props.visible && this.state.SignInModalToggle
-    const signUpModal = this.props.visible && !this.state.SignInModalToggle
+  onClose = () => {
+    this.props.history.push('/') // change current location programmatically
+  }
 
+  render () {
+    const signInModal = this.state.SignInModalToggle
     return (
       <div className={this.state.classes}>
-        <SignInModal toggleUserModal={this.props.toggleUserModal} register={this.flip} visible={signInModal} />
-        <SignUpModal toggleUserModal={this.props.toggleUserModal} login={this.flip} visible={signUpModal} />
+        <SignInModal toggleUserModal={this.onClose} register={this.flip} visible={signInModal} />
+        <SignUpModal toggleUserModal={this.onClose} login={this.flip} visible={!signInModal} />
       </div>
     )
   }

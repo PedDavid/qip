@@ -1,6 +1,9 @@
 // @flow
 
 import React from 'react'
+import {
+  Link
+} from 'react-router-dom'
 import styles from './styles.scss'
 import Tools from './components/Tools'
 import FavoriteTools from './components/FavoriteTools'
@@ -22,10 +25,10 @@ export default class SideBarOverlay extends React.Component {
       <div>
         <Sidebar.Pushable as={Segment} className={styles.sidebar}>
           <Sidebar as={Menu} animation='push' direction='left' width='thin' icon='labeled' visible={visible} vertical inverted>
-            <a onClick={this.props.toggleUserModal} className='item'>
+            <Link onClick={this.props.toggleUserModal} to='/signin' className='item'>
               <Icon name='sign in' />
               Login
-            </a>
+            </Link>
             <a className='item'>
               <Icon name='share' />
               Share board
