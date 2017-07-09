@@ -44,7 +44,8 @@
     "globals": [
       "describe",
       "it",
-      "expect"
+      "expect",
+      "WebSocket"
     ]
   },
   "jest": {
