@@ -1,4 +1,5 @@
-﻿using API.Models.Input;
+﻿using API.Domain;
+using API.Models.Input;
 using API.Models.Output;
 using System;
 using System.Collections.Generic;
