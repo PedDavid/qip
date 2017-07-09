@@ -24,22 +24,22 @@ export default class FavoriteTools extends React.Component {
     return (
       <div className={styles.quickBtnsContainer}>
         <Grid divided textAlign='center'>
-          <Grid.Row columns={1} className={styles.rows} style={{padding: '7px'}}> {/* todo: (simaovii) I don't understand why padding in className is not working... */}
+          <Grid.Row columns='1' className={styles.rows} style={{padding: '4px'}}> {/* todo: (simaovii) I don't understand why padding in className is not working... */}
             <Grid.Column>
-              <Button circular icon='list layout' onClick={this.props.toggleSideBar} />
+              <Button circular className={styles.btn} icon='list layout' onClick={this.props.toggleSideBar} />
             </Grid.Column>
           </Grid.Row>
           {this.props.favorites.map((favorite, idx) => (
-            <Grid.Row key={'favorite' + idx} columns={1} className={styles.rows} style={{padding: '7px'}}>
+            <Grid.Row key={'favorite' + idx} columns='1' className={styles.rows} style={{padding: '4px'}}>
               <Grid.Column>
-                <Favorite changeCurrentTool={this.props.changeCurrentTool} fav={favorite} />
+                <Favorite currTool={this.props.currTool} changeCurrentTool={this.props.changeCurrentTool} removeFavorite={this.props.removeFavorite} fav={favorite} />
               </Grid.Column>
             </Grid.Row>
           ))}
           {/* Add Favorite Button */}
-          <Grid.Row columns={1} className={styles.rows} style={{padding: '7px'}}>
+          <Grid.Row columns='1' className={styles.rows} style={{padding: '4px'}}>
             <Grid.Column>
-              <Button circular icon='plus' onClick={this.addFavorite} />
+              <Button className={styles.btn} circular icon='plus' onClick={this.addFavorite} />
             </Grid.Column>
           </Grid.Row>
         </Grid>

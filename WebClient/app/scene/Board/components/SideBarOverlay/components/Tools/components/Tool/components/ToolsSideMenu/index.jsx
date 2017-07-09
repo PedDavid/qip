@@ -11,14 +11,18 @@ import {
 
 export default class ToolsSideMenu extends React.Component {
   changeCurrentTool (toolInstance) {
+    this.props.toggleSideMenu() // must be here to avoid a small user experience bug
     const toolInst = toolInstance[0]
+    const defaultTools = this.props.defaultTools
     let tool = null
     if (this.props.tool.type === 'pencil') {
-      tool = new Pen(this.props.grid, toolInst.value, 5)
+      const lastPen = defaultTools[0].lastValue
+      tool = new Pen(this.props.grid, toolInst.value, lastPen != null ? lastPen.width : 5)
     } else if (this.props.tool.type === 'eraser') {
       tool = new Eraser(this.props.grid, toolInst.value)
     } else if (this.props.tool.type === 'selected radio') {
-      tool = new Pen(this.props.grid, 'black', toolInst.value)
+      const lastPen = defaultTools[0].lastValue
+      tool = new Pen(this.props.grid, lastPen == null ? 'black' : lastPen.value, toolInst.value)
     }
     this.props.changeCurrentTool(tool)
   }
@@ -31,7 +35,7 @@ export default class ToolsSideMenu extends React.Component {
     const colorPicker = toolType === 'pencil' ? toolInstance => toolInstance.value : toolInstance => 'black'
 
     return (
-      <div className={styles.toolMenu} style={{width: 40 * toolContentSize, visibility}}>
+      <div onMouseLeave={this.props.toggleSideMenu} className={styles.toolMenu} style={{width: 40 * toolContentSize, visibility}}>
         {toolContent.map((toolInstance, idx) => (
           <div key={'toolInstance' + idx} className={styles.block} onClick={this.changeCurrentTool.bind(this, [toolInstance])}>
             <span>

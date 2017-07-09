@@ -34,7 +34,7 @@ export default class SideBarOverlay extends React.Component {
           <Sidebar.Pusher>
             <Segment basic>
               {this.props.children}
-              <FavoriteTools changeCurrentTool={this.props.changeCurrentTool} addFavorite={this.props.addFavorite} currTool={this.props.currTool} favorites={this.props.favorites} toggleSideBar={this.toggleVisibility} />
+              <FavoriteTools changeCurrentTool={this.props.changeCurrentTool} removeFavorite={this.props.removeFavorite} addFavorite={this.props.addFavorite} currTool={this.props.currTool} favorites={this.props.favorites} toggleSideBar={this.toggleVisibility} />
               <Tools currTool={this.props.currTool} grid={this.props.grid} changeCurrentTool={this.props.changeCurrentTool} defaultTools={this.props.defaultTools} cleanCanvas={this.props.cleanCanvas} />
             </Segment>
           </Sidebar.Pusher>
