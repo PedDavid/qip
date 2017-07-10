@@ -1,8 +1,9 @@
 import { findNearest } from './../util/Math'
 import { Point, PointStyle } from './Point'
+import { Figure, FigureStyle } from './Figure'
 
 export default function Grid (initialFigures, currIdx) {
-  let figures = initialFigures    // TODO(simaovii): Change to hashmap
+  let figures = []    // TODO(simaovii): Change to hashmap
   let currFigureId = currIdx
 
   // return the new figure idx. If there is already the next idx, return the idx plus 0.1. This is because the concurrency
@@ -13,6 +14,10 @@ export default function Grid (initialFigures, currIdx) {
     }
     currFigureId++
     return toRet
+  }
+
+  this.getCurrentFigureId = function () {
+    return currFigureId
   }
 
   const GridNode = function (val, height) {
@@ -240,4 +245,16 @@ export default function Grid (initialFigures, currIdx) {
     }
     return Array.from(figuresToRet.values()).map(figureId => figures[figureId])
   }
+
+  // map initial figures to Figure Objects and add them to figure array
+  initialFigures.forEach(initFig => {
+    const figStyle = new FigureStyle(initFig.figureStyle.color, initFig.figureStyle.scale)
+    const newFigure = new Figure(figStyle, initFig.id)
+    newFigure.points = initFig.points
+      .map(point => { 
+        return { x: point.x, y: point.y, style: {press: point.pointStyle.width} } 
+      })
+    this.addFigure(newFigure)
+  })
+
 }
