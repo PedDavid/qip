@@ -20,8 +20,6 @@ import defaultToolsConfig from './../../public/configFiles/defaultTools'
 
 // check if it's authenticated
 
-console.log(window.localStorage.getItem('cat'))
-
 // if not, get data from localstorage
 if (window.localStorage.getItem('figures') === null && window.localStorage.getItem('pen') === null && window.localStorage.getItem('eraser') === null) {
   const tempGrid = new Grid([], -1)
@@ -58,7 +56,9 @@ export default class Board extends React.Component {
   }
   toolsConfig = new ToolsConfig(defaultToolsConfig)
 
-   componentDidMount () {
+  componentDidMount () {
+    // draw initial grid
+    grid.draw(this.canvasContext, 1)
     /* socket.onmessage = (event) => {
       console.log(event.data)
       const {type, payload} = JSON.parse(event.data)
@@ -72,7 +72,7 @@ export default class Board extends React.Component {
           grid.draw(this.refs.canvas.canvas.getContext('2d'), 1)
       }
     } */
-  } 
+  }
 
   listeners = {
     onDown: event => this.state.currTool.onPress(event, 1),
@@ -110,11 +110,12 @@ export default class Board extends React.Component {
     this.setState({currTool: tool})
   }
   cleanCanvas = () => {
+    window.localStorage.setItem('figures', '[]')
+    window.localStorage.setItem('currFigureId', '-1')
     grid.clean(this.canvasContext)
     this.toggleCleanModal()
   }
   toggleCleanModal = () => {
-    window.alert(2)
     this.setState(prevState => { return { showCleanModal: !prevState.showCleanModal } })
   }
 

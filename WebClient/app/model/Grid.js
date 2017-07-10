@@ -1,6 +1,7 @@
 import { findNearest } from './../util/Math'
-import { Point, PointStyle } from './Point'
+import { Point } from './Point'
 import { Figure, FigureStyle } from './Figure'
+import { SimplePoint } from './SimplePoint'
 
 export default function Grid (initialFigures, currIdx) {
   let figures = []    // TODO(simaovii): Change to hashmap
@@ -146,11 +147,11 @@ export default function Grid (initialFigures, currIdx) {
     const auxPoints = figure.points
     figure.points = [] // must be that way because in forEach updateMaxLinePart is also adding points to figure
     // TODO(peddavid): FlatMap then? Instead of this auxPoints and mutation in points?
-    auxPoints.forEach(point => {
-      const gridPoint = this.getOrCreatePoint(point.x, point.y)
+    auxPoints.forEach(simplePoint => {
+      const gridPoint = this.getOrCreatePoint(simplePoint.x, simplePoint.y)
       // gridPoint.addFigure(figure.id, point.style)
       figure.addPoint(gridPoint)
-      const pointStyle = new PointStyle(point.style.press) // TODO(simaovii): isto pode sair daqui quando o dto Ponto tiver o style como PointStyle
+      const pointStyle = simplePoint.style
       gridPoint.addFigure(figure.id, pointStyle)
       this.updateMaxLinePart(prev, gridPoint, figure, pointStyle)
       prev = gridPoint
@@ -179,7 +180,7 @@ export default function Grid (initialFigures, currIdx) {
     const destPointOffsetY = destPoint.y
     // criar todos os novos pontos novamente, com as novas posições
     let pointsClone = figure.points.map(point => {
-      return {x: point.x, y: point.y, style: point.getStyleOf(figure.id)}
+      return new SimplePoint(point.x, point.y, point.getStyleOf(figure.id))
     })
 
     // nota: não tentar otimizar sem ver os problemas - é necessário estas variáveis e ordem de operações
@@ -251,10 +252,6 @@ export default function Grid (initialFigures, currIdx) {
     const figStyle = new FigureStyle(initFig.figureStyle.color, initFig.figureStyle.scale)
     const newFigure = new Figure(figStyle, initFig.id)
     newFigure.points = initFig.points
-      .map(point => { 
-        return { x: point.x, y: point.y, style: {press: point.pointStyle.width} } 
-      })
     this.addFigure(newFigure)
   })
-
 }
