@@ -68,10 +68,10 @@ export default class Board extends React.Component {
     this.toolsConfig.updatePrevTool(pen)
   }
 
-  addFavorite (tool) {
+  addFavorite = (tool) => {
     this.setState(() => this.state.favorites.push(tool)) // not needed to change prevState
   }
-  removeFavorite (tool) {
+  removeFavorite = (tool) => {
     this.setState((prevState) => {
       const index = prevState.favorites.indexOf(tool)
       if (index > -1) {
@@ -79,15 +79,7 @@ export default class Board extends React.Component {
       }
     })
   }
-  onPaste = (event) => {
-    console.log(event)
-    this.setState({clipboard: 'something'})
-  }
-  onKeyDown = (event) => {
-    console.log(event.keyCode)
-    console.log(event)
-  }
-  changeCurrentTool (tool) {
+  changeCurrentTool = (tool) => {
     this.toolsConfig.updatePrevTool(this.state.currTool)
     this.setState({currTool: tool})
   }
@@ -107,10 +99,10 @@ export default class Board extends React.Component {
   render () {
     return (
       <Router>
-        <div onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.xpto}>
-          <SideBarOverlay grid={grid} changeCurrentTool={this.changeCurrentTool.bind(this)} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
-            currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite.bind(this)}
-            removeFavorite={this.removeFavorite.bind(this)} toggleUserModal={this.toggleUserModal}>
+        <div className={styles.xpto}>
+          <SideBarOverlay grid={grid} changeCurrentTool={this.changeCurrentTool} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
+            currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite}
+            removeFavorite={this.removeFavorite} toggleUserModal={this.toggleUserModal}>
             <Canvas ref={this.refCallback} width={1200} height={800} {...this.listeners}>
               HTML5 Canvas not supported
             </Canvas>
