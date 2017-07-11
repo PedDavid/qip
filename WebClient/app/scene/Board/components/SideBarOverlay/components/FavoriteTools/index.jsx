@@ -8,6 +8,7 @@ import Eraser from './../../../../../../model/tools/Eraser'
 
 import { Grid, Button } from 'semantic-ui-react'
 
+// TODO(peddavid): This could probably be a functional Component
 export default class FavoriteTools extends React.Component {
   addFavorite = () => {
     const currTool = this.props.currTool
