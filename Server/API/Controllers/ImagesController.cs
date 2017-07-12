@@ -23,13 +23,13 @@ namespace API.Controllers {
         [HttpGet]
         public IEnumerable<OutImage> GetAll(long boardId) {
             return _imageRepository
-                .GetAll(boardId)
+                .GetAllAsync(boardId)
                 .Select(ImageExtensions.Out);
         }
 
         [HttpGet("{id}", Name = "GetImage")]
         public IActionResult GetById(long id, long boardId) {
-            Image image = _imageRepository.Find(id, boardId);
+            Image image = _imageRepository.FindAsync(id, boardId);
             if(image == null) {
                 return NotFound();
             }
@@ -43,7 +43,7 @@ namespace API.Controllers {
             }
 
             Image image = new Image(boardId, inputImage.Id.Value).In(inputImage);
-            long id = _imageRepository.Add(image);
+            long id = _imageRepository.AddAsync(image);
 
             inputImage.Id = id;
             return CreatedAtRoute("GetImage", new { id = id, boardId = boardId }, inputImage);
@@ -56,25 +56,25 @@ namespace API.Controllers {
                 return BadRequest();
             }
 
-            Image image = _imageRepository.Find(id, boardId);
+            Image image = _imageRepository.FindAsync(id, boardId);
             if(image == null) {
                 return NotFound();
             }
 
             image.In(inputImage);
 
-            _imageRepository.Update(image);
+            _imageRepository.UpdateAsync(image);
             return new NoContentResult();
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(long id, long boardId) {
-            Image image = _imageRepository.Find(id, boardId);
+            Image image = _imageRepository.FindAsync(id, boardId);
             if(image == null) {
                 return NotFound();
             }
 
-            _imageRepository.Remove(id, boardId);
+            _imageRepository.RemoveAsync(id, boardId);
             return new NoContentResult();
         }
     }

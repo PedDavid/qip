@@ -23,13 +23,13 @@ namespace API.Controllers {
         [HttpGet]
         public IEnumerable<OutPointStyle> GetAll() {
             return _pointStyleRepository
-                .GetAll()
+                .GetAllAsync()
                 .Select(PointStyleExtensions.Out);
         }
 
         [HttpGet("{id}", Name = "GetPointStyle")]
         public IActionResult GetById(long id) {
-            PointStyle pointStyle = _pointStyleRepository.Find(id);
+            PointStyle pointStyle = _pointStyleRepository.FindAsync(id);
             if(pointStyle == null) {
                 return NotFound();
             }
@@ -43,7 +43,7 @@ namespace API.Controllers {
             }
 
             PointStyle pointStyle = new PointStyle().In(inputPointStyle);
-            long id = _pointStyleRepository.Add(pointStyle);
+            long id = _pointStyleRepository.AddAsync(pointStyle);
 
             inputPointStyle.Id = id;
             return CreatedAtRoute("GetPointStyle", new { id = id }, inputPointStyle);
@@ -55,25 +55,25 @@ namespace API.Controllers {
                 return BadRequest();
             }
 
-            PointStyle pointStyle = _pointStyleRepository.Find(id);
+            PointStyle pointStyle = _pointStyleRepository.FindAsync(id);
             if(pointStyle == null) {
                 return NotFound();
             }
 
             pointStyle.In(inputPointStyle);
 
-            _pointStyleRepository.Update(pointStyle);
+            _pointStyleRepository.UpdateAsync(pointStyle);
             return new NoContentResult();
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(long id) {
-            PointStyle pointStyle = _pointStyleRepository.Find(id);
+            PointStyle pointStyle = _pointStyleRepository.FindAsync(id);
             if(pointStyle == null) {
                 return NotFound();
             }
 
-            _pointStyleRepository.Remove(id);
+            _pointStyleRepository.RemoveAsync(id);
             return new NoContentResult();
         }
     }

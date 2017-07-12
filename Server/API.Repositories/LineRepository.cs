@@ -22,7 +22,7 @@ namespace API.Repositories {
             _nameConnectionString = nameConnectionString;
         }
 
-        public async Task<long> Add(Line line) {
+        public async Task<long> AddAsync(Line line) {
             long lineId = line.Id;
 
             PointsTable points = new PointsTable(line.Points);
@@ -50,7 +50,7 @@ namespace API.Repositories {
             return lineId;
         }
 
-        public async Task<Line> Find(long id, long boardId) {
+        public async Task<Line> FindAsync(long id, long boardId) {
             using(SqlConnection con = new SqlConnection()) {
                 con.ConnectionString = _configuration.GetConnectionString(_nameConnectionString);
                 await con.OpenAsync();
@@ -104,7 +104,7 @@ namespace API.Repositories {
             }
         }
 
-        public async Task<IEnumerable<Line>> GetAll(long boardId) {
+        public async Task<IEnumerable<Line>> GetAllAsync(long boardId) {
             using(SqlConnection con = new SqlConnection()) {
                 con.ConnectionString = _configuration.GetConnectionString(_nameConnectionString);
                 await con.OpenAsync();
@@ -150,7 +150,7 @@ namespace API.Repositories {
             }
         }
 
-        public Task Remove(long id, long boardId) {
+        public Task RemoveAsync(long id, long boardId) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
@@ -164,7 +164,7 @@ namespace API.Repositories {
             return _queryTemplate.StoredProcedureAsync(REMOVE_LINE, parameters);
         }
 
-        public Task Update(Line line) {
+        public Task UpdateAsync(Line line) {
             long lineId = line.Id;
 
             PointsTable points = new PointsTable(line.Points);
@@ -190,7 +190,7 @@ namespace API.Repositories {
             return _queryTemplate.StoredProcedureAsync(UPDATE_LINE, parameters);
         }
 
-        public Task PartialUpdate(Line figure) {
+        public Task PartialUpdateAsync(Line figure) {
             throw new NotImplementedException();
         }
 

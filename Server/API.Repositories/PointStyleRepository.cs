@@ -16,7 +16,7 @@ namespace API.Repositories {
             _queryTemplate = queryTemplate;
         }
 
-        public Task<long> Add(PointStyle pointStyle) {
+        public Task<long> AddAsync(PointStyle pointStyle) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
@@ -26,7 +26,7 @@ namespace API.Repositories {
             return _queryTemplate.QueryForScalarAsync<long>(INSERT_POINT_STYLE, parameters);
         }
 
-        public Task<PointStyle> Find(long id) {
+        public Task<PointStyle> FindAsync(long id) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters.Add("@id", SqlDbType.BigInt).Value = id;
@@ -34,11 +34,11 @@ namespace API.Repositories {
             return _queryTemplate.QueryForObjectAsync(SELECT_POINT_STYLE, parameters, GetPointStyle);
         }
 
-        public Task<IEnumerable<PointStyle>> GetAll() {
+        public Task<IEnumerable<PointStyle>> GetAllAsync() {
             return _queryTemplate.QueryAsync(SELECT_ALL, GetPointStyle);
         }
 
-        public Task Remove(long id) {
+        public Task RemoveAsync(long id) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters.Add("@id", SqlDbType.BigInt).Value = id;
@@ -46,7 +46,7 @@ namespace API.Repositories {
             return _queryTemplate.QueryAsync(DELETE_POINT_STYLE, parameters);
         }
 
-        public Task Update(PointStyle pointStyle) {
+        public Task UpdateAsync(PointStyle pointStyle) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
@@ -60,7 +60,7 @@ namespace API.Repositories {
             return _queryTemplate.QueryAsync(UPDATE_POINT_STYLE, parameters);
         }
 
-        public Task PartialUpdate(PointStyle pointStyle) {
+        public Task PartialUpdateAsync(PointStyle pointStyle) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters

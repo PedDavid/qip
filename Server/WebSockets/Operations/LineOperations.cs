@@ -35,7 +35,7 @@ namespace WebSockets.Operations {
 
             InLine inLine = payload.ToObject<InLine>();
             Line line = new Line(boardId, inLine.Id.Value).In(inLine);
-            Task store = Task.Run(() => _lineRepository.Add(line)); //TODO Nota: Fazer com async await para o que for cpu-bound ser feito sincronamente
+            Task store = Task.Run(() => _lineRepository.AddAsync(line)); //TODO Nota: Fazer com async await para o que for cpu-bound ser feito sincronamente
             //TODO Testar se a Task is completed or faulted, in this cases do result for get the result/exception
             //Fazer alguma coisa em caso de excepções
 
@@ -57,14 +57,14 @@ namespace WebSockets.Operations {
             InLine inLine = payload.ToObject<InLine>();
 
             Task store = Task.Run(() => {
-                Line line = _lineRepository.Find(id, boardId);
+                Line line = _lineRepository.FindAsync(id, boardId);
                 if(line == null) {
                     return;//TODO REVER
                 }
 
                 line.In(inLine);
 
-                _lineRepository.Update(line);
+                _lineRepository.UpdateAsync(line);
             });
 
             return new OperationResult(broadcastMessage: payload);
@@ -78,11 +78,11 @@ namespace WebSockets.Operations {
             long id = payload["id"].Value<long>();
 
             Task store = Task.Run(() => {
-                Line line = _lineRepository.Find(id, boardId);
+                Line line = _lineRepository.FindAsync(id, boardId);
                 if(line == null) {
                     return;//TODO REVER
                 }
-                _lineRepository.Remove(id, boardId);
+                _lineRepository.RemoveAsync(id, boardId);
              });
 
             return new OperationResult(broadcastMessage: payload);

@@ -23,13 +23,13 @@ namespace API.Controllers {
         [HttpGet]
         public IEnumerable<OutBoard> GetAll() {
             return _boardRepository
-                .GetAll()
+                .GetAllAsync()
                 .Select(BoardExtensions.Out);
         }
 
         [HttpGet("{id}", Name = "GetBoard")]
         public IActionResult GetById(long id) {
-            Board board = _boardRepository.Find(id);
+            Board board = _boardRepository.FindAsync(id);
             if(board == null) {
                 return NotFound();
             }
@@ -43,7 +43,7 @@ namespace API.Controllers {
             }
 
             Board board = new Board().In(inputBoard);
-            long id = _boardRepository.Add(board);
+            long id = _boardRepository.AddAsync(board);
 
             inputBoard.Id = id;
             return CreatedAtRoute("GetBoard", new { id = id }, inputBoard);
@@ -55,25 +55,25 @@ namespace API.Controllers {
                 return BadRequest();
             }
 
-            Board board = _boardRepository.Find(id);
+            Board board = _boardRepository.FindAsync(id);
             if(board == null) {
                 return NotFound();
             }
 
             board.In(inputBoard);
 
-            _boardRepository.Update(board);
+            _boardRepository.UpdateAsync(board);
             return new NoContentResult();
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(long id) {
-            Board board = _boardRepository.Find(id);
+            Board board = _boardRepository.FindAsync(id);
             if(board == null) {
                 return NotFound();
             }
 
-            _boardRepository.Remove(id);
+            _boardRepository.RemoveAsync(id);
             return new NoContentResult();
         }
     }

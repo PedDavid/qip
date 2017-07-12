@@ -16,7 +16,7 @@ namespace API.Repositories {
             _queryTemplate = queryTemplate;
         }
 
-        public Task<long> Add(User user) {
+        public Task<long> AddAsync(User user) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
@@ -46,7 +46,7 @@ namespace API.Repositories {
             return _queryTemplate.QueryForScalarAsync<long>(INSERT_USER, parameters);
         }
 
-        public Task<User> Find(long id) {
+        public Task<User> FindAsync(long id) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters.Add("@id", SqlDbType.BigInt).Value = id;
@@ -54,11 +54,11 @@ namespace API.Repositories {
             return _queryTemplate.QueryForObjectAsync(SELECT_USER, parameters, GetUser);
         }
 
-        public Task<IEnumerable<User>> GetAll() {
+        public Task<IEnumerable<User>> GetAllAsync() {
             return _queryTemplate.QueryAsync(SELECT_ALL, GetUser);
         }
 
-        public Task Remove(long id) {
+        public Task RemoveAsync(long id) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters.Add("@id", SqlDbType.BigInt).Value = id;
@@ -66,7 +66,7 @@ namespace API.Repositories {
             return _queryTemplate.QueryAsync(DELETE_USER, parameters);
         }
 
-        public Task Update(User user) {
+        public Task UpdateAsync(User user) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
@@ -101,7 +101,7 @@ namespace API.Repositories {
         }
 
         //Note: This method can't alter favorites and penColors for null
-        public Task PartialUpdate(User user) {
+        public Task PartialUpdateAsync(User user) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters

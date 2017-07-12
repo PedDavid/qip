@@ -23,13 +23,13 @@ namespace API.Controllers {
         [HttpGet]
         public IEnumerable<OutUserBoard_User> GetAll(long boardId) {
             return _userBoardsRepository
-                .GetAllUsers(boardId)
+                .GetAllUsersAsync(boardId)
                 .Select(UserBoard_UserExtensions.Out);
         }
 
         [HttpGet("{userId}", Name = "GetUserBoard")]
         public IActionResult GetById(long boardId, long userId) {
-            UserBoard_User user = _userBoardsRepository.FindUser(boardId, userId);
+            UserBoard_User user = _userBoardsRepository.FindUserAsync(boardId, userId);
 
             if(user == null) {
                 return NotFound();
@@ -45,7 +45,7 @@ namespace API.Controllers {
             }
 
             UserBoard userBoard = new UserBoard().In(inputUserBoard);
-            _userBoardsRepository.Add(userBoard);
+            _userBoardsRepository.AddAsync(userBoard);
 
             return CreatedAtRoute("GetUserBoard", new { boardId = userBoard.BoardId, userId = userBoard.UserId }, inputUserBoard);
         }
@@ -56,25 +56,25 @@ namespace API.Controllers {
                 return BadRequest();
             }
 
-            UserBoard user = _userBoardsRepository.Find(boardId, userId);
+            UserBoard user = _userBoardsRepository.FindAsync(boardId, userId);
             if(user == null) {
                 return NotFound();
             }
 
             user.In(inputUserBoard);
 
-            _userBoardsRepository.Update(user);
+            _userBoardsRepository.UpdateAsync(user);
             return new NoContentResult();
         }
 
         [HttpDelete("{userId}")]
         public IActionResult Delete(long boardId, long userId) {
-            UserBoard user = _userBoardsRepository.Find(boardId, userId);
+            UserBoard user = _userBoardsRepository.FindAsync(boardId, userId);
             if(user == null) {
                 return NotFound();
             }
 
-            _userBoardsRepository.Remove(boardId, userId);
+            _userBoardsRepository.RemoveAsync(boardId, userId);
             return new NoContentResult();
         }
     }

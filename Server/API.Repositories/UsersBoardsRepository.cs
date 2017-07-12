@@ -15,7 +15,7 @@ namespace API.Repositories {
             _queryTemplate = queryTemplate;
         }
 
-        public Task Add(UserBoard userBoard) {
+        public Task AddAsync(UserBoard userBoard) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
@@ -33,7 +33,7 @@ namespace API.Repositories {
             return _queryTemplate.QueryAsync(INSERT_USER_BOARD, parameters);
         }
 
-        public Task<UserBoard> Find(long boardId, long userId) {
+        public Task<UserBoard> FindAsync(long boardId, long userId) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
@@ -43,7 +43,7 @@ namespace API.Repositories {
             return _queryTemplate.QueryForObjectAsync(SELECT_USER_BOARD, parameters, GetUserBoard);
         }
 
-        public Task<UserBoard_Board> FindBoard(long userId, long boardId) {
+        public Task<UserBoard_Board> FindBoardAsync(long userId, long boardId) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
@@ -53,7 +53,7 @@ namespace API.Repositories {
             return _queryTemplate.QueryForObjectAsync(SELECT_BOARD, parameters, GetBoard);
         }
 
-        public Task<UserBoard_User> FindUser(long boardId, long userId) {
+        public Task<UserBoard_User> FindUserAsync(long boardId, long userId) {
                 List<SqlParameter> parameters = new List<SqlParameter>();
 
                 parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
@@ -63,7 +63,7 @@ namespace API.Repositories {
                 return _queryTemplate.QueryForObjectAsync(SELECT_USER, parameters, GetUser);
         }
 
-        public Task<IEnumerable<UserBoard_Board>> GetAllBoards(long userId) {
+        public Task<IEnumerable<UserBoard_Board>> GetAllBoardsAsync(long userId) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters.Add("@userId", SqlDbType.BigInt).Value = userId;
@@ -71,7 +71,7 @@ namespace API.Repositories {
             return _queryTemplate.QueryAsync(SELECT_ALL_BOARDS, parameters, GetBoard);
         }
 
-        public Task<IEnumerable<UserBoard_User>> GetAllUsers(long boardId) {
+        public Task<IEnumerable<UserBoard_User>> GetAllUsersAsync(long boardId) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
@@ -79,7 +79,7 @@ namespace API.Repositories {
             return _queryTemplate.QueryAsync(SELECT_ALL_USERS, parameters, GetUser);
         }
 
-        public Task Remove(long boardId, long userId) {
+        public Task RemoveAsync(long boardId, long userId) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters.Add("@userId", SqlDbType.BigInt).Value = userId;
@@ -89,7 +89,7 @@ namespace API.Repositories {
             return _queryTemplate.QueryAsync(DELETE_USER_BOARD, parameters);
         }
 
-        public Task Update(UserBoard userBoard) {
+        public Task UpdateAsync(UserBoard userBoard) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters

@@ -23,13 +23,13 @@ namespace API.Controllers {
         [HttpGet]
         public IEnumerable<OutLine> GetAll(long boardId) {
             return _lineRepository
-                .GetAll(boardId)
+                .GetAllAsync(boardId)
                 .Select(LineExtensions.Out);
         }
 
         [HttpGet("{id}", Name = "GetLine")]
         public IActionResult GetById(long id, long boardId) {
-            Line line = _lineRepository.Find(id, boardId);
+            Line line = _lineRepository.FindAsync(id, boardId);
             if(line == null) {
                 return NotFound();
             }
@@ -43,7 +43,7 @@ namespace API.Controllers {
             }
 
             Line line = new Line(boardId, inputLine.Id.Value).In(inputLine);
-            long id = _lineRepository.Add(line);
+            long id = _lineRepository.AddAsync(line);
 
             inputLine.Id = id;
             return CreatedAtRoute("GetLine", new { id = id, boardId = boardId }, inputLine);
@@ -56,25 +56,25 @@ namespace API.Controllers {
                 return BadRequest();
             }
 
-            Line line = _lineRepository.Find(id, boardId);
+            Line line = _lineRepository.FindAsync(id, boardId);
             if(line == null) {
                 return NotFound();
             }
 
             line.In(inputLine);
 
-            _lineRepository.Update(line);
+            _lineRepository.UpdateAsync(line);
             return new NoContentResult();
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(long id, long boardId) {
-            Line line = _lineRepository.Find(id, boardId);
+            Line line = _lineRepository.FindAsync(id, boardId);
             if(line == null) {
                 return NotFound();
             }
 
-            _lineRepository.Remove(id, boardId);
+            _lineRepository.RemoveAsync(id, boardId);
             return new NoContentResult();
         }
     }

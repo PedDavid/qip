@@ -25,13 +25,13 @@ namespace API.Controllers {
         [HttpGet]
         public IEnumerable<OutUser> GetAll() {
             return _userRepository
-                .GetAll()
+                .GetAllAsync()
                 .Select(UserExtensions.Out);
         }
 
         [HttpGet("{id}", Name = "GetUser")]
         public IActionResult GetById(long id) {
-            User user = _userRepository.Find(id);
+            User user = _userRepository.FindAsync(id);
             if(user == null) {
                 return NotFound();
             }
@@ -45,7 +45,7 @@ namespace API.Controllers {
             }
 
             User user = new User().In(inputUser);
-            long id = _userRepository.Add(user);
+            long id = _userRepository.AddAsync(user);
 
             inputUser.Id = id;
             return CreatedAtRoute("GetUser", new { id = id }, inputUser);
@@ -57,38 +57,38 @@ namespace API.Controllers {
                 return BadRequest();
             }
 
-            User user = _userRepository.Find(id);
+            User user = _userRepository.FindAsync(id);
             if(user == null) {
                 return NotFound();
             }
 
             user.In(inputUser);
 
-            _userRepository.Update(user);
+            _userRepository.UpdateAsync(user);
             return new NoContentResult();
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(long id) {
-            User user = _userRepository.Find(id);
+            User user = _userRepository.FindAsync(id);
             if(user == null) {
                 return NotFound();
             }
 
-            _userRepository.Remove(id);
+            _userRepository.RemoveAsync(id);
             return new NoContentResult();
         }
 
         [HttpGet("{userId}/boards")]
         public IEnumerable<OutUserBoard_Board> GetAll(long userId) {
             return _userBoardsRepository
-                .GetAllBoards(userId)
+                .GetAllBoardsAsync(userId)
                 .Select(UserBoard_BoardExtensions.Out);
         }
 
         [HttpGet("{userId}/boards/{boardId}")]
         public IActionResult GetById(long userId, long boardId) {
-            UserBoard_Board board = _userBoardsRepository.FindBoard(userId, boardId);
+            UserBoard_Board board = _userBoardsRepository.FindBoardAsync(userId, boardId);
 
             if(board == null) {
                 return NotFound();

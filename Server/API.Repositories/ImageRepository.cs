@@ -16,7 +16,7 @@ namespace API.Repositories {
             _queryTemplate = queryTemplate;
         }
 
-        public async Task<long> Add(Image image) {
+        public async Task<long> AddAsync(Image image) {
             long imageId = image.Id;
 
             List<SqlParameter> parameters = new List<SqlParameter>();
@@ -54,7 +54,7 @@ namespace API.Repositories {
             return imageId;
         }
 
-        public Task<Image> Find(long id, long boardId) {
+        public Task<Image> FindAsync(long id, long boardId) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters.Add("@id", SqlDbType.BigInt).Value = id;
@@ -64,7 +64,7 @@ namespace API.Repositories {
             return _queryTemplate.QueryForObjectAsync(SELECT_IMAGE, parameters, GetImage);
         }
 
-        public Task<IEnumerable<Image>> GetAll(long boardId) {
+        public Task<IEnumerable<Image>> GetAllAsync(long boardId) {
                 List<SqlParameter> parameters = new List<SqlParameter>();
 
                 parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
@@ -72,7 +72,7 @@ namespace API.Repositories {
                 return _queryTemplate.QueryAsync(SELECT_ALL, parameters, GetImage);
         }
 
-        public Task Remove(long id, long boardId) {
+        public Task RemoveAsync(long id, long boardId) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
@@ -86,7 +86,7 @@ namespace API.Repositories {
             return _queryTemplate.StoredProcedureAsync(REMOVE_IMAGE, parameters);
         }
 
-        public Task Update(Image image) {
+        public Task UpdateAsync(Image image) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
@@ -120,7 +120,7 @@ namespace API.Repositories {
             return _queryTemplate.StoredProcedureAsync(UPDATE_IMAGE, parameters);
         }
 
-        public Task PartialUpdate(Image image) {
+        public Task PartialUpdateAsync(Image image) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters

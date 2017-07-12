@@ -23,13 +23,13 @@ namespace API.Controllers {
         [HttpGet]
         public IEnumerable<OutLineStyle> GetAll() {
             return _lineStyleRepository
-                .GetAll()
+                .GetAllAsync()
                 .Select(LineStyleExtensions.Out);
         }
 
         [HttpGet("{id}", Name = "GetLineStyle")]
         public IActionResult GetById(long id) {
-            LineStyle lineStyle = _lineStyleRepository.Find(id);
+            LineStyle lineStyle = _lineStyleRepository.FindAsync(id);
             if(lineStyle == null) {
                 return NotFound();
             }
@@ -43,7 +43,7 @@ namespace API.Controllers {
             }
 
             LineStyle lineStyle = new LineStyle().In(inputLineStyle);
-            long id = _lineStyleRepository.Add(lineStyle);
+            long id = _lineStyleRepository.AddAsync(lineStyle);
 
             inputLineStyle.Id = id;
             return CreatedAtRoute("GetLineStyle", new { id = id }, inputLineStyle);
@@ -55,25 +55,25 @@ namespace API.Controllers {
                 return BadRequest();
             }
 
-            LineStyle lineStyle = _lineStyleRepository.Find(id);
+            LineStyle lineStyle = _lineStyleRepository.FindAsync(id);
             if(lineStyle == null) {
                 return NotFound();
             }
 
             lineStyle.In(inputLineStyle);
 
-            _lineStyleRepository.Update(lineStyle);
+            _lineStyleRepository.UpdateAsync(lineStyle);
             return new NoContentResult();
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(long id) {
-            LineStyle lineStyle = _lineStyleRepository.Find(id);
+            LineStyle lineStyle = _lineStyleRepository.FindAsync(id);
             if(lineStyle == null) {
                 return NotFound();
             }
 
-            _lineStyleRepository.Remove(id);
+            _lineStyleRepository.RemoveAsync(id);
             return new NoContentResult();
         }
     }

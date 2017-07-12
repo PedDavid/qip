@@ -35,7 +35,7 @@ namespace WebSockets.Operations {
 
             InImage inImage = payload.ToObject<InImage>();
             Image image = new Image(boardId, inImage.Id.Value).In(inImage);
-            Task store = Task.Run(() => _imageRepository.Add(image)); //TODO Nota: Fazer com async await para o que for cpu-bound ser feito sincronamente
+            Task store = Task.Run(() => _imageRepository.AddAsync(image)); //TODO Nota: Fazer com async await para o que for cpu-bound ser feito sincronamente
             //TODO Testar se a Task is completed or faulted, in this cases do result for get the result/exception
             //Fazer alguma coisa em caso de excepções
 
@@ -57,14 +57,14 @@ namespace WebSockets.Operations {
             InImage inImage = payload.ToObject<InImage>();
 
             Task store = Task.Run(() => {
-                Image image = _imageRepository.Find(id, boardId);
+                Image image = _imageRepository.FindAsync(id, boardId);
                 if(image == null) {
                     return;//TODO REVER
                 }
 
                 image.In(inImage);
 
-                _imageRepository.Update(image);
+                _imageRepository.UpdateAsync(image);
             });
 
             return new OperationResult(broadcastMessage: payload);
@@ -78,11 +78,11 @@ namespace WebSockets.Operations {
             long id = payload["id"].Value<long>();
 
             Task store = Task.Run(() => {
-                Image image = _imageRepository.Find(id, boardId);
+                Image image = _imageRepository.FindAsync(id, boardId);
                 if(image == null) {
                     return;//TODO REVER
                 }
-                _imageRepository.Remove(id, boardId);
+                _imageRepository.RemoveAsync(id, boardId);
              });
 
             return new OperationResult(broadcastMessage: payload);

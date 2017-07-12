@@ -17,7 +17,7 @@ namespace API.Repositories {
             _queryTemplate = queryTemplate;
         }
 
-        public Task<long> Add(Board board) {
+        public Task<long> AddAsync(Board board) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
@@ -31,7 +31,7 @@ namespace API.Repositories {
             return _queryTemplate.QueryForScalarAsync<long>(INSERT_BOARD, parameters);
         }
 
-        public Task<Board> Find(long id) {
+        public Task<Board> FindAsync(long id) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters.Add("@id", SqlDbType.BigInt).Value = id;
@@ -39,11 +39,11 @@ namespace API.Repositories {
             return _queryTemplate.QueryForObjectAsync(SELECT_BOARD, parameters, GetBoard);
         }
 
-        public Task<IEnumerable<Board>> GetAll() {
+        public Task<IEnumerable<Board>> GetAllAsync() {
             return _queryTemplate.QueryAsync(SELECT_ALL, GetBoard);
         }
 
-        public Task Remove(long id) {
+        public Task RemoveAsync(long id) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters.Add("@id", SqlDbType.BigInt).Value = id;
@@ -51,7 +51,7 @@ namespace API.Repositories {
             return _queryTemplate.QueryAsync(DELETE_BOARD, parameters);
         }
 
-        public Task Update(Board board) {
+        public Task UpdateAsync(Board board) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
@@ -69,7 +69,7 @@ namespace API.Repositories {
             return _queryTemplate.QueryAsync(UPDATE_BOARD, parameters);
         }
 
-        public Task PartialUpdate(Board board) {
+        public Task PartialUpdateAsync(Board board) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters

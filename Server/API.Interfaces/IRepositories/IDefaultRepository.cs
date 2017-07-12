@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace API.Interfaces.IRepositories {
     public interface IDefaultRepository<T> {
-        Task<long> Add(T t);
-        Task<IEnumerable<T>> GetAll();
-        Task<T> Find(long id);
-        Task Remove(long id);
-        Task Update(T t);
-        Task PartialUpdate(T t);
+        Task<long> AddAsync(T t);
+        Task<IEnumerable<T>> GetAllAsync();
+        Task<T> FindAsync(long id);
+        Task RemoveAsync(long id);
+        Task UpdateAsync(T t);
+        Task PartialUpdateAsync(T t);
     }
 }

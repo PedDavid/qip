@@ -16,7 +16,7 @@ namespace API.Repositories {
             _queryTemplate = queryTemplate;
         }
 
-        public Task<long> Add(LineStyle lineStyle) {
+        public Task<long> AddAsync(LineStyle lineStyle) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
@@ -26,7 +26,7 @@ namespace API.Repositories {
             return _queryTemplate.QueryForScalarAsync<long>(INSERT_LINE_STYLE, parameters);
         }
 
-        public Task<LineStyle> Find(long id) {
+        public Task<LineStyle> FindAsync(long id) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters.Add("@id", SqlDbType.BigInt).Value = id;
@@ -34,11 +34,11 @@ namespace API.Repositories {
             return _queryTemplate.QueryForObjectAsync(SELECT_LINE_STYLE, parameters, GetLineStyle);
         }
 
-        public Task<IEnumerable<LineStyle>> GetAll() {
+        public Task<IEnumerable<LineStyle>> GetAllAsync() {
             return _queryTemplate.QueryAsync(SELECT_ALL, GetLineStyle);
         }
 
-        public Task Remove(long id) {
+        public Task RemoveAsync(long id) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters.Add("@id", SqlDbType.BigInt).Value = id;
@@ -46,7 +46,7 @@ namespace API.Repositories {
             return _queryTemplate.QueryAsync(DELETE_LINE_STYLE, parameters);
         }
 
-        public Task Update(LineStyle lineStyle) {
+        public Task UpdateAsync(LineStyle lineStyle) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
@@ -60,7 +60,7 @@ namespace API.Repositories {
             return _queryTemplate.QueryAsync(UPDATE_LINE_STYLE, parameters);
         }
 
-        public Task PartialUpdate(LineStyle lineStyle) {
+        public Task PartialUpdateAsync(LineStyle lineStyle) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
