@@ -35,7 +35,7 @@ namespace WebSockets.Operations {
 
             InLine inLine = payload.ToObject<InLine>();
             Line line = new Line(boardId, inLine.Id.Value).In(inLine);
-            Task store = Task.Run(() => _lineRepository.AddAsync(line)); //TODO Nota: Fazer com async await para o que for cpu-bound ser feito sincronamente
+            Task store = _lineRepository.AddAsync(line);
             //TODO Testar se a Task is completed or faulted, in this cases do result for get the result/exception
             //Fazer alguma coisa em caso de excepções
 
@@ -56,18 +56,20 @@ namespace WebSockets.Operations {
 
             InLine inLine = payload.ToObject<InLine>();
 
-            Task store = Task.Run(() => {
-                Line line = _lineRepository.FindAsync(id, boardId);
-                if(line == null) {
-                    return;//TODO REVER
-                }
-
-                line.In(inLine);
-
-                _lineRepository.UpdateAsync(line);
-            });
+            Task store = StoreUpdateLine(id, boardId, inLine);
 
             return new OperationResult(broadcastMessage: payload);
+        }
+
+        private async Task StoreUpdateLine(long id, long boardId, InLine inLine) {
+            Line line = await _lineRepository.FindAsync(id, boardId);
+            if(line == null) {
+                return;//TODO REVER
+            }
+
+            line.In(inLine);
+
+            await _lineRepository.UpdateAsync(line);
         }
 
         public OperationResult DeleteLine(JObject payload) {
@@ -77,15 +79,17 @@ namespace WebSockets.Operations {
 
             long id = payload["id"].Value<long>();
 
-            Task store = Task.Run(() => {
-                Line line = _lineRepository.FindAsync(id, boardId);
-                if(line == null) {
-                    return;//TODO REVER
-                }
-                _lineRepository.RemoveAsync(id, boardId);
-             });
+            Task store = StoreDeleteLine(id, boardId);
 
             return new OperationResult(broadcastMessage: payload);
+        }
+
+        private async Task StoreDeleteLine(long id, long boardId) {
+            Line line = await _lineRepository.FindAsync(id, boardId);
+            if(line == null) {
+                return;//TODO REVER
+            }
+            await _lineRepository.RemoveAsync(id, boardId);
         }
     }
 }
