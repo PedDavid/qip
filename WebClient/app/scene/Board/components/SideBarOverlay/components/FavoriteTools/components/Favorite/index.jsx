@@ -13,14 +13,6 @@ export default class Favorite extends React.Component {
     evt.preventDefault()
     this.setState({openFavMenu: !this.state.openFavMenu})
   }
-  removeFavorite = () => {
-    const fav = this.props.fav
-    this.props.removeFavorite(fav)
-  }
-  changeCurrentTool = () => {
-    const fav = this.props.fav
-    this.props.changeCurrentTool(fav)
-  }
   render () {
     const favMenuWidth = this.state.openFavMenu ? 'visible' : 'hidden'
     const fav = this.props.fav
@@ -41,12 +33,12 @@ export default class Favorite extends React.Component {
     }
     return (
       <div onContextMenu={this.toggleFavMenu}>
-        <Button circular className={styles.fav} style={style} onClick={this.changeCurrentTool}>
+        <Button circular className={styles.fav} style={style} onClick={() => this.props.changeCurrentTool(fav)}>
           {/* it could be color:red instead of style:{color:'red'}} but the first one does not support rgba */}
           <Icon className={styles.iconStyle + ' large'} name={name} style={{color: color}} />
           <font className={styles.fontStyle} size='1'> {fav.width} </font>
         </Button>
-        <Button onClick={this.removeFavorite} icon={{name: 'trash', style: {color: 'red'}}} content='Remove' style={{marginLeft: '-25px', visibility: favMenuWidth}} className={styles.favMenu} />
+        <Button onClick={() => this.props.removeFavorite(fav)} icon={{name: 'trash', style: {color: 'red'}}} content='Remove' style={{marginLeft: '-25px', visibility: favMenuWidth}} className={styles.favMenu} />
       </div>
     )
   }

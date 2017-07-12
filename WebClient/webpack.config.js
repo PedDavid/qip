@@ -40,6 +40,9 @@ module.exports = {
     ]
   },
   devServer: {
-    publicPath: resolve(__dirname, '/dist/')
+    publicPath: resolve(__dirname, '/dist/'),
+    historyApiFallback: {
+      disableDotRule: true
+    }
   }
 }
