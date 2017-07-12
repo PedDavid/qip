@@ -16,20 +16,36 @@ import Eraser from './../../model/tools/Eraser'
 import Grid from './../../model/Grid'
 import ToolsConfig from './../../model/ToolsConfig'
 import defaultToolsConfig from './../../public/configFiles/defaultTools'
-import {Figure, FigureStyle} from './../../model/Figure'
+// import {Figure, FigureStyle} from './../../model/Figure'
 
-const grid = new Grid([], 300, 300, 0)
-const pen = new Pen(grid, 'black', 5) // obtain current tools from server
-const eraser = new Eraser(grid, 20)
+// check if it's authenticated
 
-const scheme = document.location.protocol === 'https:' ? 'wss' : 'ws'
+// if not, get data from localstorage
+if (window.localStorage.getItem('figures') === null && window.localStorage.getItem('pen') === null && window.localStorage.getItem('eraser') === null) {
+  const tempGrid = new Grid([], -1)
+  window.localStorage.setItem('figures', JSON.stringify(tempGrid.getFigures()))
+  window.localStorage.setItem('currFigureId', JSON.stringify(tempGrid.getCurrentFigureId()))
+  window.localStorage.setItem('pen', JSON.stringify(new Pen(tempGrid, 'black', 5)))
+  window.localStorage.setItem('eraser', JSON.stringify(new Eraser(tempGrid, 20)))
+}
+
+const figures = JSON.parse(window.localStorage.getItem('figures'))
+const currFigureId = JSON.parse(window.localStorage.getItem('currFigureId'))
+const grid = new Grid(figures, currFigureId)
+const tempPen = JSON.parse(window.localStorage.getItem('pen'))
+const pen = new Pen(grid, tempPen.color, tempPen.width)
+const tempEraser = JSON.parse(window.localStorage.getItem('eraser'))
+const eraser = new Eraser(grid, tempEraser.width)
+
+const socket = null
+/* const scheme = document.location.protocol === 'https:' ? 'wss' : 'ws'
 const port = document.location.port ? (':' + 53379) : ''
 const connectionUrl = scheme + '://' + document.location.hostname + port + '/ws' + '?id=0'
 const socket = new WebSocket(connectionUrl)
 
 socket.onopen = (event) => {
   console.log('DONE')
-}
+} */
 
 export default class Board extends React.Component {
   state = {
@@ -41,7 +57,9 @@ export default class Board extends React.Component {
   toolsConfig = new ToolsConfig(defaultToolsConfig)
 
   componentDidMount () {
-    socket.onmessage = (event) => {
+    // draw initial grid
+    grid.draw(this.canvasContext, 1)
+    /* socket.onmessage = (event) => {
       console.log(event.data)
       const {type, payload} = JSON.parse(event.data)
       console.log(payload)
@@ -53,7 +71,7 @@ export default class Board extends React.Component {
           grid.addFigure(newFigure)
           grid.draw(this.refs.canvas.canvas.getContext('2d'), 1)
       }
-    }
+    } */
   }
 
   listeners = {
@@ -84,11 +102,12 @@ export default class Board extends React.Component {
     this.setState({currTool: tool})
   }
   cleanCanvas = () => {
+    window.localStorage.setItem('figures', '[]')
+    window.localStorage.setItem('currFigureId', '-1')
     grid.clean(this.canvasContext)
     this.toggleCleanModal()
   }
   toggleCleanModal = () => {
-    window.alert(2)
     this.setState(prevState => { return { showCleanModal: !prevState.showCleanModal } })
   }
 

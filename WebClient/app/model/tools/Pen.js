@@ -1,5 +1,6 @@
 import { Figure, FigureStyle } from './../Figure'
-
+import {SimplePoint} from './../SimplePoint'
+import {PointStyle} from './../Point'
 import Tool from './Tool'
 
 export default class Pen implements Tool {
@@ -21,7 +22,8 @@ export default class Pen implements Tool {
     this.currentFigure = new Figure(figStyle)
 
     const press = event.pressure * this.width
-    this.currentFigure.addPoint({x, y, style: { press }})
+    const pointStyle = new PointStyle(press)
+    this.currentFigure.addPoint(new SimplePoint(x, y, pointStyle))
 
     const canvasContext = event.target.getContext('2d')
     canvasContext.beginPath()
@@ -48,7 +50,9 @@ export default class Pen implements Tool {
       if (last.x === x && last.y === y) {
         return
       }
-      this.currentFigure.addPoint({x, y, style: { press }})
+
+      const pointStyle = new PointStyle(press)
+      this.currentFigure.addPoint(new SimplePoint(x, y, pointStyle))
 
       const canvasContext = event.target.getContext('2d')
       canvasContext.beginPath() // também tem de estar aqui para dar para fazer pressure sensitive
@@ -64,11 +68,23 @@ export default class Pen implements Tool {
 
   onPressUp (event, socket) {
     this.grid.addFigure(this.currentFigure)
-    const objToSend = {
+
+    // add to localstorage
+    const dataFigure = JSON.parse(window.localStorage.getItem('figures'))
+    // map currentFigure's points to a data object
+    const currentFigureTwin = Object.assign({}, this.currentFigure) // Object.assign() method only copies enumerable and own properties from a source object to a target object
+    currentFigureTwin.points = this.currentFigure.points.map(point => {
+      const sda = point.getStyleOf(this.currentFigure.id)
+      return new SimplePoint(point.x, point.y, sda)
+    })
+    dataFigure.push(currentFigureTwin) // it can be push instead of dataFigure[id] because it will not have crashes with external id's because it's only used when there is no connection
+    window.localStorage.setItem('figures', JSON.stringify(dataFigure))
+    window.localStorage.setItem('currFigureId', JSON.stringify(this.grid.getCurrentFigureId()))
+    /* const objToSend = {
       type: 'INSERT_FIGURE',
       payload: this.currentFigure
     }
-    socket.send(JSON.stringify(objToSend))
+    socket.send(JSON.stringify(objToSend)) */
     this.currentFigure = null
   }
 
