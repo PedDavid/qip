@@ -6,8 +6,16 @@ using System.Text;
 namespace API.Repositories
 {
     public class FigureIdRepository : IFigureIdRepository {
-        public long GetMaxId() {
-            return 0;//TODO
+        private readonly SqlServerTemplate _queryTemplate;
+
+        public FigureIdRepository(SqlServerTemplate queryTemplate) {
+            _queryTemplate = queryTemplate;
         }
+
+        public long GetMaxId() {
+            return _queryTemplate.QueryForScalar<long>(SELECT_MAX_ID);
+        }
+
+        private static readonly string SELECT_MAX_ID = "SELECT max(id) FROM dbo.Figure";
     }
 }
