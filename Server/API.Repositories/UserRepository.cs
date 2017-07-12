@@ -16,160 +16,124 @@ namespace API.Repositories {
             _queryTemplate = queryTemplate;
         }
 
-        public long Add(User user) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
+        public Task<long> Add(User user) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
 
-                parameters
+            parameters
+                .Add("@name", SqlDbType.VarChar)
+                .Value = user.Name;
+
+            parameters
+                .Add("@username", SqlDbType.VarChar)
+                .Value = user.UserName;
+
+            parameters
+                .Add("@pwdHash", SqlDbType.VarChar)
+                .Value = user.PwdHash;
+
+            parameters
+                .Add("@pwdSalt", SqlDbType.VarChar)
+                .Value = user.PwdSalt;
+
+            parameters
+                .Add("@favorites", SqlDbType.VarChar)
+                .Value = user.Favorites;
+
+            parameters
+                .Add("@penColors", SqlDbType.VarChar)
+                .Value = user.PenColors;
+
+            return _queryTemplate.QueryForScalarAsync<long>(INSERT_USER, parameters);
+        }
+
+        public Task<User> Find(long id) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@id", SqlDbType.BigInt).Value = id;
+
+            return _queryTemplate.QueryForObjectAsync(SELECT_USER, parameters, GetUser);
+        }
+
+        public Task<IEnumerable<User>> GetAll() {
+            return _queryTemplate.QueryAsync(SELECT_ALL, GetUser);
+        }
+
+        public Task Remove(long id) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@id", SqlDbType.BigInt).Value = id;
+
+            return _queryTemplate.QueryAsync(DELETE_USER, parameters);
+        }
+
+        public Task Update(User user) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters
+                    .Add("@id", SqlDbType.BigInt)
+                    .Value = user.Id.Value;
+
+            parameters
                     .Add("@name", SqlDbType.VarChar)
-                    .Value = user.Name;
+                .Value = user.Name;
 
-                parameters
+            parameters
                     .Add("@username", SqlDbType.VarChar)
-                    .Value = user.UserName;
+                .Value = user.UserName;
 
-                parameters
+            parameters
                     .Add("@pwdHash", SqlDbType.VarChar)
-                    .Value = user.PwdHash;
+                .Value = user.PwdHash;
 
-                parameters
-                    .Add("@pwdSalt", SqlDbType.VarChar)
-                    .Value = user.PwdSalt;
+            parameters
+                .Add("@pwdSalt", SqlDbType.VarChar)
+                .Value = user.PwdSalt;
 
-                parameters
-                    .Add("@favorites", SqlDbType.VarChar)
-                    .Value = user.Favorites;
+            parameters
+                .Add("@favorites", SqlDbType.VarChar)
+                .Value = user.Favorites;
 
-                parameters
-                    .Add("@penColors", SqlDbType.VarChar)
-                    .Value = user.PenColors;
+            parameters
+                .Add("@penColors", SqlDbType.VarChar)
+                .Value = user.PenColors;
 
-                return _queryTemplate.QueryForScalar<long>(INSERT_USER, parameters);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public User Find(long id) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
-
-                parameters.Add("@id", SqlDbType.BigInt).Value = id;
-
-                return _queryTemplate.QueryForObject(SELECT_USER, parameters, GetUser);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public IEnumerable<User> GetAll() {
-            try {
-                return _queryTemplate.Query(SELECT_ALL, GetUser);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public void Remove(long id) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
-
-                parameters.Add("@id", SqlDbType.BigInt).Value = id;
-
-                _queryTemplate.Query(DELETE_USER, parameters);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public void Update(User user) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
-
-                parameters
-                        .Add("@id", SqlDbType.BigInt)
-                        .Value = user.Id.Value;
-
-                parameters
-                     .Add("@name", SqlDbType.VarChar)
-                    .Value = user.Name;
-
-                parameters
-                     .Add("@username", SqlDbType.VarChar)
-                    .Value = user.UserName;
-
-                parameters
-                     .Add("@pwdHash", SqlDbType.VarChar)
-                    .Value = user.PwdHash;
-
-                parameters
-                    .Add("@pwdSalt", SqlDbType.VarChar)
-                    .Value = user.PwdSalt;
-
-                parameters
-                    .Add("@favorites", SqlDbType.VarChar)
-                    .Value = user.Favorites;
-
-                parameters
-                    .Add("@penColors", SqlDbType.VarChar)
-                    .Value = user.PenColors;
-
-                _queryTemplate.Query(UPDATE_USER, parameters);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
+            return _queryTemplate.QueryAsync(UPDATE_USER, parameters);
         }
 
         //Note: This method can't alter favorites and penColors for null
-        public void PartialUpdate(User user) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
+        public Task PartialUpdate(User user) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
 
-                parameters
-                        .Add("@id", SqlDbType.BigInt)
-                        .Value = user.Id.Value;
+            parameters
+                    .Add("@id", SqlDbType.BigInt)
+                    .Value = user.Id.Value;
 
-                parameters
-                     .Add("@name", SqlDbType.VarChar)
-                    .Value = user.Name ?? SqlString.Null;
+            parameters
+                    .Add("@name", SqlDbType.VarChar)
+                .Value = user.Name ?? SqlString.Null;
 
-                parameters
-                     .Add("@username", SqlDbType.VarChar)
-                    .Value = user.UserName ?? SqlString.Null;
+            parameters
+                    .Add("@username", SqlDbType.VarChar)
+                .Value = user.UserName ?? SqlString.Null;
 
-                parameters
-                     .Add("@pwdHash", SqlDbType.VarChar)
-                    .Value = user.PwdHash ?? SqlString.Null;
+            parameters
+                    .Add("@pwdHash", SqlDbType.VarChar)
+                .Value = user.PwdHash ?? SqlString.Null;
 
-                parameters
-                    .Add("@pwdSalt", SqlDbType.VarChar)
-                    .Value = user.PwdSalt ?? SqlString.Null;
+            parameters
+                .Add("@pwdSalt", SqlDbType.VarChar)
+                .Value = user.PwdSalt ?? SqlString.Null;
 
 
-                parameters
-                    .Add("@favorites", SqlDbType.VarChar)
-                    .Value = user.Favorites ?? SqlString.Null;
+            parameters
+                .Add("@favorites", SqlDbType.VarChar)
+                .Value = user.Favorites ?? SqlString.Null;
 
-                parameters
-                    .Add("@penColors", SqlDbType.VarChar)
-                    .Value = user.PenColors ?? SqlString.Null;
+            parameters
+                .Add("@penColors", SqlDbType.VarChar)
+                .Value = user.PenColors ?? SqlString.Null;
 
-                _queryTemplate.Query(UPDATE_USER, parameters);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
+            return _queryTemplate.QueryAsync(UPDATE_USER, parameters);
         }
 
         //SQL Commands

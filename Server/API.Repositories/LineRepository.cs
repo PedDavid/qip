@@ -14,13 +14,15 @@ namespace API.Repositories {
     public class LineRepository : ILineRepository {
         private readonly IConfiguration _configuration;
         private readonly SqlServerTemplate _queryTemplate;
+        private readonly string _nameConnectionString;
 
-        public LineRepository(SqlServerTemplate queryTemplate, IConfiguration configuration) {
+        public LineRepository(SqlServerTemplate queryTemplate, IConfiguration configuration, string nameConnectionString) {
             _configuration = configuration;
             _queryTemplate = queryTemplate;
+            _nameConnectionString = nameConnectionString;
         }
 
-        public long Add(Line line) {
+        public async Task<long> Add(Line line) {
             long lineId = line.Id;
 
             PointsTable points = new PointsTable(line.Points);
@@ -43,15 +45,15 @@ namespace API.Repositories {
                 .Add("@points", SqlDbType.Structured)
                 .Value = points;
 
-            _queryTemplate.StoredProcedure(INSERT_LINE, parameters);
+            await _queryTemplate.StoredProcedureAsync(INSERT_LINE, parameters);
 
             return lineId;
         }
 
-        public Line Find(long id, long boardId) {
+        public async Task<Line> Find(long id, long boardId) {
             using(SqlConnection con = new SqlConnection()) {
-                con.ConnectionString = _configuration.GetConnectionString("QIPContext");
-                con.Open();
+                con.ConnectionString = _configuration.GetConnectionString(_nameConnectionString);
+                await con.OpenAsync();
                 SqlTransaction tran = con.BeginTransaction(IsolationLevel.Serializable);//TODO Rever niveis transacionais
                 try {
                     Line line = null;
@@ -64,8 +66,8 @@ namespace API.Repositories {
                         parameters.Add("@id", SqlDbType.BigInt).Value = id;
                         parameters.ForEach(prm => cmd.Parameters.Add(prm));
 
-                        using(SqlDataReader dr = cmd.ExecuteReader()) {
-                            if(dr.Read()) {
+                        using(SqlDataReader dr = await cmd.ExecuteReaderAsync()) {
+                            if(await dr.ReadAsync()) {
                                 line = GetLine(dr);
                             }
                         }
@@ -82,8 +84,8 @@ namespace API.Repositories {
                             parameters.ForEach(prm => cmd.Parameters.Add(prm));
 
                             List<LinePoint> points = new List<LinePoint>();
-                            using(SqlDataReader dr = cmd.ExecuteReader()) {
-                                while(dr.Read()) {
+                            using(SqlDataReader dr = await cmd.ExecuteReaderAsync()) {
+                                while(await dr.ReadAsync()) {
                                     points.Add(GetPointWithStyle(dr));
                                 }
                             }
@@ -95,18 +97,17 @@ namespace API.Repositories {
 
                     return line;
                 }
-                catch(Exception ex) {
+                catch(Exception) {
                     tran.Rollback();
-                    Console.WriteLine("E R R O : " + ex.Message);
-                    throw;//TODO alterar
+                    throw;
                 }
             }
         }
 
-        public IEnumerable<Line> GetAll(long boardId) {
+        public async Task<IEnumerable<Line>> GetAll(long boardId) {
             using(SqlConnection con = new SqlConnection()) {
-                con.ConnectionString = _configuration.GetConnectionString("QIPContext");
-                con.Open();
+                con.ConnectionString = _configuration.GetConnectionString(_nameConnectionString);
+                await con.OpenAsync();
                 SqlTransaction tran = con.BeginTransaction(IsolationLevel.Serializable);//TODO Rever niveis transacionais
                 try {
                     List<Line> lines = new List<Line>();
@@ -118,8 +119,8 @@ namespace API.Repositories {
                         parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
                         parameters.ForEach(prm => cmd.Parameters.Add(prm));
 
-                        using(SqlDataReader dr = cmd.ExecuteReader()) {
-                            while(dr.Read()) {
+                        using(SqlDataReader dr = await cmd.ExecuteReaderAsync()) {
+                            while(await dr.ReadAsync()) {
                                 lines.Add(GetLine(dr));
                             }
                         }
@@ -133,7 +134,7 @@ namespace API.Repositories {
                         parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
                         parameters.ForEach(prm => cmd.Parameters.Add(prm));
 
-                        using(SqlDataReader dr = cmd.ExecuteReader()) {
+                        using(SqlDataReader dr = await cmd.ExecuteReaderAsync()) {
                             lines = GetLinePoints(lines, dr);
                         }
                     }
@@ -142,15 +143,14 @@ namespace API.Repositories {
 
                     return lines;
                 }
-                catch(Exception ex) {
+                catch(Exception) {
                     tran.Rollback();
-                    Console.WriteLine("E R R O : " + ex.Message);
-                    throw;//TODO alterar
+                    throw;
                 }
             }
         }
 
-        public void Remove(long id, long boardId) {
+        public Task Remove(long id, long boardId) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
@@ -161,10 +161,10 @@ namespace API.Repositories {
                 .Add("@boardId", SqlDbType.BigInt)
                 .Value = boardId;
 
-            _queryTemplate.StoredProcedure(REMOVE_LINE, parameters);
+            return _queryTemplate.StoredProcedureAsync(REMOVE_LINE, parameters);
         }
 
-        public void Update(Line line) {
+        public Task Update(Line line) {
             long lineId = line.Id;
 
             PointsTable points = new PointsTable(line.Points);
@@ -187,10 +187,10 @@ namespace API.Repositories {
                 .Add("@points", SqlDbType.Structured)
                 .Value = points;
 
-            _queryTemplate.StoredProcedure(UPDATE_LINE, parameters);
+            return _queryTemplate.StoredProcedureAsync(UPDATE_LINE, parameters);
         }
 
-        public void PartialUpdate(Line figure) {
+        public Task PartialUpdate(Line figure) {
             throw new NotImplementedException();
         }
 

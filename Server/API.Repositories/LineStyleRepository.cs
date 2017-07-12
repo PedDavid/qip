@@ -16,98 +16,62 @@ namespace API.Repositories {
             _queryTemplate = queryTemplate;
         }
 
-        public long Add(LineStyle lineStyle) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
+        public Task<long> Add(LineStyle lineStyle) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
 
-                parameters
-                        .Add("@color", SqlDbType.VarChar)
-                        .Value = lineStyle.Color;
-
-                return _queryTemplate.QueryForScalar<long>(INSERT_LINE_STYLE, parameters);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public LineStyle Find(long id) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
-
-                parameters.Add("@id", SqlDbType.BigInt).Value = id;
-
-                return _queryTemplate.QueryForObject(SELECT_LINE_STYLE, parameters, GetLineStyle);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public IEnumerable<LineStyle> GetAll() {
-            try {
-                return _queryTemplate.Query(SELECT_ALL, GetLineStyle);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public void Remove(long id) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
-
-                parameters.Add("@id", SqlDbType.BigInt).Value = id;
-
-                _queryTemplate.Query(DELETE_LINE_STYLE, parameters);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public void Update(LineStyle lineStyle) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
-
-                parameters
-                        .Add("@id", SqlDbType.BigInt)
-                        .Value = lineStyle.Id.Value;
-
-                parameters
-                     .Add("@color", SqlDbType.VarChar)
+            parameters
+                    .Add("@color", SqlDbType.VarChar)
                     .Value = lineStyle.Color;
 
-                _queryTemplate.Query(UPDATE_LINE_STYLE, parameters);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
+            return _queryTemplate.QueryForScalarAsync<long>(INSERT_LINE_STYLE, parameters);
         }
 
-        public void PartialUpdate(LineStyle lineStyle) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
+        public Task<LineStyle> Find(long id) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
 
-                parameters
-                        .Add("@id", SqlDbType.BigInt)
-                        .Value = lineStyle.Id.Value;
+            parameters.Add("@id", SqlDbType.BigInt).Value = id;
 
-                parameters
-                     .Add("@color", SqlDbType.VarChar)
-                    .Value = lineStyle.Color ?? SqlString.Null;
+            return _queryTemplate.QueryForObjectAsync(SELECT_LINE_STYLE, parameters, GetLineStyle);
+        }
 
-                _queryTemplate.Query(UPDATE_LINE_STYLE, parameters);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
+        public Task<IEnumerable<LineStyle>> GetAll() {
+            return _queryTemplate.QueryAsync(SELECT_ALL, GetLineStyle);
+        }
+
+        public Task Remove(long id) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@id", SqlDbType.BigInt).Value = id;
+
+            return _queryTemplate.QueryAsync(DELETE_LINE_STYLE, parameters);
+        }
+
+        public Task Update(LineStyle lineStyle) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters
+                    .Add("@id", SqlDbType.BigInt)
+                    .Value = lineStyle.Id.Value;
+
+            parameters
+                    .Add("@color", SqlDbType.VarChar)
+                .Value = lineStyle.Color;
+
+            return _queryTemplate.QueryAsync(UPDATE_LINE_STYLE, parameters);
+        }
+
+        public Task PartialUpdate(LineStyle lineStyle) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters
+                    .Add("@id", SqlDbType.BigInt)
+                    .Value = lineStyle.Id.Value;
+
+            parameters
+                    .Add("@color", SqlDbType.VarChar)
+                .Value = lineStyle.Color ?? SqlString.Null;
+
+            return _queryTemplate.QueryAsync(UPDATE_LINE_STYLE, parameters);
         }
 
         //SQL Commands
