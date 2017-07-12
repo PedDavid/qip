@@ -1,7 +1,5 @@
 import React from 'react'
 import styles from './styles.scss'
-import Pen from './../../../../../../../../model/tools/Pen'
-import Eraser from './../../../../../../../../model/tools/Eraser'
 
 import { Button, Icon } from 'semantic-ui-react'
 
@@ -24,15 +22,10 @@ export default class Favorite extends React.Component {
   render () {
     const favMenuWidth = this.state.openFavMenu ? 'visible' : 'hidden'
     const fav = this.props.fav
-    // todo: change the way this is done
-    let name = null
-    let color = 'black'
-    if (fav instanceof Pen) {
-      name = 'pencil'
-      color = fav.color
-    } else if (fav instanceof Eraser) {
-      name = 'eraser'
-    }
+
+    const iconName = this.props.toolsConfig.getDefaultToolOf(fav.constructor.name).icon
+    const color = fav.color !== undefined ? fav.color : 'black'
+
     let style = null
     if (this.props.currTool === fav) {
       style = {
@@ -43,7 +36,7 @@ export default class Favorite extends React.Component {
       <div onContextMenu={this.toggleFavMenu}>
         <Button circular className={styles.fav} style={style} onClick={this.changeCurrentTool}>
           {/* it could be color:red instead of style:{color:'red'}} but the first one does not support rgba */}
-          <Icon className={styles.iconStyle + ' large'} name={name} style={{color: color}} />
+          <Icon className={styles.iconStyle + ' large'} name={iconName} style={{color: color}} />
           <font className={styles.fontStyle} size='1'> {fav.width} </font>
         </Button>
         <Button onClick={this.removeFavorite} icon={{name: 'trash', style: {color: 'red'}}} content='Remove' style={{marginLeft: '-25px', visibility: favMenuWidth}} className={styles.favMenu} />

@@ -3,6 +3,8 @@ import Tool from './tools/Tool'
 import Pen from './tools/Pen'
 import Eraser from './tools/Eraser'
 
+// todo (simaovii) tirar esta classe do model. por em utils
+
 // this class has the purpose to configure all tools and simplify all the management of the tools.
 // DefaultTools can be accessed two ways:
 // by calling ToolsConfig.defaultTools -> Tool[]
@@ -15,8 +17,14 @@ export default class ToolsConfig {
 
   // !!! at the moment, this is not working
   getDefaultToolOf = function (toolType: Tool) {
-    const idx = this.defaultTools.findIndex(defTool => defTool.toolType instanceof toolType)
-    return idx && this.defaultTools[idx]
+    const idx = this.defaultTools
+      .findIndex(defTool => {
+        if (defTool.toolType !== undefined) {
+          return defTool.toolType.name === toolType
+        }
+        return false
+      })
+    return this.defaultTools[idx]
   }
 
   // private method to map all the defaultTools to a type so it can be possible
