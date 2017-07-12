@@ -21,19 +21,19 @@ namespace WebSockets.StringWebSockets {
 
         private class _StringWSSession {
             public long Id { get; }
-            private readonly List<StringWebSocket> items;
+            private readonly List<StringWebSocket> _wsl;
             private readonly ReaderWriterLockSlim _rwlock;
 
             public _StringWSSession(long id) {
                 Id = id;
                 _rwlock = new ReaderWriterLockSlim();
-                items = new List<StringWebSocket>();
+                _wsl = new List<StringWebSocket>();
             }
 
             public IStringWebSocketSession Add(StringWebSocket webSocket) {
                 _rwlock.EnterWriteLock();
                 try {
-                    items.Add(webSocket);
+                    _wsl.Add(webSocket);
 
                     return new StringWSSession(webSocket, this);
                 }
@@ -45,7 +45,7 @@ namespace WebSockets.StringWebSockets {
             public void Remove(StringWebSocket webSocket) {
                 _rwlock.EnterWriteLock();
                 try {
-                    items.Remove(webSocket);
+                    _wsl.Remove(webSocket);
                 }
                 finally {
                     _rwlock.ExitWriteLock();
@@ -57,7 +57,7 @@ namespace WebSockets.StringWebSockets {
 
                 _rwlock.EnterReadLock();
                 try {
-                    items
+                    _wsl
                         .Where(ws => ws.State == WebSocketState.Open)
                         .Where(filter)
                         .Select(ws => ws.SendAsync(message))

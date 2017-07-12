@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 namespace WebSockets.Models {
     public enum Action {
-        PING,
         CREATE_IMAGE,
         DELETE_IMAGE,
         ALTER_IMAGE,
