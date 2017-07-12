@@ -1,0 +1,9 @@
+.flip {
+  transform: rotateY(180deg);
+  transition: 0.6s;
+}
+
+.flipInverse{
+  transform: rotateY(0deg);
+  transition: 0.6s;
+}

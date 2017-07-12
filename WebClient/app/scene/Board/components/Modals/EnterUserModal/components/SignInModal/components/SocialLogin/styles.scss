@@ -1,0 +1,51 @@
+.socialBt {
+  transition: 0.5s;
+  display: inline-block;
+  width: 35px;
+  height: 35px;
+  margin: 5px;
+  overflow: hidden;
+}
+
+.socialBt:hover {
+  width: 130px;
+  height: 35px;
+  transition: 0.5s;
+  margin: 5px;
+  padding-left: 11px;
+  display: inline-block;  
+}
+
+.socialBt:hover .socialIcon {
+  position: relative;
+  display: block;
+  line-height: 1;
+  border-radius: 0;
+  text-align: center;
+  top: 0px;
+  left: 0px;
+  color: white;
+  float: left;  
+}
+
+// not nedded
+.socialIcon {
+  position: relative;
+  display: block;
+  left: 0px;
+  top: 0xp;
+  float: left;
+}
+
+.socialName {
+  visibility: hidden;
+  display: block;
+  float: left;
+}
+
+.socialBt:hover .socialName {
+  visibility: visible;
+  display: block;
+  float: left;
+  transition-delay: 0.5s;
+}

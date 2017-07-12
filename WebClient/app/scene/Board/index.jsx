@@ -6,7 +6,8 @@ import {
 
 import SideBarOverlay from './components/SideBarOverlay'
 import Canvas from './components/Canvas'
-import Modalx from './components/Modal'
+import CleanBoardModal from './components/Modals/CleanBoardModal'
+import EnterUserModal from './components/Modals/EnterUserModal'
 import styles from './styles.scss'
 
 import Pen from './../../model/tools/Pen'
@@ -42,10 +43,12 @@ const pen = new Pen(grid, 'black', 5)
 const eraser = new Eraser(grid, 5)
 export default class Board extends React.Component {
   state = {
-    showModal: false,
+    showCleanModal: false,
+    showUserModal: false,
     currTool: pen,
-    favorites: [pen, eraser]
+    favorites: [pen, eraser] // obtain favorites from server
   }
+  toolsConfig = new ToolsConfig(defaultToolsConfig)
 
   listeners = {
     // currently, this.perists is not defined but it will on componentDidMount
@@ -74,7 +77,7 @@ export default class Board extends React.Component {
   addFavorite (tool) {
     this.setState(() => this.state.favorites.push(tool)) // not needed to change prevState
   }
-  removeFavorite (tool) {
+  removeFavorite = (tool) => {
     this.setState((prevState) => {
       const index = prevState.favorites.indexOf(tool)
       if (index > -1) {
@@ -82,23 +85,18 @@ export default class Board extends React.Component {
       }
     })
   }
-  onPaste = (event) => {
-    console.log(event)
-    this.setState({clipboard: 'something'})
-  }
-  onKeyDown = (event) => {
-    console.log(event.keyCode)
-    console.log(event)
-  }
-  changeCurrentTool (tool) {
+  changeCurrentTool = (tool) => {
+    this.toolsConfig.updatePrevTool(this.state.currTool)
     this.setState({currTool: tool})
   }
-  cleanCanvas () {
+  cleanCanvas = () => {
+    window.localStorage.setItem('figures', '[]')
+    window.localStorage.setItem('currFigureId', '-1')
     grid.clean(this.canvasContext)
-    this.toggleModal()
+    this.toggleCleanModal()
   }
-  toggleModal () {
-    this.setState(prevState => { return { showModal: !prevState.showModal } })
+  toggleCleanModal = () => {
+    this.setState(prevState => { return { showCleanModal: !prevState.showCleanModal } })
   }
 
   refCallback = (ref) => {
