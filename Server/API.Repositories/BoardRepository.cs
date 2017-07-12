@@ -17,110 +17,74 @@ namespace API.Repositories {
             _queryTemplate = queryTemplate;
         }
 
-        public long Add(Board board) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
+        public Task<long> AddAsync(Board board) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
 
-                parameters
-                        .Add("@name", SqlDbType.VarChar)
-                        .Value = board.Name;
-
-                parameters
-                        .Add("@maxDistPoints", SqlDbType.TinyInt)
-                        .Value = board.MaxDistPoints.Value;
-
-                return _queryTemplate.QueryForScalar<long>(INSERT_BOARD, parameters);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public Board Find(long id) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
-
-                parameters.Add("@id", SqlDbType.BigInt).Value = id;
-
-                return _queryTemplate.QueryForObject(SELECT_BOARD, parameters, GetBoard);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public IEnumerable<Board> GetAll() {
-            try {
-                return _queryTemplate.Query(SELECT_ALL, GetBoard);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public void Remove(long id) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
-
-                parameters.Add("@id", SqlDbType.BigInt).Value = id;
-
-                _queryTemplate.Query(DELETE_BOARD, parameters);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public void Update(Board board) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
-
-                parameters
-                        .Add("@id", SqlDbType.BigInt)
-                        .Value = board.Id.Value;
-
-                parameters
-                     .Add("@name", SqlDbType.VarChar)
+            parameters
+                    .Add("@name", SqlDbType.VarChar)
                     .Value = board.Name;
 
-                parameters
+            parameters
                     .Add("@maxDistPoints", SqlDbType.TinyInt)
                     .Value = board.MaxDistPoints.Value;
 
-                _queryTemplate.Query(UPDATE_BOARD, parameters);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
+            return _queryTemplate.QueryForScalarAsync<long>(INSERT_BOARD, parameters);
         }
 
-        public void PartialUpdate(Board board) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
+        public Task<Board> FindAsync(long id) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
 
-                parameters
-                        .Add("@id", SqlDbType.BigInt)
-                        .Value = board.Id.Value;
+            parameters.Add("@id", SqlDbType.BigInt).Value = id;
 
-                parameters
-                     .Add("@name", SqlDbType.VarChar)
-                    .Value = board.Name ?? SqlString.Null;
+            return _queryTemplate.QueryForObjectAsync(SELECT_BOARD, parameters, GetBoard);
+        }
 
-                parameters
-                    .Add("@maxDistPoints", SqlDbType.TinyInt)
-                    .Value = board.MaxDistPoints ?? SqlByte.Null;
+        public Task<IEnumerable<Board>> GetAllAsync() {
+            return _queryTemplate.QueryAsync(SELECT_ALL, GetBoard);
+        }
 
-                _queryTemplate.Query(UPDATE_BOARD, parameters);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
+        public Task RemoveAsync(long id) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@id", SqlDbType.BigInt).Value = id;
+
+            return _queryTemplate.QueryAsync(DELETE_BOARD, parameters);
+        }
+
+        public Task UpdateAsync(Board board) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters
+                    .Add("@id", SqlDbType.BigInt)
+                    .Value = board.Id.Value;
+
+            parameters
+                 .Add("@name", SqlDbType.VarChar)
+                .Value = board.Name;
+
+            parameters
+                .Add("@maxDistPoints", SqlDbType.TinyInt)
+                .Value = board.MaxDistPoints.Value;
+
+            return _queryTemplate.QueryAsync(UPDATE_BOARD, parameters);
+        }
+
+        public Task PartialUpdateAsync(Board board) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters
+                    .Add("@id", SqlDbType.BigInt)
+                    .Value = board.Id.Value;
+
+            parameters
+                 .Add("@name", SqlDbType.VarChar)
+                .Value = board.Name ?? SqlString.Null;
+
+            parameters
+                .Add("@maxDistPoints", SqlDbType.TinyInt)
+                .Value = board.MaxDistPoints ?? SqlByte.Null;
+
+            return _queryTemplate.QueryAsync(UPDATE_BOARD, parameters);
         }
 
         //SQL Commands

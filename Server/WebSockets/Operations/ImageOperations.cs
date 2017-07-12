@@ -35,7 +35,7 @@ namespace WebSockets.Operations {
 
             InImage inImage = payload.ToObject<InImage>();
             Image image = new Image(boardId, inImage.Id.Value).In(inImage);
-            Task store = Task.Run(() => _imageRepository.Add(image)); //TODO Nota: Fazer com async await para o que for cpu-bound ser feito sincronamente
+            Task store = _imageRepository.AddAsync(image); //TODO Nota: Fazer com async await para o que for cpu-bound ser feito sincronamente
             //TODO Testar se a Task is completed or faulted, in this cases do result for get the result/exception
             //Fazer alguma coisa em caso de excepções
 
@@ -56,18 +56,20 @@ namespace WebSockets.Operations {
 
             InImage inImage = payload.ToObject<InImage>();
 
-            Task store = Task.Run(() => {
-                Image image = _imageRepository.Find(id, boardId);
-                if(image == null) {
-                    return;//TODO REVER
-                }
-
-                image.In(inImage);
-
-                _imageRepository.Update(image);
-            });
+            Task store = StoreUpdateImage(id, boardId, inImage);
 
             return new OperationResult(broadcastMessage: payload);
+        }
+
+        private async Task StoreUpdateImage(long id, long boardId, InImage inImage) {
+            Image image = await _imageRepository.FindAsync(id, boardId);
+            if(image == null) {
+                return;//TODO REVER
+            }
+
+            image.In(inImage);
+
+            await _imageRepository.UpdateAsync(image);
         }
 
         public OperationResult DeleteImage(JObject payload) {
@@ -77,15 +79,17 @@ namespace WebSockets.Operations {
 
             long id = payload["id"].Value<long>();
 
-            Task store = Task.Run(() => {
-                Image image = _imageRepository.Find(id, boardId);
-                if(image == null) {
-                    return;//TODO REVER
-                }
-                _imageRepository.Remove(id, boardId);
-             });
+            Task store = StoreDeleteImage(id, boardId);
 
             return new OperationResult(broadcastMessage: payload);
+        }
+
+        private async Task StoreDeleteImage(long id, long boardId) {
+            Image image = await _imageRepository.FindAsync(id, boardId);
+            if(image == null) {
+                return;//TODO REVER
+            }
+            await _imageRepository.RemoveAsync(id, boardId);
         }
     }
 }

@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace API.Interfaces.IRepositories {
     public interface IFigureRepository<T> {
-        long Add(T figure);
-        IEnumerable<T> GetAll(long boardId);
-        T Find(long id, long boardId);
-        void Remove(long id, long boardId);
-        void Update(T figure);
-        void PartialUpdate(T figure);
+        Task<long> AddAsync(T figure);
+        Task<IEnumerable<T>> GetAllAsync(long boardId);
+        Task<T> FindAsync(long id, long boardId);
+        Task RemoveAsync(long id, long boardId);
+        Task UpdateAsync(T figure);
+        Task PartialUpdateAsync(T figure);
     }
 }
