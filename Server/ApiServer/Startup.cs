@@ -39,13 +39,14 @@ namespace ApiServer {
             // Add framework services.
             services.AddMvc();
 
-            //TODO Rever tempos de vida
+            //TODO Rever tempos de vida: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection
             services.AddSingleton(new SqlServerTemplate(Configuration));
 
             services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddSingleton(typeof(StringWebSocketsSessionManager));
 
+            services.AddScoped<IFigureIdRepository, FigureIdRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IBoardRepository, BoardRepository>();
             services.AddScoped<IImageRepository, ImageRepository>();

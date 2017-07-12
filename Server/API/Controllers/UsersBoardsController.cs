@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using API.Models;
-using API.Models.Input;
-using API.Models.Extensions;
-using API.Models.Output;
+using IODomain.Input;
+using IODomain.Extensions;
+using IODomain.Output;
 using API.Interfaces.IRepositories;
 using API.Domain;
 
