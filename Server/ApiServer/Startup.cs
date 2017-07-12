@@ -40,7 +40,7 @@ namespace ApiServer {
             services.AddMvc();
 
             //TODO Rever tempos de vida: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection
-            services.AddSingleton(new SqlServerTemplate(Configuration));
+            services.AddSingleton(new SqlServerTemplate(Configuration, "QIPContext"));
 
             services.AddSingleton<IConfiguration>(Configuration);
 
