@@ -78,8 +78,8 @@ export default class Eraser implements Tool {
         const width = currPoint.getStyleOf(figure.id).width
         const canvasContext = canvas.getContext('2d')
         const rect = new Rect(prev, currPoint, width, canvasContext)
-        const { canvasWidth, canvasHeight } = canvasContext.canvas
-        // const rect = myContext.getRect(prev, currPoint, width)
+        const canvasWidth = canvasContext.canvas.width
+        const canvasHeight = canvasContext.canvas.height
         if (this.eraseLine !== null) {
           // TODO(simaovii): não verifica se toda a área da borracha interseta a linha desenhada
           if (this.intersectsLine(this.eraseLine, prev, currPoint)) {

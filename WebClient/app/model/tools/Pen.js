@@ -62,12 +62,17 @@ export default class Pen implements Tool {
     }
   }
 
-  onPressUp () {
+  onPressUp (event, socket) {
     this.grid.addFigure(this.currentFigure)
+    const objToSend = {
+      type: 'INSERT_FIGURE',
+      payload: this.currentFigure
+    }
+    socket.send(JSON.stringify(objToSend))
     this.currentFigure = null
   }
 
-  onOut () {
+  onOut (event, socket) {
     const grid = this.grid
     if (this.currentFigure === null) {
       return
