@@ -21,15 +21,15 @@ namespace API.Controllers {
         }
 
         [HttpGet]
-        public IEnumerable<OutImage> GetAll(long boardId) {
-            return _imageRepository
-                .GetAllAsync(boardId)
-                .Select(ImageExtensions.Out);
+        public async Task<IEnumerable<OutImage>> GetAll(long boardId) {
+            IEnumerable<Image> images = await _imageRepository.GetAllAsync(boardId);
+
+            return images.Select(ImageExtensions.Out);
         }
 
         [HttpGet("{id}", Name = "GetImage")]
-        public IActionResult GetById(long id, long boardId) {
-            Image image = _imageRepository.FindAsync(id, boardId);
+        public async Task<IActionResult> GetById(long id, long boardId) {
+            Image image = await _imageRepository.FindAsync(id, boardId);
             if(image == null) {
                 return NotFound();
             }
@@ -37,13 +37,13 @@ namespace API.Controllers {
         }
 
         [HttpPost]
-        public IActionResult Create(long boardId, [FromBody] InImage inputImage) {
+        public async Task<IActionResult> Create(long boardId, [FromBody] InImage inputImage) {
             if(inputImage == null || inputImage.BoardId != boardId || !inputImage.Id.HasValue) {
                 return BadRequest();
             }
 
             Image image = new Image(boardId, inputImage.Id.Value).In(inputImage);
-            long id = _imageRepository.AddAsync(image);
+            long id = await _imageRepository.AddAsync(image);
 
             inputImage.Id = id;
             return CreatedAtRoute("GetImage", new { id = id, boardId = boardId }, inputImage);
@@ -51,30 +51,30 @@ namespace API.Controllers {
 
 
         [HttpPut("{id}")]
-        public IActionResult Update(long id, long boardId, [FromBody] InImage inputImage) {
+        public async Task<IActionResult> Update(long id, long boardId, [FromBody] InImage inputImage) {
             if(inputImage == null || inputImage.Id != id || inputImage.BoardId != boardId) {
                 return BadRequest();
             }
 
-            Image image = _imageRepository.FindAsync(id, boardId);
+            Image image = await _imageRepository.FindAsync(id, boardId);
             if(image == null) {
                 return NotFound();
             }
 
             image.In(inputImage);
 
-            _imageRepository.UpdateAsync(image);
+            await _imageRepository.UpdateAsync(image);
             return new NoContentResult();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(long id, long boardId) {
-            Image image = _imageRepository.FindAsync(id, boardId);
+        public async Task<IActionResult> Delete(long id, long boardId) {
+            Image image = await _imageRepository.FindAsync(id, boardId);
             if(image == null) {
                 return NotFound();
             }
 
-            _imageRepository.RemoveAsync(id, boardId);
+            await _imageRepository.RemoveAsync(id, boardId);
             return new NoContentResult();
         }
     }

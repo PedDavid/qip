@@ -21,15 +21,15 @@ namespace API.Controllers {
         }
 
         [HttpGet]
-        public IEnumerable<OutUserBoard_User> GetAll(long boardId) {
-            return _userBoardsRepository
-                .GetAllUsersAsync(boardId)
-                .Select(UserBoard_UserExtensions.Out);
+        public async Task<IEnumerable<OutUserBoard_User>> GetAll(long boardId) {
+            IEnumerable<UserBoard_User> userBoards = await _userBoardsRepository.GetAllUsersAsync(boardId);
+
+            return userBoards.Select(UserBoard_UserExtensions.Out);
         }
 
         [HttpGet("{userId}", Name = "GetUserBoard")]
-        public IActionResult GetById(long boardId, long userId) {
-            UserBoard_User user = _userBoardsRepository.FindUserAsync(boardId, userId);
+        public async Task<IActionResult> GetById(long boardId, long userId) {
+            UserBoard_User user = await _userBoardsRepository.FindUserAsync(boardId, userId);
 
             if(user == null) {
                 return NotFound();
@@ -39,42 +39,42 @@ namespace API.Controllers {
         }
 
         [HttpPost]
-        public IActionResult Create(long boardId, [FromBody] InUserBoard inputUserBoard) {
+        public async Task<IActionResult> Create(long boardId, [FromBody] InUserBoard inputUserBoard) {
             if(inputUserBoard == null || inputUserBoard.BoardId != boardId) {
                 return BadRequest();
             }
 
             UserBoard userBoard = new UserBoard().In(inputUserBoard);
-            _userBoardsRepository.AddAsync(userBoard);
+            await _userBoardsRepository.AddAsync(userBoard);
 
             return CreatedAtRoute("GetUserBoard", new { boardId = userBoard.BoardId, userId = userBoard.UserId }, inputUserBoard);
         }
 
         [HttpPut("{userId}")]
-        public IActionResult Update(long boardId, long userId, [FromBody] InUserBoard inputUserBoard) {
+        public async Task<IActionResult> Update(long boardId, long userId, [FromBody] InUserBoard inputUserBoard) {
             if(inputUserBoard == null || inputUserBoard.BoardId != boardId || inputUserBoard.UserId != userId) {
                 return BadRequest();
             }
 
-            UserBoard user = _userBoardsRepository.FindAsync(boardId, userId);
+            UserBoard user = await _userBoardsRepository.FindAsync(boardId, userId);
             if(user == null) {
                 return NotFound();
             }
 
             user.In(inputUserBoard);
 
-            _userBoardsRepository.UpdateAsync(user);
+            await _userBoardsRepository.UpdateAsync(user);
             return new NoContentResult();
         }
 
         [HttpDelete("{userId}")]
-        public IActionResult Delete(long boardId, long userId) {
-            UserBoard user = _userBoardsRepository.FindAsync(boardId, userId);
+        public async Task<IActionResult> Delete(long boardId, long userId) {
+            UserBoard user = await _userBoardsRepository.FindAsync(boardId, userId);
             if(user == null) {
                 return NotFound();
             }
 
-            _userBoardsRepository.RemoveAsync(boardId, userId);
+            await _userBoardsRepository.RemoveAsync(boardId, userId);
             return new NoContentResult();
         }
     }

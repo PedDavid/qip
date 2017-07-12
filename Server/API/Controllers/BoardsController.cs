@@ -21,15 +21,15 @@ namespace API.Controllers {
         }
 
         [HttpGet]
-        public IEnumerable<OutBoard> GetAll() {
-            return _boardRepository
-                .GetAllAsync()
-                .Select(BoardExtensions.Out);
+        public async Task<IEnumerable<OutBoard>> GetAll() {
+            IEnumerable<Board> boards = await _boardRepository.GetAllAsync();
+
+            return boards.Select(BoardExtensions.Out);
         }
 
         [HttpGet("{id}", Name = "GetBoard")]
-        public IActionResult GetById(long id) {
-            Board board = _boardRepository.FindAsync(id);
+        public async Task<IActionResult> GetById(long id) {
+            Board board = await _boardRepository.FindAsync(id);
             if(board == null) {
                 return NotFound();
             }
@@ -37,43 +37,43 @@ namespace API.Controllers {
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] InBoard inputBoard) {
+        public async Task<IActionResult> Create([FromBody] InBoard inputBoard) {
             if(inputBoard == null) {
                 return BadRequest();
             }
 
             Board board = new Board().In(inputBoard);
-            long id = _boardRepository.AddAsync(board);
+            long id = await _boardRepository.AddAsync(board);
 
             inputBoard.Id = id;
             return CreatedAtRoute("GetBoard", new { id = id }, inputBoard);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(long id, [FromBody] InBoard inputBoard) {
+        public async Task<IActionResult> Update(long id, [FromBody] InBoard inputBoard) {
             if(inputBoard == null || inputBoard.Id != id) {
                 return BadRequest();
             }
 
-            Board board = _boardRepository.FindAsync(id);
+            Board board = await _boardRepository.FindAsync(id);
             if(board == null) {
                 return NotFound();
             }
 
             board.In(inputBoard);
 
-            _boardRepository.UpdateAsync(board);
+            await _boardRepository.UpdateAsync(board);
             return new NoContentResult();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(long id) {
-            Board board = _boardRepository.FindAsync(id);
+        public async Task<IActionResult> Delete(long id) {
+            Board board = await _boardRepository.FindAsync(id);
             if(board == null) {
                 return NotFound();
             }
 
-            _boardRepository.RemoveAsync(id);
+            await _boardRepository.RemoveAsync(id);
             return new NoContentResult();
         }
     }
