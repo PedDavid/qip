@@ -1,9 +1,5 @@
-// @flow
-
 import React from 'react'
-import {
-  Link
-} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import styles from './styles.scss'
 import Tools from './components/Tools'
 import FavoriteTools from './components/FavoriteTools'

@@ -9,9 +9,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\API.Domain\API.Domain.csproj" />
     <ProjectReference Include="..\API.Interfaces\API.Interfaces.csproj" />
-    <ProjectReference Include="..\API.Repositories\API.Repositories.csproj" />
+    <ProjectReference Include="..\API.Services\API.Services.csproj" />
+    <ProjectReference Include="..\IODomain\IODomain.csproj" />
   </ItemGroup>
 
 </Project>
