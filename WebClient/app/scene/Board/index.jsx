@@ -8,7 +8,9 @@ import SideBarOverlay from './components/SideBarOverlay'
 import Canvas from './components/Canvas'
 import CleanBoardModal from './components/Modals/CleanBoardModal'
 import EnterUserModal from './components/Modals/EnterUserModal'
+import ShareBoardModal from './components/Modals/ShareBoardModal'
 import styles from './styles.scss'
+import fetch from 'isomorphic-fetch'
 
 import Pen from './../../model/tools/Pen'
 import Eraser from './../../model/tools/Eraser'
@@ -38,15 +40,18 @@ const tempEraser = JSON.parse(window.localStorage.getItem('eraser'))
 const eraser = new Eraser(grid, tempEraser.width)
 */
 
-const grid = new Grid([], -1)
-const pen = new Pen(grid, 'black', 5)
-const eraser = new Eraser(grid, 5)
 export default class Board extends React.Component {
+  grid = new Grid([], -1)
+  defaultPen = new Pen(this.grid, 'black', 5)
+  defaultEraser = new Eraser(this.grid, 5)
+
   state = {
     showCleanModal: false,
     showUserModal: false,
-    currTool: pen,
-    favorites: [pen, eraser] // obtain favorites from server
+    showShareModal: false,
+    currTool: this.defaultPen,
+    favorites: [], // obtain favorites from server
+    currentBoardId: null
   }
   toolsConfig = new ToolsConfig(defaultToolsConfig)
 
@@ -62,16 +67,57 @@ export default class Board extends React.Component {
     console.log('current board id: ' + this.props.match.params.board)
     const boardId = this.props.match.params.board
     const persistType = PersistType.WebSockets
-    this.persist = new Persist(persistType, boardId, this.canvasContext, grid)
+    this.persist = new Persist(persistType, boardId, this.canvasContext, this.grid)
+
+    if (boardId != null) {
+      // fetch data of current board
+      Promise.all([
+        fetch(`http://localhost:57251/api/boards/${boardId}/figures/lines`, {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          method: 'GET'
+        }),
+        fetch(`http://localhost:57251/api/boards/${boardId}/figures/images`, {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          method: 'GET'
+        })
+      ]).then(responses => {
+        if (responses.some(res => res.status >= 400)) {
+          throw new Error('Bad response from server')
+        }
+        return {lines: responses[0].json(), images: responses[1].json()}
+      }).then(figures => {
+        const ids = figures.map(figure => figure.map(innerFig => innerFig.id))
+        var max = ids.reduce((a, b) => {
+          return Math.max(a, b)
+        })
+        // todo: make possible to get images too
+        this.grid = new Grid(figures.lines, max)
+        // const pen = new Pen(this.grid, 'black', 5)
+        // const eraser = new Eraser(this.grid, 5)
+
+        // update current board id and connect to websockets
+        this.updateBoardId(boardId)
+      }).catch(err => {
+        console.log(err)
+        console.log('The board id passed as parameter is not valid')
+        this.props.history.push('/') // change current location programmatically in case of error
+      })
+    }
 
     // draw initial grid
-    grid.draw(this.canvasContext, 1)
+    this.grid.draw(this.canvasContext, 1)
   }
 
   componentWillMount () {
     // necessary procedure to avoid bug
-    this.toolsConfig.updatePrevTool(eraser)
-    this.toolsConfig.updatePrevTool(pen)
+    this.toolsConfig.updatePrevTool(this.defaultPen)
+    this.toolsConfig.updatePrevTool(this.defaultEraser)
   }
 
   addFavorite (tool) {
@@ -92,28 +138,40 @@ export default class Board extends React.Component {
   cleanCanvas = () => {
     window.localStorage.setItem('figures', '[]')
     window.localStorage.setItem('currFigureId', '-1')
-    grid.clean(this.canvasContext)
+    this.grid.clean(this.canvasContext)
     this.toggleCleanModal()
   }
   toggleCleanModal = () => {
     this.setState(prevState => { return { showCleanModal: !prevState.showCleanModal } })
   }
 
+  toggleShareModal = () => {
+    this.setState(prevState => { return { showShareModal: !prevState.showShareModal } })
+  }
+
   refCallback = (ref) => {
     this.canvasContext = ref.canvas.getContext('2d')
+  }
+
+  updateBoardId = (id) => {
+    this.setState({
+      currentBoardId: id
+    })
+    this.persist.connect(id)
   }
 
   render () {
     return (
       <div onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.xpto}>
-        <SideBarOverlay grid={grid} changeCurrentTool={this.changeCurrentTool.bind(this)} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
+        <SideBarOverlay grid={this.grid} changeCurrentTool={this.changeCurrentTool.bind(this)} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
           currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite.bind(this)}
-          removeFavorite={this.removeFavorite.bind(this)} toggleUserModal={this.toggleUserModal}>
+          removeFavorite={this.removeFavorite.bind(this)} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}>
           <Canvas ref={this.refCallback} width={1200} height={800} {...this.listeners}>
             HTML5 Canvas not supported
           </Canvas>
         </SideBarOverlay>
         <CleanBoardModal cleanCanvas={this.cleanCanvas} closeModal={this.toggleCleanModal} visible={this.state.showCleanModal} />
+        <ShareBoardModal boardId={this.state.currentBoardId} visible={this.state.showShareModal} closeModal={this.toggleShareModal} updateCurrentBoard={this.updateBoardId} />
         <Route path='/signin' component={EnterUserModal} />
       </div>
     )

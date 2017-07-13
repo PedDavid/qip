@@ -9,6 +9,7 @@ export class Persist {
     this.canvasContext = canvasContext
     this.socket = null
     this.grid = grid
+    this.connected = false
   }
 
   connect = function (boardId) {
@@ -19,6 +20,7 @@ export class Persist {
 
     this.socket.onopen = (event) => {
       this._configureWSProtocol()
+      this.connected = true
     }
   }
 
