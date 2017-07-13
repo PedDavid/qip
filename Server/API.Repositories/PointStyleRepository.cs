@@ -16,98 +16,62 @@ namespace API.Repositories {
             _queryTemplate = queryTemplate;
         }
 
-        public long Add(PointStyle pointStyle) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
+        public Task<long> AddAsync(PointStyle pointStyle) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
 
-                parameters
-                        .Add("@width", SqlDbType.Int)
-                        .Value = pointStyle.Width;
-
-                return _queryTemplate.QueryForScalar<long>(INSERT_POINT_STYLE, parameters);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public PointStyle Find(long id) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
-
-                parameters.Add("@id", SqlDbType.BigInt).Value = id;
-
-                return _queryTemplate.QueryForObject(SELECT_POINT_STYLE, parameters, GetPointStyle);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public IEnumerable<PointStyle> GetAll() {
-            try {
-                return _queryTemplate.Query(SELECT_ALL, GetPointStyle);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public void Remove(long id) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
-
-                parameters.Add("@id", SqlDbType.BigInt).Value = id;
-
-                _queryTemplate.Query(DELETE_POINT_STYLE, parameters);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public void Update(PointStyle pointStyle) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
-
-                parameters
-                        .Add("@id", SqlDbType.BigInt)
-                        .Value = pointStyle.Id.Value;
-
-                parameters
-                     .Add("@width", SqlDbType.Int)
+            parameters
+                    .Add("@width", SqlDbType.Int)
                     .Value = pointStyle.Width;
 
-                _queryTemplate.Query(UPDATE_POINT_STYLE, parameters);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
+            return _queryTemplate.QueryForScalarAsync<long>(INSERT_POINT_STYLE, parameters);
         }
 
-        public void PartialUpdate(PointStyle pointStyle) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
+        public Task<PointStyle> FindAsync(long id) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
 
-                parameters
-                        .Add("@id", SqlDbType.BigInt)
-                        .Value = pointStyle.Id.Value;
+            parameters.Add("@id", SqlDbType.BigInt).Value = id;
 
-                parameters
-                     .Add("@width", SqlDbType.Int)
-                    .Value = pointStyle.Width ?? SqlInt32.Null;
+            return _queryTemplate.QueryForObjectAsync(SELECT_POINT_STYLE, parameters, GetPointStyle);
+        }
 
-                _queryTemplate.Query(UPDATE_POINT_STYLE, parameters);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
+        public Task<IEnumerable<PointStyle>> GetAllAsync() {
+            return _queryTemplate.QueryAsync(SELECT_ALL, GetPointStyle);
+        }
+
+        public Task RemoveAsync(long id) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@id", SqlDbType.BigInt).Value = id;
+
+            return _queryTemplate.QueryAsync(DELETE_POINT_STYLE, parameters);
+        }
+
+        public Task UpdateAsync(PointStyle pointStyle) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters
+                    .Add("@id", SqlDbType.BigInt)
+                    .Value = pointStyle.Id.Value;
+
+            parameters
+                    .Add("@width", SqlDbType.Int)
+                .Value = pointStyle.Width;
+
+            return _queryTemplate.QueryAsync(UPDATE_POINT_STYLE, parameters);
+        }
+
+        public Task PartialUpdateAsync(PointStyle pointStyle) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters
+                    .Add("@id", SqlDbType.BigInt)
+                    .Value = pointStyle.Id.Value;
+
+            parameters
+                    .Add("@width", SqlDbType.Int)
+                .Value = pointStyle.Width ?? SqlInt32.Null;
+
+            return _queryTemplate.QueryAsync(UPDATE_POINT_STYLE, parameters);
         }
 
         //SQL Commands
