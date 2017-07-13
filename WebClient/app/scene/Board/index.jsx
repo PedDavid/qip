@@ -4,13 +4,16 @@ import {
   Route
 } from 'react-router-dom'
 
+import {
+  Loader
+} from 'semantic-ui-react'
+
 import SideBarOverlay from './components/SideBarOverlay'
 import Canvas from './components/Canvas'
 import CleanBoardModal from './components/Modals/CleanBoardModal'
 import EnterUserModal from './components/Modals/EnterUserModal'
 import ShareBoardModal from './components/Modals/ShareBoardModal'
 import styles from './styles.scss'
-import fetch from 'isomorphic-fetch'
 
 import Pen from './../../model/tools/Pen'
 import Eraser from './../../model/tools/Eraser'
@@ -21,24 +24,6 @@ import {Persist, PersistType} from './../../util/Persist'
 // import {Figure, FigureStyle} from './../../model/Figure'
 
 // check if it's authenticated
-
-// if not, get data from localstorage
-/* if (window.localStorage.getItem('figures') === null && window.localStorage.getItem('pen') === null && window.localStorage.getItem('eraser') === null) {
-  const tempGrid = new Grid([], -1)
-  window.localStorage.setItem('figures', JSON.stringify(tempGrid.getFigures()))
-  window.localStorage.setItem('currFigureId', JSON.stringify(tempGrid.getCurrentFigureId()))
-  window.localStorage.setItem('pen', JSON.stringify(new Pen(tempGrid, 'black', 5)))
-  window.localStorage.setItem('eraser', JSON.stringify(new Eraser(tempGrid, 20)))
-}
-
-const figures = JSON.parse(window.localStorage.getItem('figures'))
-const currFigureId = JSON.parse(window.localStorage.getItem('currFigureId'))
-const grid = new Grid(figures, currFigureId)
-const tempPen = JSON.parse(window.localStorage.getItem('pen'))
-const pen = new Pen(grid, tempPen.color, tempPen.width)
-const tempEraser = JSON.parse(window.localStorage.getItem('eraser'))
-const eraser = new Eraser(grid, tempEraser.width)
-*/
 
 export default class Board extends React.Component {
   grid = new Grid([], -1)
@@ -51,7 +36,8 @@ export default class Board extends React.Component {
     showShareModal: false,
     currTool: this.defaultPen,
     favorites: [], // obtain favorites from server
-    currentBoardId: null
+    currentBoardId: null,
+    loading: true
   }
   toolsConfig = new ToolsConfig(defaultToolsConfig)
 
@@ -66,52 +52,39 @@ export default class Board extends React.Component {
   componentDidMount () {
     console.log('current board id: ' + this.props.match.params.board)
     const boardId = this.props.match.params.board
-    const persistType = PersistType.WebSockets
-    this.persist = new Persist(persistType, boardId, this.canvasContext, this.grid)
+    let persistType = null
 
-    if (boardId != null) {
-      // fetch data of current board
-      Promise.all([
-        fetch(`http://localhost:57251/api/boards/${boardId}/figures/lines`, {
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          method: 'GET'
-        }),
-        fetch(`http://localhost:57251/api/boards/${boardId}/figures/images`, {
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          method: 'GET'
-        })
-      ]).then(responses => {
-        if (responses.some(res => res.status >= 400)) {
-          throw new Error('Bad response from server')
-        }
-        return {lines: responses[0].json(), images: responses[1].json()}
-      }).then(figures => {
-        const ids = figures.map(figure => figure.map(innerFig => innerFig.id))
-        var max = ids.reduce((a, b) => {
-          return Math.max(a, b)
-        })
-        // todo: make possible to get images too
-        this.grid = new Grid(figures.lines, max)
-        // const pen = new Pen(this.grid, 'black', 5)
-        // const eraser = new Eraser(this.grid, 5)
-
-        // update current board id and connect to websockets
-        this.updateBoardId(boardId)
-      }).catch(err => {
-        console.log(err)
-        console.log('The board id passed as parameter is not valid')
-        this.props.history.push('/') // change current location programmatically in case of error
-      })
+    // if there isn't a specific board, or if the user is not authenticated, get persisted data from local storage
+    // todo: implement isAuthenticated()
+    if (boardId == null) {
+      persistType = PersistType().LocalStorage
+    } else if (boardId != null) {
+      persistType = PersistType().WebSockets
     }
 
-    // draw initial grid
-    this.grid.draw(this.canvasContext, 1)
+    this.persist = new Persist(persistType, boardId, this.canvasContext, this.grid)
+
+    // get initial board from server or from local storage
+    this.persist.getInitialBoardAsync()
+      .then(grid => {
+        if (persistType === PersistType().WebSockets) {
+          // todo update board id and start web socket connection
+          this.updateBoardId(boardId)
+        }
+        this.grid = grid
+        this.setState({
+          loading: false
+        })
+        // draw initial grid
+        this.grid.draw(this.canvasContext, 1)
+      }).catch(err => {
+        console.log(err)
+        console.log(err.message)
+        this.setState({
+          loading: false
+        })
+        this.props.history.push('/') // change current location programmatically in case of error
+      })
   }
 
   componentWillMount () {
@@ -173,6 +146,7 @@ export default class Board extends React.Component {
         <CleanBoardModal cleanCanvas={this.cleanCanvas} closeModal={this.toggleCleanModal} visible={this.state.showCleanModal} />
         <ShareBoardModal boardId={this.state.currentBoardId} visible={this.state.showShareModal} closeModal={this.toggleShareModal} updateCurrentBoard={this.updateBoardId} />
         <Route path='/signin' component={EnterUserModal} />
+        <Loader active={this.state.loading} content='Fetching Data ...' />
       </div>
     )
   }

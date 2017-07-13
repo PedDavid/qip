@@ -66,7 +66,7 @@ export default class Pen implements Tool {
     }
   }
 
-  onPressUp (event, socket) {
+  onPressUp (event, persist) {
     this.grid.addFigure(this.currentFigure)
 
     // add to localstorage
@@ -74,17 +74,22 @@ export default class Pen implements Tool {
     // map currentFigure's points to a data object
     const currentFigureTwin = Object.assign({}, this.currentFigure) // Object.assign() method only copies enumerable and own properties from a source object to a target object
     currentFigureTwin.points = this.currentFigure.points.map(point => {
-      const sda = point.getStyleOf(this.currentFigure.id)
-      return new SimplePoint(point.x, point.y, sda)
+      return new SimplePoint(point.x, point.y, point.getStyleOf(this.currentFigure.id))
     })
-    dataFigure.push(currentFigureTwin) // it can be push instead of dataFigure[id] because it will not have crashes with external id's because it's only used when there is no connection
-    window.localStorage.setItem('figures', JSON.stringify(dataFigure))
-    window.localStorage.setItem('currFigureId', JSON.stringify(this.grid.getCurrentFigureId()))
-    /* const objToSend = {
-      type: 'INSERT_FIGURE',
-      payload: this.currentFigure
+
+    if (persist.connected) {
+      const objToSend = {
+        type: 'INSERT_FIGURE',
+        payload: this.currentFigureTwin
+      }
+      persist.socket.send(JSON.stringify(objToSend))
+    } else {
+      dataFigure.push(currentFigureTwin) // it can be push instead of dataFigure[id] because it will not have crashes with external id's because it's only used when there is no connection
+      window.localStorage.setItem('figures', JSON.stringify(dataFigure))
+      window.localStorage.setItem('currFigureId', JSON.stringify(this.grid.getCurrentFigureId()))
     }
-    socket.send(JSON.stringify(objToSend)) */
+
+    // reset current figure
     this.currentFigure = null
   }
 
