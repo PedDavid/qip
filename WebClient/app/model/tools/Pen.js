@@ -80,11 +80,16 @@ export default class Pen implements Tool {
     dataFigure.push(currentFigureTwin) // it can be push instead of dataFigure[id] because it will not have crashes with external id's because it's only used when there is no connection
     window.localStorage.setItem('figures', JSON.stringify(dataFigure))
     window.localStorage.setItem('currFigureId', JSON.stringify(this.grid.getCurrentFigureId()))
-    /* const objToSend = {
-      type: 'INSERT_FIGURE',
-      payload: this.currentFigure
+
+    // send by websockets
+    if (socket.connected) {
+      const objToSend = {
+        type: 'INSERT_FIGURE',
+        payload: this.currentFigureTwin
+      }
+      socket.send(JSON.stringify(objToSend))
     }
-    socket.send(JSON.stringify(objToSend)) */
+
     this.currentFigure = null
   }
 
