@@ -6,13 +6,12 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 
+// TODO(peddavid): Change to more readable names
+
 namespace WebSockets.StringWebSockets {
     public class StringWebSocketsSessionManager {
-        private readonly ConcurrentDictionary<long, _StringWSSession> sessions;
-
-        public StringWebSocketsSessionManager() {
-            sessions = new ConcurrentDictionary<long, _StringWSSession>();
-        }
+        private readonly ConcurrentDictionary<long, _StringWSSession> sessions 
+            = new ConcurrentDictionary<long, _StringWSSession>();
 
         public IStringWebSocketSession Register(long sessionId, StringWebSocket webSocket) {
             _StringWSSession psession = sessions.GetOrAdd(sessionId, id => new _StringWSSession(id));
@@ -67,7 +66,7 @@ namespace WebSockets.StringWebSockets {
                     _rwlock.ExitReadLock();
                 }
 
-                await Task.WhenAll(sending);
+                await Task.WhenAll(sending); // TODO(peddavid): Wait every?
             }
         }
 

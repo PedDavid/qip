@@ -73,7 +73,7 @@ namespace WebSockets.StringWebSockets {
             if(String.IsNullOrEmpty(message))
                 return;
 
-            byte[] buffer = Encoding.UTF8.GetBytes(message);//TODO Não sei se posso fazer isto, mas ao que parece funciona
+            byte[] buffer = Encoding.UTF8.GetBytes(message);//TODO Não sei se posso fazer isto, mas ao que parece funciona, (peddavid): deve haver um contrato documentado com a codificão da mensagem enviada por websockets
 
             await InternalWebSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
         }
