@@ -64,6 +64,7 @@ namespace WebSockets.StringWebSockets {
             await _stringWebSocket.CloseAsync(_stringWebSocket.CloseStatus.Value, _stringWebSocket.CloseStatusDescription, CancellationToken.None);
         }
 
+        // TODO(peddavid): WebSocket Response?
         private async Task SendReponse(JToken owner, JToken type, JToken response) {
             if(response != null) {
                 dynamic res = new { owner = owner, type = type, payload = response };

@@ -60,10 +60,10 @@ namespace WebSockets.StringWebSockets {
                         .Where(ws => ws.State == WebSocketState.Open)
                         .Where(filter)
                         .Select(ws => ws.SendAsync(message))
-                        .Aggregate(sending, (s, t) => { s.Add(t); return s; });
+                        .Aggregate(sending, (s, t) => { s.Add(t); return s; }); // TODO(peddavid): Unnecessary state change in "functional" code, why not just ToList()?
                 }
                 finally {
-                    _rwlock.ExitReadLock();
+                    _rwlock.ExitReadLock(); // TODO(peddavid): Exit read lock while async operations are being done?
                 }
 
                 await Task.WhenAll(sending); // TODO(peddavid): Wait every?
