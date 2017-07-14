@@ -16,7 +16,7 @@ namespace API.Repositories {
             _queryTemplate = queryTemplate;
         }
 
-        public long Add(Image image) {
+        public async Task<long> AddAsync(Image image) {
             long imageId = image.Id;
 
             List<SqlParameter> parameters = new List<SqlParameter>();
@@ -49,42 +49,30 @@ namespace API.Repositories {
                 .Add("@src", SqlDbType.NVarChar)
                 .Value = image.Src;
 
-            _queryTemplate.StoredProcedure(INSERT_IMAGE, parameters);
+            await _queryTemplate.StoredProcedureAsync(INSERT_IMAGE, parameters);
 
             return imageId;
         }
 
-        public Image Find(long id, long boardId) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
+        public Task<Image> FindAsync(long id, long boardId) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
 
-                parameters.Add("@id", SqlDbType.BigInt).Value = id;
+            parameters.Add("@id", SqlDbType.BigInt).Value = id;
 
-                parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
+            parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
 
-                return _queryTemplate.QueryForObject(SELECT_IMAGE, parameters, GetImage);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
+            return _queryTemplate.QueryForObjectAsync(SELECT_IMAGE, parameters, GetImage);
         }
 
-        public IEnumerable<Image> GetAll(long boardId) {
-            try {
+        public Task<IEnumerable<Image>> GetAllAsync(long boardId) {
                 List<SqlParameter> parameters = new List<SqlParameter>();
 
                 parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
 
-                return _queryTemplate.Query(SELECT_ALL, parameters, GetImage);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
+                return _queryTemplate.QueryAsync(SELECT_ALL, parameters, GetImage);
         }
 
-        public void Remove(long id, long boardId) {
+        public Task RemoveAsync(long id, long boardId) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
@@ -95,10 +83,10 @@ namespace API.Repositories {
                 .Add("@boardId", SqlDbType.BigInt)
                 .Value = boardId;
 
-            _queryTemplate.StoredProcedure(REMOVE_IMAGE, parameters);
+            return _queryTemplate.StoredProcedureAsync(REMOVE_IMAGE, parameters);
         }
 
-        public void Update(Image image) {
+        public Task UpdateAsync(Image image) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
@@ -129,10 +117,10 @@ namespace API.Repositories {
                 .Add("@src", SqlDbType.NVarChar)
                 .Value = image.Src;
 
-            _queryTemplate.StoredProcedure(UPDATE_IMAGE, parameters);
+            return _queryTemplate.StoredProcedureAsync(UPDATE_IMAGE, parameters);
         }
 
-        public void PartialUpdate(Image image) {
+        public Task PartialUpdateAsync(Image image) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
@@ -163,7 +151,7 @@ namespace API.Repositories {
                 .Add("@src", SqlDbType.NVarChar)
                 .Value = image.Src ?? SqlString.Null;
 
-            _queryTemplate.StoredProcedure(UPDATE_IMAGE, parameters);
+            return _queryTemplate.StoredProcedureAsync(UPDATE_IMAGE, parameters);
         }
 
         //SQL Functions
