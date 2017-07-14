@@ -1,5 +1,5 @@
 import { findNearest } from './../util/Math'
-import { Point } from './Point'
+import { Point, PointStyle } from './Point'
 import { Figure, FigureStyle } from './Figure'
 import { SimplePoint } from './SimplePoint'
 
@@ -151,7 +151,7 @@ export default function Grid (initialFigures, currIdx) {
       const gridPoint = this.getOrCreatePoint(simplePoint.x, simplePoint.y)
       // gridPoint.addFigure(figure.id, point.style)
       figure.addPoint(gridPoint)
-      const pointStyle = simplePoint.style
+      const pointStyle = new PointStyle(simplePoint.style.width) // actualy, SimplePoint.style is a PointStyle but as the data is being parsed from json, it must be instantiated again
       gridPoint.addFigure(figure.id, pointStyle)
       this.updateMaxLinePart(prev, gridPoint, figure, pointStyle)
       prev = gridPoint

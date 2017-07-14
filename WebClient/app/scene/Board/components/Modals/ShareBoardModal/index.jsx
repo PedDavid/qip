@@ -21,7 +21,7 @@ export default class ShareBoardModal extends React.Component {
       return
     }
 
-    fetch('http://localhost:57251/api/boards', {
+    fetch('http://localhost:57059/api/boards', {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'

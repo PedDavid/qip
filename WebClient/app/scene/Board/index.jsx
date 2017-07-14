@@ -50,7 +50,6 @@ export default class Board extends React.Component {
   }
 
   componentDidMount () {
-    console.log('current board id: ' + this.props.match.params.board)
     const boardId = this.props.match.params.board
     let persistType = null
 
@@ -62,7 +61,7 @@ export default class Board extends React.Component {
       persistType = PersistType().WebSockets
     }
 
-    this.persist = new Persist(persistType, boardId, this.canvasContext, this.grid)
+    this.persist = new Persist(persistType, this.canvasContext, this.grid)
 
     // get initial board from server or from local storage
     this.persist.getInitialBoardAsync()
@@ -78,7 +77,7 @@ export default class Board extends React.Component {
         // draw initial grid
         this.grid.draw(this.canvasContext, 1)
       }).catch(err => {
-        console.log(err)
+        console.error(err)
         console.log(err.message)
         this.setState({
           loading: false
@@ -127,6 +126,7 @@ export default class Board extends React.Component {
   }
 
   updateBoardId = (id) => {
+    console.info('current board id: ' + this.props.match.params.board)
     this.setState({
       currentBoardId: id
     })

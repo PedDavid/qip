@@ -14,12 +14,17 @@ export class Persist {
     this.socket = null
     this.grid = grid
     this.connected = false
+    this.boardId = null
   }
 
   connect = function (boardId) {
+    this.boardId = boardId
     const scheme = document.location.protocol === 'https:' ? 'wss' : 'ws'
-    const port = document.location.port ? (53379) : ''
-    const connectionUrl = `${scheme}://${document.location.hostname}:${port}/api/websockets?id=${this.boardId}`
+    const port = document.location.port ? (57059) : ''
+    const connectionUrl = `${scheme}://${document.location.hostname}:${port}/api/websockets?id=${boardId}`
+    console.log('making web socket connection to: ')
+    console.log(connectionUrl)
+    console.info('console info log')
     this.socket = new WebSocket(connectionUrl)
 
     this.socket.onopen = (event) => {
@@ -32,12 +37,16 @@ export class Persist {
     this.socket.onmessage = (event) => {
       const {type, payload} = JSON.parse(event.data)
       switch (type) {
-        case 'INSERT_FIGURE':
-          const figStyle = new FigureStyle(payload.figureStyle.color, payload.figureStyle.scale)
+        case 'CREATE_LINE':
+          if (payload.tempId != null) {
+            // todo update figure id
+            return
+          }
+          const figStyle = new FigureStyle(payload.style.color, 1)
           const newFigure = new Figure(figStyle, payload.id)
           newFigure.points = payload.points
-          this.addFigure(newFigure)
-          this.grid.draw(this._canvasContext, 1)
+          this.grid.addFigure(newFigure)
+          this.grid.draw(this.canvasContext, 1)
       }
     }
   }
@@ -52,16 +61,17 @@ export class Persist {
 
   // get initial board from server by web sockets
   _getInitialBoardWS = function (boardId) {
+    // todo: fazer também um fetch ao board específico e obter o maxFigureId em vez de estar a verificar qual o maior atrvés das figuras recebidas
     // fetch data of current board
     return Promise.all([
-      fetch(`http://localhost:57251/api/boards/${boardId}/figures/lines`, {
+      fetch(`http://localhost:57059/api/boards/${boardId}/figures/lines`, {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
         method: 'GET'
       }),
-      fetch(`http://localhost:57251/api/boards/${boardId}/figures/images`, {
+      fetch(`http://localhost:57059/api/boards/${boardId}/figures/images`, {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
@@ -72,15 +82,13 @@ export class Persist {
       if (responses.some(res => res.status >= 400)) {
         throw new Error('Bad response from server. Check if Board Id is correct')
       }
-      return {lines: responses[0].json(), images: responses[1].json()}
+      return responses[0].json()
     }).then(figures => {
-      const ids = figures.map(figure => figure.map(innerFig => innerFig.id))
-      var max = ids.reduce((a, b) => {
-        return Math.max(a, b)
-      })
+      const lines = figures
+      let maxId = 5
 
       // todo: make possible to get images too
-      return new Grid(figures.lines, max)
+      return new Grid(lines, maxId)
       // const pen = new Pen(this.grid, 'black', 5)
       // const eraser = new Eraser(this.grid, 5)
 
@@ -103,7 +111,7 @@ export class Persist {
 
       const figures = JSON.parse(window.localStorage.getItem('figures'))
       const nextFigureId = JSON.parse(window.localStorage.getItem('currFigureId')) + 1
-      const grid = new Grid(figures, currFigureId)
+      const grid = new Grid(figures, nextFigureId)
       // const tempPen = JSON.parse(window.localStorage.getItem('pen'))
       // const pen = new Pen(grid, tempPen.color, tempPen.width)
       // const tempEraser = JSON.parse(window.localStorage.getItem('eraser'))
