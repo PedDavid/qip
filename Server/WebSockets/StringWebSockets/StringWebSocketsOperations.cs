@@ -2,11 +2,8 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
-using WebSockets.Models;
 using WebSockets.Operations;
 
 namespace WebSockets.StringWebSockets {
@@ -14,12 +11,13 @@ namespace WebSockets.StringWebSockets {
         private readonly StringWebSocket _stringWebSocket;
         private readonly Dictionary<Models.Action, Operation> _operations;
 
-        public IStringWebSocketSession Session { get; set; }
+        private readonly IStringWebSocketSession _session;
+        public readonly long _clientId;
 
-        public long? ClientId { get; set; }
-
-        public StringWebSocketsOperations(StringWebSocket stringWebSocket, Dictionary<Models.Action, Operation> operations) {
+        public StringWebSocketsOperations(long clientId, StringWebSocket stringWebSocket, IStringWebSocketSession session, Dictionary<Models.Action, Operation> operations) { // TODO(peddavid): Change this "hard constructor"
+            _clientId = clientId;
             _stringWebSocket = stringWebSocket;
+            _session = session;
             _operations = operations;
         }
 
@@ -49,8 +47,7 @@ namespace WebSockets.StringWebSockets {
                     continue;//TODO REVER
                 }
 
-                if(ClientId.HasValue)
-                    infoPayload["clientId"] = ClientId.Value;
+                infoPayload["clientId"] = _clientId;
 
                 OperationResult res = _operations[type]((JObject)infoPayload);
 
@@ -61,7 +58,7 @@ namespace WebSockets.StringWebSockets {
                 
             } while(!_stringWebSocket.CloseStatus.HasValue);
 
-            Session.Exit();
+            _session.Exit();
             await _stringWebSocket.CloseAsync(_stringWebSocket.CloseStatus.Value, _stringWebSocket.CloseStatusDescription, CancellationToken.None);
         }
 
@@ -74,10 +71,10 @@ namespace WebSockets.StringWebSockets {
         }
 
         private async Task SendBroadcast(JToken owner, JToken type, JObject broadcast) {
-            if(Session != null && broadcast != null) {
+            if(_session != null && broadcast != null) {
                 dynamic res = new { owner = owner, type = type, payload = broadcast };
                 string jsonRes = await JsonConvert.SerializeObjectAsync(res);
-                await Session.BroadcastAsync(jsonRes);
+                await _session.BroadcastAsync(jsonRes);
             }
         }
     }

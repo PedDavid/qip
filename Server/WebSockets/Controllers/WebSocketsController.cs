@@ -37,12 +37,9 @@ namespace WebSockets.Controllers {
             if(HttpContext.WebSockets.IsWebSocketRequest && id.HasValue) {
                 StringWebSocket webSocket = await HttpContext.WebSockets.AcceptStringWebSocketAsync();
 
-                long vid = id.Value;
-                var swsopers = new StringWebSocketsOperations(webSocket, _operations) {
-                    // TODO(peddavid): Why not using parameters too? And make them readonly private after?
-                    Session = _sessionManager.Register(vid, webSocket),
-                    ClientId = vid
-                };
+                long clientId = id.Value; // TODO(peddavid): Rename?
+                var session = _sessionManager.Register(clientId, webSocket);
+                var swsopers = new StringWebSocketsOperations(clientId, webSocket, session, _operations);
 
                 await swsopers.AcceptRequests();
             }
