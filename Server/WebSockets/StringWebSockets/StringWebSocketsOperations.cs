@@ -23,19 +23,6 @@ namespace WebSockets.StringWebSockets {
             _operations = operations;
         }
 
-        public StringWebSocketsOperations(StringWebSocket stringWebSocket) : this(stringWebSocket, new Dictionary<Models.Action, Operation>()) {}
-
-        public StringWebSocketsOperations(WebSocket webSocket) : this(new StringWebSocket(webSocket)) {}
-
-        public StringWebSocketsOperations AddOperation(Models.Action action, Operation operation) {
-            _operations.Add(action, operation);
-            return this;
-        }
-
-        public void RemoveOperation(Models.Action action) {
-            _operations.Remove(action);
-        }
-
         public async Task AcceptRequests() {
             do {
                 string msg = await _stringWebSocket.ReceiveAsync();
