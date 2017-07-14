@@ -1,10 +1,12 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+
 using WebSockets.Operations;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace WebSockets.StringWebSockets {
     public class StringWebSocketsOperations {
