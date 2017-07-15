@@ -70,7 +70,7 @@ export default class SideBarOverlay extends React.Component {
                   <Button className={styles.btnPlus}>
                     <Icon name='plus' className={styles.iconPlus} />
                   </Button>
-                </Dropdown.Item>                
+                </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
             <a className='item'>
