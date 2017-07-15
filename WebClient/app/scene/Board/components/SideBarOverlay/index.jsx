@@ -13,7 +13,8 @@ import {
   Segment,
   Menu,
   Icon,
-  Dropdown
+  Dropdown,
+  Button
 } from 'semantic-ui-react'
 
 export default class SideBarOverlay extends React.Component {
@@ -24,8 +25,9 @@ export default class SideBarOverlay extends React.Component {
   toggleVisibility = () => this.setState({ visible: !this.state.visible })
 
   openBoards = () => {
+    console.log(styles.myBoards)
     this.setState({extraStyle: {
-      paddingRight: '200px',
+      paddingRight: '300px',
       width: '210px'
     }})
   }
@@ -52,12 +54,23 @@ export default class SideBarOverlay extends React.Component {
               <Icon name='share' />
               Share board
             </a>
-            <Dropdown onClose={this.closeBoards} onClick={this.openBoards} item text='My Boards'>
-              <Dropdown.Menu>
-                <Dropdown.Header>My Boards</Dropdown.Header>
-                <Dropdown.Item>My First Board</Dropdown.Item>
-                <Dropdown.Item>Daw Board</Dropdown.Item>
-                <Dropdown.Item>Family Board</Dropdown.Item>
+            <Dropdown ref='menux' onClose={this.closeBoards} onClick={this.openBoards} item text='My Boards'>
+              <Dropdown.Menu className={styles.myBoards} >
+                <Dropdown.Header>School</Dropdown.Header>
+                <Dropdown.Item>Semester 1 xpto class</Dropdown.Item>
+                <Dropdown.Item>Semester 2</Dropdown.Item>
+                <Dropdown.Item>Semester 3</Dropdown.Item>
+
+                <Dropdown.Header>Personal</Dropdown.Header>
+                <Dropdown.Item >Diary</Dropdown.Item>
+                <Dropdown.Item >Ideas</Dropdown.Item>
+                <Dropdown.Item >House</Dropdown.Item>
+
+                <Dropdown.Item className={styles.addBoard}>
+                  <Button className={styles.btnPlus}>
+                    <Icon name='plus' className={styles.iconPlus} />
+                  </Button>
+                </Dropdown.Item>                
               </Dropdown.Menu>
             </Dropdown>
             <a className='item'>
