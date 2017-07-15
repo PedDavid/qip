@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using API.Models;
-using API.Models.Output;
-using API.Models.Input;
-using API.Models.Extensions;
+using IODomain.Output;
+using IODomain.Input;
+using IODomain.Extensions;
 using API.Interfaces.IRepositories;
 using API.Domain;
 
@@ -22,15 +21,15 @@ namespace API.Controllers {
         }
 
         [HttpGet]
-        public IEnumerable<OutLine> GetAll(long boardId) {
-            return _lineRepository
-                .GetAll(boardId)
-                .Select(LineExtensions.Out);
+        public async Task<IEnumerable<OutLine>> GetAll(long boardId) {
+            IEnumerable<Line> lines = await _lineRepository.GetAllAsync(boardId);
+
+            return lines.Select(LineExtensions.Out);
         }
 
         [HttpGet("{id}", Name = "GetLine")]
-        public IActionResult GetById(long id, long boardId) {
-            Line line = _lineRepository.Find(id, boardId);
+        public async Task<IActionResult> GetById(long id, long boardId) {
+            Line line = await _lineRepository.FindAsync(id, boardId);
             if(line == null) {
                 return NotFound();
             }
@@ -38,13 +37,13 @@ namespace API.Controllers {
         }
 
         [HttpPost]
-        public IActionResult Create(long boardId, [FromBody] InLine inputLine) {
+        public async Task<IActionResult> Create(long boardId, [FromBody] InLine inputLine) {
             if(inputLine == null || inputLine.BoardId != boardId || !inputLine.Id.HasValue) {
                 return BadRequest();
             }
 
             Line line = new Line(boardId, inputLine.Id.Value).In(inputLine);
-            long id = _lineRepository.Add(line);
+            long id = await _lineRepository.AddAsync(line);
 
             inputLine.Id = id;
             return CreatedAtRoute("GetLine", new { id = id, boardId = boardId }, inputLine);
@@ -52,30 +51,30 @@ namespace API.Controllers {
 
 
         [HttpPut("{id}")]
-        public IActionResult Update(long id, long boardId, [FromBody] InLine inputLine) {
+        public async Task<IActionResult> Update(long id, long boardId, [FromBody] InLine inputLine) {
             if(inputLine == null || inputLine.Id != id || inputLine.BoardId != boardId) {
                 return BadRequest();
             }
 
-            Line line = _lineRepository.Find(id, boardId);
+            Line line = await _lineRepository.FindAsync(id, boardId);
             if(line == null) {
                 return NotFound();
             }
 
             line.In(inputLine);
 
-            _lineRepository.Update(line);
+            await _lineRepository.UpdateAsync(line);
             return new NoContentResult();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(long id, long boardId) {
-            Line line = _lineRepository.Find(id, boardId);
+        public async Task<IActionResult> Delete(long id, long boardId) {
+            Line line = await _lineRepository.FindAsync(id, boardId);
             if(line == null) {
                 return NotFound();
             }
 
-            _lineRepository.Remove(id, boardId);
+            await _lineRepository.RemoveAsync(id, boardId);
             return new NoContentResult();
         }
     }

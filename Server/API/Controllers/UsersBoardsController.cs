@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using API.Models;
-using API.Models.Input;
-using API.Models.Extensions;
-using API.Models.Output;
+using IODomain.Input;
+using IODomain.Extensions;
+using IODomain.Output;
 using API.Interfaces.IRepositories;
 using API.Domain;
 
@@ -22,15 +21,15 @@ namespace API.Controllers {
         }
 
         [HttpGet]
-        public IEnumerable<OutUserBoard_User> GetAll(long boardId) {
-            return _userBoardsRepository
-                .GetAllUsers(boardId)
-                .Select(UserBoard_UserExtensions.Out);
+        public async Task<IEnumerable<OutUserBoard_User>> GetAll(long boardId) {
+            IEnumerable<UserBoard_User> userBoards = await _userBoardsRepository.GetAllUsersAsync(boardId);
+
+            return userBoards.Select(UserBoard_UserExtensions.Out);
         }
 
         [HttpGet("{userId}", Name = "GetUserBoard")]
-        public IActionResult GetById(long boardId, long userId) {
-            UserBoard_User user = _userBoardsRepository.FindUser(boardId, userId);
+        public async Task<IActionResult> GetById(long boardId, long userId) {
+            UserBoard_User user = await _userBoardsRepository.FindUserAsync(boardId, userId);
 
             if(user == null) {
                 return NotFound();
@@ -40,42 +39,42 @@ namespace API.Controllers {
         }
 
         [HttpPost]
-        public IActionResult Create(long boardId, [FromBody] InUserBoard inputUserBoard) {
+        public async Task<IActionResult> Create(long boardId, [FromBody] InUserBoard inputUserBoard) {
             if(inputUserBoard == null || inputUserBoard.BoardId != boardId) {
                 return BadRequest();
             }
 
             UserBoard userBoard = new UserBoard().In(inputUserBoard);
-            _userBoardsRepository.Add(userBoard);
+            await _userBoardsRepository.AddAsync(userBoard);
 
             return CreatedAtRoute("GetUserBoard", new { boardId = userBoard.BoardId, userId = userBoard.UserId }, inputUserBoard);
         }
 
         [HttpPut("{userId}")]
-        public IActionResult Update(long boardId, long userId, [FromBody] InUserBoard inputUserBoard) {
+        public async Task<IActionResult> Update(long boardId, long userId, [FromBody] InUserBoard inputUserBoard) {
             if(inputUserBoard == null || inputUserBoard.BoardId != boardId || inputUserBoard.UserId != userId) {
                 return BadRequest();
             }
 
-            UserBoard user = _userBoardsRepository.Find(boardId, userId);
+            UserBoard user = await _userBoardsRepository.FindAsync(boardId, userId);
             if(user == null) {
                 return NotFound();
             }
 
             user.In(inputUserBoard);
 
-            _userBoardsRepository.Update(user);
+            await _userBoardsRepository.UpdateAsync(user);
             return new NoContentResult();
         }
 
         [HttpDelete("{userId}")]
-        public IActionResult Delete(long boardId, long userId) {
-            UserBoard user = _userBoardsRepository.Find(boardId, userId);
+        public async Task<IActionResult> Delete(long boardId, long userId) {
+            UserBoard user = await _userBoardsRepository.FindAsync(boardId, userId);
             if(user == null) {
                 return NotFound();
             }
 
-            _userBoardsRepository.Remove(boardId, userId);
+            await _userBoardsRepository.RemoveAsync(boardId, userId);
             return new NoContentResult();
         }
     }

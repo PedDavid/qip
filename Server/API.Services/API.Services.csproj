@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\API.Domain\API.Domain.csproj" />
+    <ProjectReference Include="..\API.Interfaces\API.Interfaces.csproj" />
+    <ProjectReference Include="..\IODomain\IODomain.csproj" />
+  </ItemGroup>
+
+</Project>

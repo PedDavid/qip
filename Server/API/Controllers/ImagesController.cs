@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using API.Models;
-using API.Models.Output;
-using API.Models.Input;
 using API.Interfaces.IRepositories;
 using API.Domain;
-using API.Models.Extensions;
+using IODomain.Input;
+using IODomain.Extensions;
+using IODomain.Output;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -22,15 +21,15 @@ namespace API.Controllers {
         }
 
         [HttpGet]
-        public IEnumerable<OutImage> GetAll(long boardId) {
-            return _imageRepository
-                .GetAll(boardId)
-                .Select(ImageExtensions.Out);
+        public async Task<IEnumerable<OutImage>> GetAll(long boardId) {
+            IEnumerable<Image> images = await _imageRepository.GetAllAsync(boardId);
+
+            return images.Select(ImageExtensions.Out);
         }
 
         [HttpGet("{id}", Name = "GetImage")]
-        public IActionResult GetById(long id, long boardId) {
-            Image image = _imageRepository.Find(id, boardId);
+        public async Task<IActionResult> GetById(long id, long boardId) {
+            Image image = await _imageRepository.FindAsync(id, boardId);
             if(image == null) {
                 return NotFound();
             }
@@ -38,13 +37,13 @@ namespace API.Controllers {
         }
 
         [HttpPost]
-        public IActionResult Create(long boardId, [FromBody] InImage inputImage) {
+        public async Task<IActionResult> Create(long boardId, [FromBody] InImage inputImage) {
             if(inputImage == null || inputImage.BoardId != boardId || !inputImage.Id.HasValue) {
                 return BadRequest();
             }
 
             Image image = new Image(boardId, inputImage.Id.Value).In(inputImage);
-            long id = _imageRepository.Add(image);
+            long id = await _imageRepository.AddAsync(image);
 
             inputImage.Id = id;
             return CreatedAtRoute("GetImage", new { id = id, boardId = boardId }, inputImage);
@@ -52,30 +51,30 @@ namespace API.Controllers {
 
 
         [HttpPut("{id}")]
-        public IActionResult Update(long id, long boardId, [FromBody] InImage inputImage) {
+        public async Task<IActionResult> Update(long id, long boardId, [FromBody] InImage inputImage) {
             if(inputImage == null || inputImage.Id != id || inputImage.BoardId != boardId) {
                 return BadRequest();
             }
 
-            Image image = _imageRepository.Find(id, boardId);
+            Image image = await _imageRepository.FindAsync(id, boardId);
             if(image == null) {
                 return NotFound();
             }
 
             image.In(inputImage);
 
-            _imageRepository.Update(image);
+            await _imageRepository.UpdateAsync(image);
             return new NoContentResult();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(long id, long boardId) {
-            Image image = _imageRepository.Find(id, boardId);
+        public async Task<IActionResult> Delete(long id, long boardId) {
+            Image image = await _imageRepository.FindAsync(id, boardId);
             if(image == null) {
                 return NotFound();
             }
 
-            _imageRepository.Remove(id, boardId);
+            await _imageRepository.RemoveAsync(id, boardId);
             return new NoContentResult();
         }
     }

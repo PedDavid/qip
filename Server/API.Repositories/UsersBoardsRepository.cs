@@ -15,144 +15,96 @@ namespace API.Repositories {
             _queryTemplate = queryTemplate;
         }
 
-        public void Add(UserBoard userBoard) {
-            try {
+        public Task AddAsync(UserBoard userBoard) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters
+                    .Add("@userId", SqlDbType.BigInt)
+                    .Value = userBoard.UserId.Value;
+
+            parameters
+                .Add("@boardId", SqlDbType.BigInt)
+                .Value = userBoard.BoardId.Value;
+
+            parameters
+                .Add("@permission", SqlDbType.TinyInt)
+                .Value = (byte)userBoard.Permission;
+
+            return _queryTemplate.QueryAsync(INSERT_USER_BOARD, parameters);
+        }
+
+        public Task<UserBoard> FindAsync(long boardId, long userId) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
+
+            parameters.Add("@userId", SqlDbType.BigInt).Value = userId;
+
+            return _queryTemplate.QueryForObjectAsync(SELECT_USER_BOARD, parameters, GetUserBoard);
+        }
+
+        public Task<UserBoard_Board> FindBoardAsync(long userId, long boardId) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
+
+            parameters.Add("@userId", SqlDbType.BigInt).Value = userId;
+
+            return _queryTemplate.QueryForObjectAsync(SELECT_BOARD, parameters, GetBoard);
+        }
+
+        public Task<UserBoard_User> FindUserAsync(long boardId, long userId) {
                 List<SqlParameter> parameters = new List<SqlParameter>();
 
-                parameters
-                        .Add("@userId", SqlDbType.BigInt)
-                        .Value = userBoard.UserId.Value;
+                parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
 
-                parameters
+                parameters.Add("@userId", SqlDbType.BigInt).Value = userId;
+
+                return _queryTemplate.QueryForObjectAsync(SELECT_USER, parameters, GetUser);
+        }
+
+        public Task<IEnumerable<UserBoard_Board>> GetAllBoardsAsync(long userId) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@userId", SqlDbType.BigInt).Value = userId;
+
+            return _queryTemplate.QueryAsync(SELECT_ALL_BOARDS, parameters, GetBoard);
+        }
+
+        public Task<IEnumerable<UserBoard_User>> GetAllUsersAsync(long boardId) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
+
+            return _queryTemplate.QueryAsync(SELECT_ALL_USERS, parameters, GetUser);
+        }
+
+        public Task RemoveAsync(long boardId, long userId) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@userId", SqlDbType.BigInt).Value = userId;
+
+            parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
+
+            return _queryTemplate.QueryAsync(DELETE_USER_BOARD, parameters);
+        }
+
+        public Task UpdateAsync(UserBoard userBoard) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters
+                    .Add("@userId", SqlDbType.BigInt)
+                    .Value = userBoard.UserId.Value;
+
+            parameters
                     .Add("@boardId", SqlDbType.BigInt)
-                    .Value = userBoard.BoardId.Value;
+                .Value = userBoard.BoardId.Value;
 
-                parameters
+            parameters
                     .Add("@permission", SqlDbType.TinyInt)
-                    .Value = (byte)userBoard.Permission;
+                .Value = (byte)userBoard.Permission;
 
-                _queryTemplate.Query(INSERT_USER_BOARD, parameters);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public UserBoard Find(long boardId, long userId) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
-
-                parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
-
-                parameters.Add("@userId", SqlDbType.BigInt).Value = userId;
-
-                return _queryTemplate.QueryForObject(SELECT_USER_BOARD, parameters, GetUserBoard);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public UserBoard_Board FindBoard(long userId, long boardId) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
-
-                parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
-
-                parameters.Add("@userId", SqlDbType.BigInt).Value = userId;
-
-                return _queryTemplate.QueryForObject(SELECT_BOARD, parameters, GetBoard);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public UserBoard_User FindUser(long boardId, long userId) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
-
-                parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
-
-                parameters.Add("@userId", SqlDbType.BigInt).Value = userId;
-
-                return _queryTemplate.QueryForObject(SELECT_USER, parameters, GetUser);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public IEnumerable<UserBoard_Board> GetAllBoards(long userId) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
-
-                parameters.Add("@userId", SqlDbType.BigInt).Value = userId;
-
-                return _queryTemplate.Query(SELECT_ALL_BOARDS, parameters, GetBoard);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public IEnumerable<UserBoard_User> GetAllUsers(long boardId) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
-
-                parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
-
-                return _queryTemplate.Query(SELECT_ALL_USERS, parameters, GetUser);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public void Remove(long boardId, long userId) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
-
-                parameters.Add("@userId", SqlDbType.BigInt).Value = userId;
-
-                parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
-
-                _queryTemplate.Query(DELETE_USER_BOARD, parameters);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
-        }
-
-        public void Update(UserBoard userBoard) {
-            try {
-                List<SqlParameter> parameters = new List<SqlParameter>();
-
-                parameters
-                        .Add("@userId", SqlDbType.BigInt)
-                        .Value = userBoard.UserId.Value;
-
-                parameters
-                     .Add("@boardId", SqlDbType.BigInt)
-                    .Value = userBoard.BoardId.Value;
-
-                parameters
-                     .Add("@permission", SqlDbType.TinyInt)
-                    .Value = (byte)userBoard.Permission;
-
-                _queryTemplate.Query(UPDATE_USER_BOARD, parameters);
-            }
-            catch(Exception ex) {
-                Console.WriteLine("E R R O : " + ex.Message);
-                throw;//TODO alterar
-            }
+            return _queryTemplate.QueryAsync(UPDATE_USER_BOARD, parameters);
         }
 
         //SQL Commands

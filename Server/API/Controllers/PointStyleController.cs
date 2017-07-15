@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using API.Models;
-using API.Models.Output;
-using API.Models.Input;
-using API.Models.Extensions;
+using IODomain.Output;
+using IODomain.Input;
+using IODomain.Extensions;
 using API.Interfaces.IRepositories;
 using API.Domain;
 
@@ -22,15 +21,15 @@ namespace API.Controllers {
         }
 
         [HttpGet]
-        public IEnumerable<OutPointStyle> GetAll() {
-            return _pointStyleRepository
-                .GetAll()
-                .Select(PointStyleExtensions.Out);
+        public async Task<IEnumerable<OutPointStyle>> GetAll() {
+            IEnumerable<PointStyle> pointStyles = await _pointStyleRepository.GetAllAsync();
+
+            return pointStyles.Select(PointStyleExtensions.Out);
         }
 
         [HttpGet("{id}", Name = "GetPointStyle")]
-        public IActionResult GetById(long id) {
-            PointStyle pointStyle = _pointStyleRepository.Find(id);
+        public async Task<IActionResult> GetById(long id) {
+            PointStyle pointStyle = await _pointStyleRepository.FindAsync(id);
             if(pointStyle == null) {
                 return NotFound();
             }
@@ -38,43 +37,43 @@ namespace API.Controllers {
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] InPointStyle inputPointStyle) {
+        public async Task<IActionResult> Create([FromBody] InPointStyle inputPointStyle) {
             if(inputPointStyle == null) {
                 return BadRequest();
             }
 
             PointStyle pointStyle = new PointStyle().In(inputPointStyle);
-            long id = _pointStyleRepository.Add(pointStyle);
+            long id = await _pointStyleRepository.AddAsync(pointStyle);
 
             inputPointStyle.Id = id;
             return CreatedAtRoute("GetPointStyle", new { id = id }, inputPointStyle);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(long id, [FromBody] InPointStyle inputPointStyle) {
+        public async Task<IActionResult> Update(long id, [FromBody] InPointStyle inputPointStyle) {
             if(inputPointStyle == null || inputPointStyle.Id != id) {
                 return BadRequest();
             }
 
-            PointStyle pointStyle = _pointStyleRepository.Find(id);
+            PointStyle pointStyle = await _pointStyleRepository.FindAsync(id);
             if(pointStyle == null) {
                 return NotFound();
             }
 
             pointStyle.In(inputPointStyle);
 
-            _pointStyleRepository.Update(pointStyle);
+            await _pointStyleRepository.UpdateAsync(pointStyle);
             return new NoContentResult();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(long id) {
-            PointStyle pointStyle = _pointStyleRepository.Find(id);
+        public async Task<IActionResult> Delete(long id) {
+            PointStyle pointStyle = await _pointStyleRepository.FindAsync(id);
             if(pointStyle == null) {
                 return NotFound();
             }
 
-            _pointStyleRepository.Remove(id);
+            await _pointStyleRepository.RemoveAsync(id);
             return new NoContentResult();
         }
     }

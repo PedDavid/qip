@@ -1,9 +1,5 @@
-// @flow
-
 import React from 'react'
-import {
-  Link
-} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import styles from './styles.scss'
 import Tools from './components/Tools'
 import FavoriteTools from './components/FavoriteTools'
@@ -50,7 +46,7 @@ export default class SideBarOverlay extends React.Component {
               <Icon name='sign in' />
               Login
             </Link>
-            <a className='item'>
+            <a onClick={this.props.toggleShareModal} className='item'>
               <Icon name='share' />
               Share board
             </a>

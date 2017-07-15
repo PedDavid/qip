@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using API.Models;
-using API.Models.Input;
-using API.Models.Output;
-using API.Models.Extensions;
 using API.Interfaces.IRepositories;
 using API.Domain;
+using IODomain.Output;
+using IODomain.Extensions;
+using IODomain.Input;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -24,15 +23,15 @@ namespace API.Controllers {
         }
 
         [HttpGet]
-        public IEnumerable<OutUser> GetAll() {
-            return _userRepository
-                .GetAll()
-                .Select(UserExtensions.Out);
+        public async Task<IEnumerable<OutUser>> GetAll() {
+            IEnumerable<User> users = await _userRepository.GetAllAsync();
+
+            return users.Select(UserExtensions.Out);
         }
 
         [HttpGet("{id}", Name = "GetUser")]
-        public IActionResult GetById(long id) {
-            User user = _userRepository.Find(id);
+        public async Task<IActionResult> GetById(long id) {
+            User user = await _userRepository.FindAsync(id);
             if(user == null) {
                 return NotFound();
             }
@@ -40,56 +39,56 @@ namespace API.Controllers {
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] InUser inputUser) {
+        public async Task<IActionResult> Create([FromBody] InUser inputUser) {
             if(inputUser == null) {
                 return BadRequest();
             }
 
             User user = new User().In(inputUser);
-            long id = _userRepository.Add(user);
+            long id = await _userRepository.AddAsync(user);
 
             inputUser.Id = id;
             return CreatedAtRoute("GetUser", new { id = id }, inputUser);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(long id, [FromBody] InUser inputUser) {
+        public async Task<IActionResult> Update(long id, [FromBody] InUser inputUser) {
             if(inputUser == null || inputUser.Id != id) {
                 return BadRequest();
             }
 
-            User user = _userRepository.Find(id);
+            User user = await _userRepository.FindAsync(id);
             if(user == null) {
                 return NotFound();
             }
 
             user.In(inputUser);
 
-            _userRepository.Update(user);
+            await _userRepository.UpdateAsync(user);
             return new NoContentResult();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(long id) {
-            User user = _userRepository.Find(id);
+        public async Task<IActionResult> Delete(long id) {
+            User user = await _userRepository.FindAsync(id);
             if(user == null) {
                 return NotFound();
             }
 
-            _userRepository.Remove(id);
+            await _userRepository.RemoveAsync(id);
             return new NoContentResult();
         }
 
         [HttpGet("{userId}/boards")]
-        public IEnumerable<OutUserBoard_Board> GetAll(long userId) {
-            return _userBoardsRepository
-                .GetAllBoards(userId)
-                .Select(UserBoard_BoardExtensions.Out);
+        public async Task<IEnumerable<OutUserBoard_Board>> GetAll(long userId) {
+            IEnumerable<UserBoard_Board> userBoards = await _userBoardsRepository.GetAllBoardsAsync(userId);
+
+            return userBoards.Select(UserBoard_BoardExtensions.Out);
         }
 
         [HttpGet("{userId}/boards/{boardId}")]
-        public IActionResult GetById(long userId, long boardId) {
-            UserBoard_Board board = _userBoardsRepository.FindBoard(userId, boardId);
+        public async Task<IActionResult> GetById(long userId, long boardId) {
+            UserBoard_Board board = await _userBoardsRepository.FindBoardAsync(userId, boardId);
 
             if(board == null) {
                 return NotFound();

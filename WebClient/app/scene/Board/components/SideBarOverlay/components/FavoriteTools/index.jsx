@@ -1,5 +1,3 @@
-// @flow
-
 import React from 'react'
 import Favorite from './components/Favorite'
 import styles from './styles.scss'
@@ -9,8 +7,11 @@ import Move from './../../../../../../model/tools/Move'
 
 import { Grid, Button } from 'semantic-ui-react'
 
+// TODO(peddavid): This could probably be a functional Component
 export default class FavoriteTools extends React.Component {
   addFavorite = () => {
+    // TODO(peddavid): Is this really needed? Prop by prop comparison should be enough.
+    // Also alert seems bad UX, at most is should animate the already existing Favorite
     const currTool = this.props.currTool
     const favorites = this.props.favorites
     // todo (simaovii) não gosto de como isto é feito ...

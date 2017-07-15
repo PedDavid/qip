@@ -8,15 +8,17 @@ using System.Threading.Tasks;
 
 namespace API.Repositories {
     public class SqlServerTemplate {
-        private IConfiguration _configuration;
+        private readonly IConfiguration _configuration;
+        private readonly string _nameConnectionString;
 
-        public SqlServerTemplate(IConfiguration configuration) {
+        public SqlServerTemplate(IConfiguration configuration, string nameConnectionString) {
             _configuration = configuration;
+            _nameConnectionString = nameConnectionString;
         }
 
-        public List<T> Query<T>(string sql, List<SqlParameter> parameters, Func<SqlDataReader, T> rowMapper) {
+        public IEnumerable<T> Query<T>(string sql, List<SqlParameter> parameters, Func<SqlDataReader, T> rowMapper) {
             List<T> result = new List<T>();
-            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString("QIPContext"))) {
+            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString(_nameConnectionString))) {
                 using(SqlCommand cmd = con.CreateCommand()) {
                     cmd.CommandText = sql;
 
@@ -33,12 +35,12 @@ namespace API.Repositories {
             }
         }
 
-        public List<T> Query<T>(string sql, Func<SqlDataReader, T> rowMapper) {
+        public IEnumerable<T> Query<T>(string sql, Func<SqlDataReader, T> rowMapper) {
             return Query(sql, new List<SqlParameter>(), rowMapper);
         }
 
         public void Query(string sql, List<SqlParameter> parameters) {
-            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString("QIPContext"))) {
+            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString(_nameConnectionString))) {
                 using(SqlCommand cmd = con.CreateCommand()) {
                     cmd.CommandText = sql;
 
@@ -55,7 +57,7 @@ namespace API.Repositories {
         }
 
         public T QueryForScalar<T>(string sql, List<SqlParameter> parameters) {
-            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString("QIPContext"))) {
+            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString(_nameConnectionString))) {
                 using(SqlCommand cmd = con.CreateCommand()) {
                     cmd.CommandText = sql;
 
@@ -72,7 +74,7 @@ namespace API.Repositories {
         }
 
         public T QueryForObject<T>(string sql, List<SqlParameter> parameters, Func<SqlDataReader, T> rowMapper) {
-            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString("QIPContext"))) {
+            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString(_nameConnectionString))) {
                 using(SqlCommand cmd = con.CreateCommand()) {
                     cmd.CommandText = sql;
 
@@ -94,7 +96,7 @@ namespace API.Repositories {
         }
 
         public void StoredProcedure(string procedure, List<SqlParameter> parameters) {
-            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString("QIPContext"))) {
+            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString(_nameConnectionString))) {
                 using(SqlCommand cmd = con.CreateCommand()) {
                     cmd.CommandText = procedure;
                     cmd.CommandType = CommandType.StoredProcedure;
@@ -103,6 +105,99 @@ namespace API.Repositories {
 
                     con.Open();
                     cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public async Task<IEnumerable<T>> QueryAsync<T>(string sql, List<SqlParameter> parameters, Func<SqlDataReader, T> rowMapper) {
+            List<T> result = new List<T>();
+            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString(_nameConnectionString))) {
+                using(SqlCommand cmd = con.CreateCommand()) {
+                    cmd.CommandText = sql;
+
+                    parameters.ForEach(prm => cmd.Parameters.Add(prm));
+
+                    await con.OpenAsync();
+                    SqlDataReader dr = await cmd.ExecuteReaderAsync();
+
+                    while(await dr.ReadAsync())
+                        result.Add(rowMapper(dr));
+
+                    return result;
+                }
+            }
+        }
+
+        public Task<IEnumerable<T>> QueryAsync<T>(string sql, Func<SqlDataReader, T> rowMapper) {
+            return QueryAsync(sql, new List<SqlParameter>(), rowMapper);
+        }
+
+        public async Task QueryAsync(string sql, List<SqlParameter> parameters) {
+            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString(_nameConnectionString))) {
+                using(SqlCommand cmd = con.CreateCommand()) {
+                    cmd.CommandText = sql;
+
+                    parameters.ForEach(prm => cmd.Parameters.Add(prm));
+
+                    await con.OpenAsync();
+                    await cmd.ExecuteNonQueryAsync();
+                }
+            }
+        }
+
+        public Task QueryAsync(string sql) {
+            return QueryAsync(sql, new List<SqlParameter>());
+        }
+
+        public async Task<T> QueryForScalarAsync<T>(string sql, List<SqlParameter> parameters) {
+            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString(_nameConnectionString))) {
+                using(SqlCommand cmd = con.CreateCommand()) {
+                    cmd.CommandText = sql;
+
+                    parameters.ForEach(prm => cmd.Parameters.Add(prm));
+
+                    await con.OpenAsync();
+                    return (T)await cmd.ExecuteScalarAsync();
+                }
+            }
+        }
+
+        public Task<T> QueryForScalarAsync<T>(string sql) {
+            return QueryForScalarAsync<T>(sql, new List<SqlParameter>());
+        }
+
+        public async Task<T> QueryForObjectAsync<T>(string sql, List<SqlParameter> parameters, Func<SqlDataReader, T> rowMapper) {
+            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString(_nameConnectionString))) {
+                using(SqlCommand cmd = con.CreateCommand()) {
+                    cmd.CommandText = sql;
+
+                    parameters.ForEach(prm => cmd.Parameters.Add(prm));
+
+                    await con.OpenAsync();
+                    SqlDataReader dr = await cmd.ExecuteReaderAsync();
+
+                    if(await dr.ReadAsync())
+                        return rowMapper(dr);
+
+                    return default(T);
+                }
+            }
+        }
+
+        public Task<T> QueryForObjectAsync<T>(string sql, Func<SqlDataReader, T> rowMapper) {
+            return QueryForObjectAsync(sql, new List<SqlParameter>(), rowMapper);
+        }
+
+        public async Task StoredProcedureAsync(string procedure, List<SqlParameter> parameters) {
+            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString(_nameConnectionString))) {
+                using(SqlCommand cmd = con.CreateCommand()) {
+                    cmd.CommandText = procedure;
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    parameters.ForEach(prm => cmd.Parameters.Add(prm));
+
+                    await con.OpenAsync();
+                    await cmd.ExecuteNonQueryAsync();
                 }
             }
         }

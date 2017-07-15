@@ -66,25 +66,39 @@ export default class Pen implements Tool {
     }
   }
 
-  onPressUp (event, socket) {
+  onPressUp (event, persist) {
     this.grid.addFigure(this.currentFigure)
 
-    // add to localstorage
-    const dataFigure = JSON.parse(window.localStorage.getItem('figures'))
     // map currentFigure's points to a data object
     const currentFigureTwin = Object.assign({}, this.currentFigure) // Object.assign() method only copies enumerable and own properties from a source object to a target object
-    currentFigureTwin.points = this.currentFigure.points.map(point => {
-      const sda = point.getStyleOf(this.currentFigure.id)
-      return new SimplePoint(point.x, point.y, sda)
+    currentFigureTwin.points = this.currentFigure.points.map((point, idx) => {
+      return new SimplePoint(point.x, point.y, point.getStyleOf(this.currentFigure.id), idx)
     })
-    dataFigure.push(currentFigureTwin) // it can be push instead of dataFigure[id] because it will not have crashes with external id's because it's only used when there is no connection
-    window.localStorage.setItem('figures', JSON.stringify(dataFigure))
-    window.localStorage.setItem('currFigureId', JSON.stringify(this.grid.getCurrentFigureId()))
-    /* const objToSend = {
-      type: 'INSERT_FIGURE',
-      payload: this.currentFigure
+
+    // map object so it can be parsed by api
+    // todo: change model to join this
+    currentFigureTwin.tempId = currentFigureTwin.id
+    delete currentFigureTwin.id
+    currentFigureTwin.style = currentFigureTwin.figureStyle
+    delete currentFigureTwin.figureStyle
+    currentFigureTwin.clientId = persist.boardId // todo: why i have to pass this??
+
+    if (persist.connected) {
+      const objToSend = {
+        type: 'CREATE_LINE',
+        owner: parseInt(persist.boardId),
+        payload: currentFigureTwin
+      }
+      persist.socket.send(JSON.stringify(objToSend))
+    } else {
+      // add to localstorage
+      const dataFigure = JSON.parse(window.localStorage.getItem('figures'))
+      dataFigure.push(currentFigureTwin) // it can be push instead of dataFigure[id] because it will not have crashes with external id's because it's only used when there is no connection
+      window.localStorage.setItem('figures', JSON.stringify(dataFigure))
+      window.localStorage.setItem('currFigureId', JSON.stringify(this.grid.getCurrentFigureId()))
     }
-    socket.send(JSON.stringify(objToSend)) */
+
+    // reset current figure
     this.currentFigure = null
   }
 

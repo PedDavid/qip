@@ -84,7 +84,6 @@
     <Build Include="dbo\Stored Procedures\InsertNewImage.sql" />
     <Build Include="dbo\Stored Procedures\InsertNewImageWithPoint.sql" />
     <Build Include="dbo\Stored Procedures\InsertNewLine.sql" />
-    <Build Include="dbo\Stored Procedures\InsertUser.sql" />
     <Build Include="dbo\Stored Procedures\RemoveFigure.sql" />
     <Build Include="dbo\Stored Procedures\UpdateImage.sql" />
     <Build Include="dbo\Stored Procedures\UpdateLine.sql" />
