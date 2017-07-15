@@ -19,8 +19,9 @@ matrix:
     solution: Server.sln
     before_script: cd Server
     script:
-    - dotnet restore API
+    - dotnet restore
     - dotnet build API
+    - dotnet build WebSockets
 notifications:
   slack:
     rooms:
