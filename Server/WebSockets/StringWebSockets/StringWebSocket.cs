@@ -70,11 +70,7 @@ namespace WebSockets.StringWebSockets {
         }
 
         public async Task SendAsync(string message) {
-            if(String.IsNullOrEmpty(message))
-                return; // TODO(peddavid): Is this really needed? Why would someone call Send with a Null/Empty string without really meaning it?
-
-            byte[] buffer = Encoding.UTF8.GetBytes(message);//TODO Não sei se posso fazer isto, mas ao que parece funciona, (peddavid): deve haver um contrato documentado com a codificão da mensagem enviada por websockets
-
+            byte[] buffer = Encoding.UTF8.GetBytes(message);    // TODO(peddavid): Contract with webClient
             await InternalWebSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
         }
     }

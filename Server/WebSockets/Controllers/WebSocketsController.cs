@@ -11,7 +11,7 @@ using API.Interfaces.IRepositories;
 using API.Services;
 
 namespace WebSockets.Controllers {
-    [Route("api/[controller]")] // TODO(peddavid): Another Route "/ws"?
+    [Route("ws")]
     public class WebSocketsController : Controller {
         private StringWebSocketsSessionManager _sessionManager;
         private readonly LineOperations _lineOperations;
@@ -35,14 +35,13 @@ namespace WebSockets.Controllers {
             };
         }
 
-        [HttpGet]
-        public async Task Index(long? id) {
-            if(HttpContext.WebSockets.IsWebSocketRequest && id.HasValue) {
+        [HttpGet("{roomId}")]
+        public async Task Index(long roomId) {
+            if(HttpContext.WebSockets.IsWebSocketRequest) {
                 StringWebSocket webSocket = await HttpContext.WebSockets.AcceptStringWebSocketAsync();
 
-                long clientId = id.Value; // TODO(peddavid): Rename?
-                var session = _sessionManager.Register(clientId, webSocket);
-                var swsopers = new StringWebSocketsOperations(clientId, webSocket, session, _operations);
+                var session = _sessionManager.Register(roomId, webSocket);
+                var swsopers = new StringWebSocketsOperations(roomId, webSocket, session, _operations);
 
                 await swsopers.AcceptRequests();
             }

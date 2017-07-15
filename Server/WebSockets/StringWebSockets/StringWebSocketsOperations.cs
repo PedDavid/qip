@@ -14,10 +14,10 @@ namespace WebSockets.StringWebSockets {
         private readonly Dictionary<Models.Action, Operation> _operations;
 
         private readonly IStringWebSocketSession _session;
-        public readonly long _clientId;
+        private readonly long _roomId;
 
-        public StringWebSocketsOperations(long clientId, StringWebSocket stringWebSocket, IStringWebSocketSession session, Dictionary<Models.Action, Operation> operations) { // TODO(peddavid): Change this "hard constructor"
-            _clientId = clientId;
+        public StringWebSocketsOperations(long roomId, StringWebSocket stringWebSocket, IStringWebSocketSession session, Dictionary<Models.Action, Operation> operations) { // TODO(peddavid): Change this "hard constructor"
+            _roomId = roomId;
             _stringWebSocket = stringWebSocket;
             _session = session;
             _operations = operations;
@@ -49,7 +49,7 @@ namespace WebSockets.StringWebSockets {
                     continue;//TODO REVER
                 }
 
-                infoPayload["clientId"] = _clientId;
+                infoPayload["clientId"] = _roomId;
 
                 OperationResult res = _operations[type]((JObject)infoPayload);
 

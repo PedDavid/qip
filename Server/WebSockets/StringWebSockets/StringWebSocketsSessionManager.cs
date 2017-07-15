@@ -13,8 +13,8 @@ namespace WebSockets.StringWebSockets {
         private readonly ConcurrentDictionary<long, _StringWSSession> sessions 
             = new ConcurrentDictionary<long, _StringWSSession>();
 
-        public IStringWebSocketSession Register(long sessionId, StringWebSocket webSocket) {
-            _StringWSSession psession = sessions.GetOrAdd(sessionId, id => new _StringWSSession(id));
+        public IStringWebSocketSession Register(long roomId, StringWebSocket webSocket) {
+            _StringWSSession psession = sessions.GetOrAdd(roomId, id => new _StringWSSession(id));
             return psession.Add(webSocket);
         }
 
@@ -52,21 +52,18 @@ namespace WebSockets.StringWebSockets {
             }
 
             public async Task BroadcastAsync(string message, Func<StringWebSocket, bool> filter) {
-                List<Task> sending = new List<Task>();
-
                 _rwlock.EnterReadLock();
                 try {
-                    _wsl
+                    var sending = _wsl
                         .Where(ws => ws.State == WebSocketState.Open)
                         .Where(filter)
                         .Select(ws => ws.SendAsync(message))
-                        .Aggregate(sending, (s, t) => { s.Add(t); return s; }); // TODO(peddavid): Unnecessary state change in "functional" code, why not just ToList()?
+                        .ToList();
+                    await Task.WhenAll(sending);
                 }
                 finally {
-                    _rwlock.ExitReadLock(); // TODO(peddavid): Exit read lock while async operations are being done?
+                    _rwlock.ExitReadLock();
                 }
-
-                await Task.WhenAll(sending); // TODO(peddavid): Wait every?
             }
         }
 
