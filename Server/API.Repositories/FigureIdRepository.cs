@@ -16,6 +16,6 @@ namespace API.Repositories
             return _queryTemplate.QueryForScalar<long>(SELECT_MAX_ID);
         }
 
-        private static readonly string SELECT_MAX_ID = "SELECT max(id) FROM dbo.Figure";
+        private static readonly string SELECT_MAX_ID = "SELECT isnull(max(id), -1) as maxId FROM dbo.Figure";
     }
 }

@@ -25,7 +25,7 @@ export default class SideBarOverlay extends React.Component {
               <Icon name='sign in' />
               Login
             </Link>
-            <a className='item'>
+            <a onClick={this.props.toggleShareModal} className='item'>
               <Icon name='share' />
               Share board
             </a>
