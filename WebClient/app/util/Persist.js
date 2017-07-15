@@ -16,9 +16,10 @@ export class Persist {
   }
 
   connect = function (boardId) {
+    // TODO(peddavid): Configuration of endpoints
     const scheme = document.location.protocol === 'https:' ? 'wss' : 'ws'
     const port = document.location.port ? (57059) : ''
-    const connectionUrl = `${scheme}://${document.location.hostname}:${port}/api/websockets?id=${boardId}`
+    const connectionUrl = `${scheme}://localhost:${port}/api/websockets?id=${boardId}`
     console.log('making web socket connection to: ' + connectionUrl)
     this.socket = new WebSocket(connectionUrl)
 
