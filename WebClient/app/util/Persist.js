@@ -18,18 +18,23 @@ export class Persist {
   }
 
   connect = function (boardId) {
-    this.boardId = boardId
     const scheme = document.location.protocol === 'https:' ? 'wss' : 'ws'
     const port = document.location.port ? (57059) : ''
     const connectionUrl = `${scheme}://${document.location.hostname}:${port}/api/websockets?id=${boardId}`
-    console.log('making web socket connection to: ')
-    console.log(connectionUrl)
-    console.info('console info log')
+    console.log('making web socket connection to: ' + connectionUrl)
     this.socket = new WebSocket(connectionUrl)
 
     this.socket.onopen = (event) => {
+      console.info('web socket connection to: ' + connectionUrl + ' is now open')
       this._configureWSProtocol()
       this.connected = true
+      this.boardId = boardId
+    }
+
+    this.socket.onerror = (event) => {
+      console.error('an error occurred on web socket connection to: ' + connectionUrl)
+      this.connected = false
+      this.boardId = null
     }
   }
 
@@ -38,8 +43,12 @@ export class Persist {
       const {type, payload} = JSON.parse(event.data)
       switch (type) {
         case 'CREATE_LINE':
+          // update maxFigureId
+          this.grid.updateCurrentFigIdIfGreater(payload.id)
           if (payload.tempId != null) {
-            // todo update figure id
+            // update figure id
+            this.grid.getFigure(payload.tempId).id = payload.id
+            console.log('updated line with id ' + payload.tempId + ' to id ' + payload.id)
             return
           }
           const figStyle = new FigureStyle(payload.style.color, 1)
@@ -47,6 +56,7 @@ export class Persist {
           newFigure.points = payload.points
           this.grid.addFigure(newFigure)
           this.grid.draw(this.canvasContext, 1)
+          console.log('received new line with id ' + payload.id)
       }
     }
   }
@@ -62,6 +72,7 @@ export class Persist {
   // get initial board from server by web sockets
   _getInitialBoardWS = function (boardId) {
     // todo: fazer também um fetch ao board específico e obter o maxFigureId em vez de estar a verificar qual o maior atrvés das figuras recebidas
+    console.info('getting board data from server by web sockets')
     // fetch data of current board
     return Promise.all([
       fetch(`http://localhost:57059/api/boards/${boardId}/figures/lines`, {
@@ -86,7 +97,8 @@ export class Persist {
     }).then(figures => {
       const lines = figures
       let maxId = 5
-
+      console.log('lines fetched from initial board:')
+      console.log(figures)
       // todo: make possible to get images too
       return new Grid(lines, maxId)
       // const pen = new Pen(this.grid, 'black', 5)
@@ -99,6 +111,7 @@ export class Persist {
 
   // get initial board from local storage
   _getInitialBoardLS = function () {
+    console.info('getting board data from local storage')
     return new Promise((resolve, reject) => {
       // if it's not authenticated or not sharing board, get data from localstorage
       if (window.localStorage.getItem('figures') === null && window.localStorage.getItem('pen') === null && window.localStorage.getItem('eraser') === null) {

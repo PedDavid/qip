@@ -59,9 +59,10 @@ export default class ShareBoardModal extends React.Component {
   }
 
   componentWillReceiveProps (nexProps) {
-    if (this.props.boardId !== null && this.props.boardId !== nexProps.boardUrl) {
+    const boardId = this.props.boardId
+    if (boardId !== nexProps.boardUrl) {
       this.setState({
-        boardUrl: baseUrl + this.props.boardId
+        boardUrl: boardId != null ? baseUrl + this.props.boardId : ''
       })
     }
   }

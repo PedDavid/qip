@@ -26,9 +26,11 @@ import {Persist, PersistType} from './../../util/Persist'
 // check if it's authenticated
 
 export default class Board extends React.Component {
+  // check if these default tools are necessary
   grid = new Grid([], -1)
   defaultPen = new Pen(this.grid, 'black', 5)
   defaultEraser = new Eraser(this.grid, 5)
+  persist = {boardId: null} // this is necessary because the first time render occurs, there is no this.persist object
 
   state = {
     showCleanModal: false,
@@ -36,7 +38,6 @@ export default class Board extends React.Component {
     showShareModal: false,
     currTool: this.defaultPen,
     favorites: [], // obtain favorites from server
-    currentBoardId: null,
     loading: true
   }
   toolsConfig = new ToolsConfig(defaultToolsConfig)
@@ -64,7 +65,7 @@ export default class Board extends React.Component {
     this.persist = new Persist(persistType, this.canvasContext, this.grid)
 
     // get initial board from server or from local storage
-    this.persist.getInitialBoardAsync()
+    this.persist.getInitialBoardAsync(boardId)
       .then(grid => {
         if (persistType === PersistType().WebSockets) {
           // todo update board id and start web socket connection
@@ -127,9 +128,6 @@ export default class Board extends React.Component {
 
   updateBoardId = (id) => {
     console.info('current board id: ' + this.props.match.params.board)
-    this.setState({
-      currentBoardId: id
-    })
     this.persist.connect(id)
   }
 
@@ -144,7 +142,7 @@ export default class Board extends React.Component {
           </Canvas>
         </SideBarOverlay>
         <CleanBoardModal cleanCanvas={this.cleanCanvas} closeModal={this.toggleCleanModal} visible={this.state.showCleanModal} />
-        <ShareBoardModal boardId={this.state.currentBoardId} visible={this.state.showShareModal} closeModal={this.toggleShareModal} updateCurrentBoard={this.updateBoardId} />
+        <ShareBoardModal boardId={this.persist.boardId} visible={this.state.showShareModal} closeModal={this.toggleShareModal} updateCurrentBoard={this.updateBoardId} />
         <Route path='/signin' component={EnterUserModal} />
         <Loader active={this.state.loading} content='Fetching Data ...' />
       </div>

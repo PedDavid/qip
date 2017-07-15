@@ -71,8 +71,8 @@ export default class Pen implements Tool {
 
     // map currentFigure's points to a data object
     const currentFigureTwin = Object.assign({}, this.currentFigure) // Object.assign() method only copies enumerable and own properties from a source object to a target object
-    currentFigureTwin.points = this.currentFigure.points.map(point => {
-      return new SimplePoint(point.x, point.y, point.getStyleOf(this.currentFigure.id))
+    currentFigureTwin.points = this.currentFigure.points.map((point, idx) => {
+      return new SimplePoint(point.x, point.y, point.getStyleOf(this.currentFigure.id), idx)
     })
 
     // map object so it can be parsed by api

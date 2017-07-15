@@ -21,6 +21,12 @@ export default function Grid (initialFigures, currIdx) {
     return currFigureId
   }
 
+  this.updateCurrentFigIdIfGreater = function (newMaxId) {
+    if (currFigureId < newMaxId) {
+      currFigureId = newMaxId
+    }
+  }
+
   const GridNode = function (val, height) {
     this.val = val
     this.height = height
@@ -249,7 +255,7 @@ export default function Grid (initialFigures, currIdx) {
 
   // map initial figures to Figure Objects and add them to figure array
   initialFigures.forEach(initFig => {
-    const figStyle = new FigureStyle(initFig.figureStyle.color, initFig.figureStyle.scale)
+    const figStyle = new FigureStyle(initFig.style.color, initFig.style.scale)
     const newFigure = new Figure(figStyle, initFig.id)
     newFigure.points = initFig.points
     this.addFigure(newFigure)
