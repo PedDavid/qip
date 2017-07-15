@@ -34,7 +34,9 @@
     "standard-loader": "^6.0.1",
     "style-loader": "^0.18.1",
     "webpack": "^2.6.1",
-    "webpack-dev-server": "^2.4.5"
+    "webpack-dev-server": "^2.4.5",
+    "react-router-dom": "^4.1.1",
+    "isomorphic-fetch": "^2.2.1"
   },
   "standard": {
     "plugins": [
@@ -52,9 +54,5 @@
     "moduleNameMapper": {
       "\\.s?css$": "identity-obj-proxy"
     }
-  },
-  "dependencies": {
-    "auth0-js": "^8.8.0",
-    "react-router-dom": "^4.1.1"
   }
 }
