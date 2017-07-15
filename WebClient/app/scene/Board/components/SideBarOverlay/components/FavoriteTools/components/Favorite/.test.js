@@ -7,11 +7,17 @@ import { Button } from 'semantic-ui-react'
 
 import Pen from './../../../../../../../../model/tools/Pen'
 
+import ToolsConfig from './../../../../../../../../model/ToolsConfig'
+import defaultToolsConfig from './../../../../../../../../public/configFiles/defaultTools'
+
+
 describe('Component: Favorite', () => {
   const tool = new Pen(null, 'red', 5)
+  const toolsConfig = new ToolsConfig(defaultToolsConfig)
   const props = {
     fav: tool,
-    currTool: tool
+    currTool: tool,
+    toolsConfig
   }
   const wrapper = shallow(<Favorite {...props} />)
   it('Is not null', () => {
