@@ -28,15 +28,13 @@ import {Persist, PersistType} from './../../util/Persist'
 export default class Board extends React.Component {
   // check if these default tools are necessary
   grid = new Grid([], -1)
-  defaultPen = new Pen(this.grid, 'black', 5)
-  defaultEraser = new Eraser(this.grid, 5)
   persist = {boardId: null} // this is necessary because the first time render occurs, there is no this.persist object
 
   state = {
     showCleanModal: false,
     showUserModal: false,
     showShareModal: false,
-    currTool: this.defaultPen,
+    currTool: null,
     favorites: [], // obtain favorites from server
     loading: true
   }
@@ -72,11 +70,21 @@ export default class Board extends React.Component {
           this.updateBoardId(boardId)
         }
         this.grid = grid
-        this.setState({
-          loading: false
-        })
         // draw initial grid
         this.grid.draw(this.canvasContext, 1)
+
+        // if there is no pen and eraser
+        const defaultPen = new Pen(this.grid, 'black', 5)
+        const defaultEraser = new Eraser(this.grid, 5)
+
+        // necessary procedure to avoid bug
+        this.toolsConfig.updatePrevTool(defaultPen)
+        this.toolsConfig.updatePrevTool(defaultEraser)
+
+        this.setState({
+          loading: false,
+          currTool: defaultPen
+        })
       }).catch(err => {
         console.error(err)
         console.log(err.message)
@@ -85,12 +93,6 @@ export default class Board extends React.Component {
         })
         this.props.history.push('/') // change current location programmatically in case of error
       })
-  }
-
-  componentWillMount () {
-    // necessary procedure to avoid bug
-    this.toolsConfig.updatePrevTool(this.defaultPen)
-    this.toolsConfig.updatePrevTool(this.defaultEraser)
   }
 
   addFavorite (tool) {
