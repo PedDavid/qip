@@ -6,16 +6,15 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 
+// TODO(peddavid): Change to more readable names
+
 namespace WebSockets.StringWebSockets {
     public class StringWebSocketsSessionManager {
-        private readonly ConcurrentDictionary<long, _StringWSSession> sessions;
+        private readonly ConcurrentDictionary<long, _StringWSSession> sessions 
+            = new ConcurrentDictionary<long, _StringWSSession>();
 
-        public StringWebSocketsSessionManager() {
-            sessions = new ConcurrentDictionary<long, _StringWSSession>();
-        }
-
-        public IStringWebSocketSession Register(long sessionId, StringWebSocket webSocket) {
-            _StringWSSession psession = sessions.GetOrAdd(sessionId, id => new _StringWSSession(id));
+        public IStringWebSocketSession Register(long roomId, StringWebSocket webSocket) {
+            _StringWSSession psession = sessions.GetOrAdd(roomId, id => new _StringWSSession(id));
             return psession.Add(webSocket);
         }
 
@@ -53,21 +52,18 @@ namespace WebSockets.StringWebSockets {
             }
 
             public async Task BroadcastAsync(string message, Func<StringWebSocket, bool> filter) {
-                List<Task> sending = new List<Task>();
-
                 _rwlock.EnterReadLock();
                 try {
-                    _wsl
+                    var sending = _wsl
                         .Where(ws => ws.State == WebSocketState.Open)
                         .Where(filter)
                         .Select(ws => ws.SendAsync(message))
-                        .Aggregate(sending, (s, t) => { s.Add(t); return s; });
+                        .ToList();
+                    await Task.WhenAll(sending);
                 }
                 finally {
                     _rwlock.ExitReadLock();
                 }
-
-                await Task.WhenAll(sending);
             }
         }
 
