@@ -1,5 +1,3 @@
-// @Flow
-
 import {Figure, FigureStyle} from './../model/Figure'
 import fetch from 'isomorphic-fetch'
 import Grid from './../model/Grid'

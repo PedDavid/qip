@@ -1,5 +1,3 @@
-// @flow
-
 import React from 'react'
 import { Modal, Button, Icon, Input } from 'semantic-ui-react'
 import fetch from 'isomorphic-fetch'
