@@ -17,11 +17,16 @@ namespace WebSockets.Controllers {
         private readonly LineOperations _lineOperations;
         private readonly ImageOperations _imageOperations;
 
-        public WebSocketsController(StringWebSocketsSessionManager sessionManager, IFigureIdRepository figureIdRepository, IImageRepository imageRepository, ILineRepository lineRepository) {
+        public WebSocketsController(
+            StringWebSocketsSessionManager sessionManager, 
+            IFigureIdRepository figureIdRepository, 
+            IImageRepository imageRepository, 
+            ILineRepository lineRepository, 
+            FigureIdGenerator idGenerator
+        ) {
             _sessionManager = sessionManager;
-            var idGen = FigureIdGenerator.Create(figureIdRepository);
-            _imageOperations = new ImageOperations(imageRepository, idGen);
-            _lineOperations = new LineOperations(lineRepository, idGen);
+            _imageOperations = new ImageOperations(imageRepository, idGenerator);
+            _lineOperations = new LineOperations(lineRepository, idGenerator);
         }
 
         [HttpGet]

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -9,7 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using API.Repositories;
 using WebSockets.StringWebSockets;
-using API.Interfaces.IRepositories;
+using API.Repositories.Extensions.DependencyInjection;
+using API.Services;
 
 namespace ApiServer {
     public class Startup {
@@ -25,7 +23,7 @@ namespace ApiServer {
         public IConfigurationRoot Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services) {
+        public void ConfigureServices(IServiceCollection services) {//TODO Ler ao fazer os Tests: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection
             // Add the CORS services
             services.AddCors(options => {
                 options.AddPolicy("AllowSpecificOrigin",
@@ -36,30 +34,23 @@ namespace ApiServer {
                 );
             });
 
+            // Adds services required for using options.
+            services.AddOptions();
+
+            // Configure using a sub-section of the appsettings.json file.
+            services.Configure<RepositoriesOptions>(Configuration.GetSection("ConnectionStrings"));
+
             // Add framework services.
             services.AddMvc();
 
-            //TODO Rever tempos de vida: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection
-            services.AddSingleton(provider => new SqlServerTemplate(provider.GetService<IConfiguration>(), "QIPContext"));
+            //Add Db Repositories
+            services.AddRepositories();
 
-            services.AddSingleton<IConfiguration>(Configuration);
+            //Add StringWebSockets Session Manager
+            services.AddSingleton<StringWebSocketsSessionManager>();
 
-            services.AddSingleton(typeof(StringWebSocketsSessionManager));
-
-            services.AddScoped<IFigureIdRepository, FigureIdRepository>();
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IBoardRepository, BoardRepository>();
-            services.AddScoped<IImageRepository, ImageRepository>();
-            services.AddScoped<ILineRepository, LineRepository>(
-                provider => new LineRepository(
-                    provider.GetService<SqlServerTemplate>(),
-                    provider.GetService<IConfiguration>(), 
-                    "QIPContext"
-                    )
-            );
-            services.AddScoped<ILineStyleRepository, LineStyleRepository>();
-            services.AddScoped<IPointStyleRepository, PointStyleRepository>();
-            services.AddScoped<IUsersBoardsRepository, UsersBoardsRepository>();
+            //Add Generator of Figure Ids
+            services.AddSingleton(provider => FigureIdGenerator.Create(provider.GetService<FigureIdRepository>()));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
