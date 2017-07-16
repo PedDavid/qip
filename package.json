@@ -4,5 +4,8 @@
     "scripts": {
         "postinstall": "cd WebClient && npm install",
         "start": "cd WebClient && node server.js"
+    },
+    "dependencies": {
+        "express": "^4.15.3"
     }
 }
