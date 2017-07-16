@@ -16,7 +16,7 @@ GO
 begin tran
 	declare @figureId int = 1
 	
-	insert into dbo.Board values('test_board')
+	insert into dbo.Board values('test_board', 0)
 	declare @boardIdx int = IDENT_CURRENT('dbo.Board')
 
 	insert into dbo.Point values(10, 10)
@@ -39,8 +39,11 @@ begin tran
 
 	if @testResult = 4
 		print 'Test Passed'
-	else
-		print 'Test Failed'
+	else begin
+		rollback;
+		throw 51000, 'Test Failed', 1;	
+		return;
+	end
 
 rollback
 
@@ -50,7 +53,7 @@ GO
 begin tran
 	declare @figureId int = 1
 	
-	insert into dbo.Board values('test_board')
+	insert into dbo.Board values('test_board', 0)
 	declare @boardIdx int = IDENT_CURRENT('dbo.Board')
 
 	exec dbo.InsertNewImage @figureId, @boardIdx, 10, 10, 'srcExample', 200, 200
@@ -74,8 +77,11 @@ begin tran
 
 	if @testResult = 4
 		print 'Test Passed'
-	else
-		print 'Test Failed'
+	else begin
+		rollback;
+		throw 51000, 'Test Failed', 1;	
+		return;
+	end
 
 rollback
 
@@ -84,7 +90,7 @@ GO
 begin tran
 	declare @figureId int = 1
 	
-	insert into dbo.Board values('test_board')
+	insert into dbo.Board values('test_board', 0)
 	declare @boardIdx int = IDENT_CURRENT('dbo.Board')
 
 	insert into dbo.Point values(10, 10)
@@ -122,8 +128,11 @@ begin tran
 
 	if @testResult = 8
 		print 'Test Passed'
-	else
-		print 'Test Failed'
+	else begin
+		rollback;
+		throw 51000, 'Test Failed', 1;	
+		return;
+	end
 
 rollback
 
@@ -135,7 +144,7 @@ GO
 begin tran
 	declare @figureId int = 1
 	
-	insert into dbo.Board values('test_board')
+	insert into dbo.Board values('test_board', 0)
 	declare @boardIdx int = IDENT_CURRENT('dbo.Board')
 
 	insert into dbo.Point values(10, 10)
@@ -156,10 +165,9 @@ begin tran
 	if exists (select * from dbo.Point where id=@pointId and x=10 and y=10)
 		set @testResult = @testResult+1
 
-	insert into dbo.Point values(20, 20)
-	declare @updatedPointId int = IDENT_CURRENT('dbo.Point')
+	-- new Point => (20, 20)
 
-	exec dbo.UpdateImage @boardIdx, @figureId, @updatedPointId
+	exec dbo.UpdateImage @boardIdx, @figureId, 20, 20
 
 	if exists (select * from dbo.Board where @boardIdx=id)
 		set @testResult = @testResult+1
@@ -169,15 +177,17 @@ begin tran
 	
 	if exists (select * from dbo.[Image] where figureId = @figureId and width=200 and height=200)
 		set @testResult = @testResult+1
-	--
 
-	if exists (select * from dbo.Point where id=@updatedPointId and x=20 and y=20)
+	if exists (select * from dbo.Point where x=20 and y=20)
 		set @testResult = @testResult+1
 
 	if @testResult = 8
 		print 'Test Passed'
-	else
-		print 'Test Failed.'
+	else begin
+		rollback;
+		throw 51000, 'Test Failed', 1;	
+		return;
+	end
 
 rollback
 
@@ -191,7 +201,7 @@ GO
 begin tran
 	declare @figureId int = 1
 	
-	insert into dbo.Board values('test_board')
+	insert into dbo.Board values('test_board', 0)
 	declare @boardIdx int = IDENT_CURRENT('dbo.Board')
 
 	insert into dbo.Point values(10, 10)
@@ -212,10 +222,9 @@ begin tran
 	if exists (select * from dbo.Point where id=@pointId and x=10 and y=10)
 		set @testResult = @testResult+1
 
-	insert into dbo.Point values(20, 20)
-	declare @updatedPointId int = IDENT_CURRENT('dbo.Point')
+	-- new Point => (20, 20)
 
-	exec dbo.UpdateImage @boardIdx, @figureId, @updatedPointId, @width=400, @height=400, @src='srcExampleUpdated'
+	exec dbo.UpdateImage @boardIdx, @figureId, 20, 20, @width=400, @height=400, @src='srcExampleUpdated'
 
 	if exists (select * from dbo.[Image] where @boardIdx=boardId and @figureId=figureId)
 		set @testResult = @testResult+1
@@ -223,7 +232,7 @@ begin tran
 	if exists (select * from dbo.Figure where boardId=@boardIdx and id = @figureId)
 		set @testResult = @testResult+1
 
-	if exists (select * from dbo.Point where id=@updatedPointId and x=20 and y=20)
+	if exists (select * from dbo.Point where x=20 and y=20)
 		set @testResult = @testResult+1
 
 	--other parameters
@@ -232,8 +241,11 @@ begin tran
 
 	if @testResult = 8
 		print 'Test Passed'
-	else
-		print 'Test Failed.'
+	else begin
+		rollback;
+		throw 51000, 'Test Failed', 1;	
+		return;
+	end
 
 rollback
 
@@ -244,7 +256,7 @@ GO
 begin tran
 	declare @figureId bigint = 1
 
-	insert into dbo.Board values('test_board')
+	insert into dbo.Board values('test_board', 0)
 	declare @boardIdx int = IDENT_CURRENT('dbo.Board')
 
 	insert into dbo.PointStyle values(5)
@@ -270,7 +282,10 @@ begin tran
 
 	if @testResult = 4
 		print 'Test Passed'
-	else
-		print 'Test Failed'
+	else begin
+		rollback;
+		throw 51000, 'Test Failed', 1;	
+		return;
+	end
 
 rollback
