@@ -5,20 +5,19 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 
 namespace API.Repositories {
     public class SqlServerTemplate {
-        private readonly IConfiguration _configuration;
-        private readonly string _nameConnectionString;
+        private readonly RepositoriesOptions _options;
 
-        public SqlServerTemplate(IConfiguration configuration, string nameConnectionString) {
-            _configuration = configuration;
-            _nameConnectionString = nameConnectionString;
+        public SqlServerTemplate(IOptionsSnapshot<RepositoriesOptions> options) {
+            _options = options.Value;
         }
 
         public IEnumerable<T> Query<T>(string sql, List<SqlParameter> parameters, Func<SqlDataReader, T> rowMapper) {
             List<T> result = new List<T>();
-            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString(_nameConnectionString))) {
+            using(SqlConnection con = new SqlConnection(_options.Context)) {
                 using(SqlCommand cmd = con.CreateCommand()) {
                     cmd.CommandText = sql;
 
@@ -40,7 +39,7 @@ namespace API.Repositories {
         }
 
         public void Query(string sql, List<SqlParameter> parameters) {
-            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString(_nameConnectionString))) {
+            using(SqlConnection con = new SqlConnection(_options.Context)) {
                 using(SqlCommand cmd = con.CreateCommand()) {
                     cmd.CommandText = sql;
 
@@ -57,7 +56,7 @@ namespace API.Repositories {
         }
 
         public T QueryForScalar<T>(string sql, List<SqlParameter> parameters) {
-            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString(_nameConnectionString))) {
+            using(SqlConnection con = new SqlConnection(_options.Context)) {
                 using(SqlCommand cmd = con.CreateCommand()) {
                     cmd.CommandText = sql;
 
@@ -74,7 +73,7 @@ namespace API.Repositories {
         }
 
         public T QueryForObject<T>(string sql, List<SqlParameter> parameters, Func<SqlDataReader, T> rowMapper) {
-            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString(_nameConnectionString))) {
+            using(SqlConnection con = new SqlConnection(_options.Context)) {
                 using(SqlCommand cmd = con.CreateCommand()) {
                     cmd.CommandText = sql;
 
@@ -96,7 +95,7 @@ namespace API.Repositories {
         }
 
         public void StoredProcedure(string procedure, List<SqlParameter> parameters) {
-            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString(_nameConnectionString))) {
+            using(SqlConnection con = new SqlConnection(_options.Context)) {
                 using(SqlCommand cmd = con.CreateCommand()) {
                     cmd.CommandText = procedure;
                     cmd.CommandType = CommandType.StoredProcedure;
@@ -111,7 +110,7 @@ namespace API.Repositories {
 
         public async Task<IEnumerable<T>> QueryAsync<T>(string sql, List<SqlParameter> parameters, Func<SqlDataReader, T> rowMapper) {
             List<T> result = new List<T>();
-            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString(_nameConnectionString))) {
+            using(SqlConnection con = new SqlConnection(_options.Context)) {
                 using(SqlCommand cmd = con.CreateCommand()) {
                     cmd.CommandText = sql;
 
@@ -133,7 +132,7 @@ namespace API.Repositories {
         }
 
         public async Task QueryAsync(string sql, List<SqlParameter> parameters) {
-            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString(_nameConnectionString))) {
+            using(SqlConnection con = new SqlConnection(_options.Context)) {
                 using(SqlCommand cmd = con.CreateCommand()) {
                     cmd.CommandText = sql;
 
@@ -150,7 +149,7 @@ namespace API.Repositories {
         }
 
         public async Task<T> QueryForScalarAsync<T>(string sql, List<SqlParameter> parameters) {
-            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString(_nameConnectionString))) {
+            using(SqlConnection con = new SqlConnection(_options.Context)) {
                 using(SqlCommand cmd = con.CreateCommand()) {
                     cmd.CommandText = sql;
 
@@ -167,7 +166,7 @@ namespace API.Repositories {
         }
 
         public async Task<T> QueryForObjectAsync<T>(string sql, List<SqlParameter> parameters, Func<SqlDataReader, T> rowMapper) {
-            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString(_nameConnectionString))) {
+            using(SqlConnection con = new SqlConnection(_options.Context)) {
                 using(SqlCommand cmd = con.CreateCommand()) {
                     cmd.CommandText = sql;
 
@@ -189,7 +188,7 @@ namespace API.Repositories {
         }
 
         public async Task StoredProcedureAsync(string procedure, List<SqlParameter> parameters) {
-            using(SqlConnection con = new SqlConnection(_configuration.GetConnectionString(_nameConnectionString))) {
+            using(SqlConnection con = new SqlConnection(_options.Context)) {
                 using(SqlCommand cmd = con.CreateCommand()) {
                     cmd.CommandText = procedure;
                     cmd.CommandType = CommandType.StoredProcedure;

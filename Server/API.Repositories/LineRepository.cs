@@ -2,6 +2,7 @@
 using API.Interfaces.IRepositories;
 using API.Repositories.Model;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -12,14 +13,12 @@ using System.Threading.Tasks;
 
 namespace API.Repositories {
     public class LineRepository : ILineRepository {
-        private readonly IConfiguration _configuration;
         private readonly SqlServerTemplate _queryTemplate;
-        private readonly string _nameConnectionString;
+        private readonly RepositoriesOptions _options;
 
-        public LineRepository(SqlServerTemplate queryTemplate, IConfiguration configuration, string nameConnectionString) {
-            _configuration = configuration;
+        public LineRepository(SqlServerTemplate queryTemplate, IOptionsSnapshot<RepositoriesOptions> options) {
             _queryTemplate = queryTemplate;
-            _nameConnectionString = nameConnectionString;
+            _options = options.Value;
         }
 
         public async Task<long> AddAsync(Line line) {
@@ -51,8 +50,7 @@ namespace API.Repositories {
         }
 
         public async Task<Line> FindAsync(long id, long boardId) {
-            using(SqlConnection con = new SqlConnection()) {
-                con.ConnectionString = _configuration.GetConnectionString(_nameConnectionString);
+            using(SqlConnection con = new SqlConnection(_options.Context)) {
                 await con.OpenAsync();
                 SqlTransaction tran = con.BeginTransaction(IsolationLevel.Serializable);//TODO Rever niveis transacionais
                 try {
@@ -105,8 +103,7 @@ namespace API.Repositories {
         }
 
         public async Task<IEnumerable<Line>> GetAllAsync(long boardId) {
-            using(SqlConnection con = new SqlConnection()) {
-                con.ConnectionString = _configuration.GetConnectionString(_nameConnectionString);
+            using(SqlConnection con = new SqlConnection(_options.Context)) {
                 await con.OpenAsync();
                 SqlTransaction tran = con.BeginTransaction(IsolationLevel.Serializable);//TODO Rever niveis transacionais
                 try {
