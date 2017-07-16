@@ -2,6 +2,7 @@
     "name": "qip",
     "version": "0.0.1",
     "scripts": {
-        "postinstall": "npm install --prefix WebClient"
+        "postinstall": "cd WebClient && npm install",
+        "start": "cd WebClient && node server.js"
     }
 }
