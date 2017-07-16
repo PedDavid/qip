@@ -73,7 +73,6 @@
     <Build Include="dbo\Tables\LineStyle.sql" />
     <Build Include="dbo\Tables\Line_Point.sql" />
     <Build Include="dbo\Tables\Point.sql" />
-    <Build Include="dbo\Tables\PointStyle.sql" />
     <Build Include="dbo\Tables\User.sql" />
     <Build Include="dbo\Tables\User_Board.sql" />
     <Build Include="dbo\Functions\GetFigures.sql" />
