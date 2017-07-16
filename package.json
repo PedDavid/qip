@@ -3,6 +3,6 @@
     "version": "0.0.1",
     "scripts": {
         "postinstall": "cd WebClient && npm install",
-        "start": "node WebClient/server.js"
+        "start": "cd WebClient && node server.js"
     }
 }
