@@ -10,7 +10,7 @@
     "build": "webpack",
     "start": "webpack-dev-server",
     "test": "standard && jest",
-    "postinstall": "webpack -p"
+    "heroku-postbuild": "webpack -p"
   },
   "devDependencies": {
     "babel-core": "^6.24.1",
