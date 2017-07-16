@@ -28,6 +28,9 @@ namespace ApiServer {
             services.AddCors(options => {
                 options.AddPolicy("AllowSpecificOrigin",
                     builder => builder//TODO config
+                                .WithOrigins("http://localhost:8080")
+                                .AllowAnyMethod()
+                                .AllowAnyHeader()
                                 .WithOrigins("http://localhost:51018")
                                 .AllowAnyMethod()
                                 .AllowAnyHeader()

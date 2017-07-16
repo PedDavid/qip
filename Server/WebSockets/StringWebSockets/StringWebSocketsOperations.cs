@@ -1,39 +1,26 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
-using WebSockets.Models;
+
 using WebSockets.Operations;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace WebSockets.StringWebSockets {
     public class StringWebSocketsOperations {
         private readonly StringWebSocket _stringWebSocket;
         private readonly Dictionary<Models.Action, Operation> _operations;
 
-        public IStringWebSocketSession Session { get; set; }
+        private readonly IStringWebSocketSession _session;
+        private readonly long _roomId;
 
-        public long? ClientId { get; set; }
-
-        public StringWebSocketsOperations(StringWebSocket stringWebSocket, Dictionary<Models.Action, Operation> operations) {
+        public StringWebSocketsOperations(long roomId, StringWebSocket stringWebSocket, IStringWebSocketSession session, Dictionary<Models.Action, Operation> operations) { // TODO(peddavid): Change this "hard constructor"
+            _roomId = roomId;
             _stringWebSocket = stringWebSocket;
+            _session = session;
             _operations = operations;
-        }
-
-        public StringWebSocketsOperations(StringWebSocket stringWebSocket) : this(stringWebSocket, new Dictionary<Models.Action, Operation>()) {}
-
-        public StringWebSocketsOperations(WebSocket webSocket) : this(new StringWebSocket(webSocket)) {}
-
-        public StringWebSocketsOperations AddOperation(Models.Action action, Operation operation) {
-            _operations.Add(action, operation);
-            return this;
-        }
-
-        public void RemoveOperation(Models.Action action) {
-            _operations.Remove(action);
         }
 
         public async Task AcceptRequests() {
@@ -62,8 +49,7 @@ namespace WebSockets.StringWebSockets {
                     continue;//TODO REVER
                 }
 
-                if(ClientId.HasValue)
-                    infoPayload["clientId"] = ClientId.Value;
+                infoPayload["clientId"] = _roomId;
 
                 OperationResult res = _operations[type]((JObject)infoPayload);
 
@@ -74,10 +60,11 @@ namespace WebSockets.StringWebSockets {
                 
             } while(!_stringWebSocket.CloseStatus.HasValue);
 
-            Session.Exit();
+            _session.Exit();
             await _stringWebSocket.CloseAsync(_stringWebSocket.CloseStatus.Value, _stringWebSocket.CloseStatusDescription, CancellationToken.None);
         }
 
+        // TODO(peddavid): WebSocket Response?
         private async Task SendReponse(JToken owner, JToken type, JToken response) {
             if(response != null) {
                 dynamic res = new { owner = owner, type = type, payload = response };
@@ -87,10 +74,10 @@ namespace WebSockets.StringWebSockets {
         }
 
         private async Task SendBroadcast(JToken owner, JToken type, JObject broadcast) {
-            if(Session != null && broadcast != null) {
+            if(_session != null && broadcast != null) {
                 dynamic res = new { owner = owner, type = type, payload = broadcast };
                 string jsonRes = await JsonConvert.SerializeObjectAsync(res);
-                await Session.BroadcastAsync(jsonRes);
+                await _session.BroadcastAsync(jsonRes);
             }
         }
     }

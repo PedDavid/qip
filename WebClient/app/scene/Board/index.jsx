@@ -1,14 +1,18 @@
 import React from 'react'
 
 import {
-  BrowserRouter as Router,
   Route
 } from 'react-router-dom'
+
+import {
+  Loader
+} from 'semantic-ui-react'
 
 import SideBarOverlay from './components/SideBarOverlay'
 import Canvas from './components/Canvas'
 import CleanBoardModal from './components/Modals/CleanBoardModal'
 import EnterUserModal from './components/Modals/EnterUserModal'
+import ShareBoardModal from './components/Modals/ShareBoardModal'
 import styles from './styles.scss'
 
 import Pen from './../../model/tools/Pen'
@@ -16,59 +20,82 @@ import Eraser from './../../model/tools/Eraser'
 import Grid from './../../model/Grid'
 import ToolsConfig from './../../model/ToolsConfig'
 import defaultToolsConfig from './../../public/configFiles/defaultTools'
-import {Figure, FigureStyle} from './../../model/Figure'
+import {Persist, PersistType} from './../../util/Persist'
+// import {Figure, FigureStyle} from './../../model/Figure'
 
-const grid = new Grid([], 300, 300, 0)
-const pen = new Pen(grid, 'black', 5) // obtain current tools from server
-const eraser = new Eraser(grid, 20)
-
-const scheme = document.location.protocol === 'https:' ? 'wss' : 'ws'
-const port = document.location.port ? (':' + 53379) : ''
-const connectionUrl = scheme + '://' + document.location.hostname + port + '/ws' + '?id=0'
-const socket = new WebSocket(connectionUrl)
-
-socket.onopen = (event) => {
-  console.log('DONE')
-}
+// check if it's authenticated
 
 export default class Board extends React.Component {
+  // check if these default tools are necessary
+  grid = new Grid([], -1)
+  persist = {boardId: null} // this is necessary because the first time render occurs, there is no this.persist object
+
   state = {
     showCleanModal: false,
     showUserModal: false,
-    currTool: pen,
-    favorites: [pen, eraser] // obtain favorites from server
+    showShareModal: false,
+    currTool: null,
+    favorites: [], // obtain favorites from server
+    loading: true
   }
   toolsConfig = new ToolsConfig(defaultToolsConfig)
 
-  componentDidMount () {
-    socket.onmessage = (event) => {
-      console.log(event.data)
-      const {type, payload} = JSON.parse(event.data)
-      console.log(payload)
-      switch (type) {
-        case 'INSERT_FIGURE':
-          const figStyle = new FigureStyle(payload.figureStyle.color, 1)
-          const newFigure = new Figure(figStyle, payload.id)
-          newFigure.points = payload.points.map(point => { return { x: point.x, y: point.y, style: {press: 3} } })
-          grid.addFigure(newFigure)
-          grid.draw(this.refs.canvas.canvas.getContext('2d'), 1)
-      }
-    }
-  }
-
   listeners = {
+    // currently, this.perists is not defined but it will on componentDidMount
     onDown: event => this.state.currTool.onPress(event, 1),
-    onUp: event => this.state.currTool.onPressUp(event, socket),
+    onUp: event => this.state.currTool.onPressUp(event, this.persist),
     onMove: event => this.state.currTool.onSwipe(event, 1),
-    onOut: event => this.state.currTool.onOut(event, socket)
+    onOut: event => this.state.currTool.onOut(event, this.persist)
   }
 
-  componentWillMount () {
-    this.toolsConfig.updatePrevTool(eraser)
-    this.toolsConfig.updatePrevTool(pen)
+  componentDidMount () {
+    const boardId = this.props.match.params.board
+    let persistType = null
+
+    // if there isn't a specific board, or if the user is not authenticated, get persisted data from local storage
+    // todo: implement isAuthenticated()
+    if (boardId == null) {
+      persistType = PersistType().LocalStorage
+    } else if (boardId != null) {
+      persistType = PersistType().WebSockets
+    }
+
+    this.persist = new Persist(persistType, this.canvasContext, this.grid)
+
+    // get initial board from server or from local storage
+    this.persist.getInitialBoardAsync(boardId)
+      .then(grid => {
+        if (persistType === PersistType().WebSockets) {
+          // todo update board id and start web socket connection
+          this.updateBoardId(boardId)
+        }
+        this.grid = grid
+        // draw initial grid
+        this.grid.draw(this.canvasContext, 1)
+
+        // if there is no pen and eraser
+        const defaultPen = new Pen(this.grid, 'black', 5)
+        const defaultEraser = new Eraser(this.grid, 5)
+
+        // necessary procedure to avoid bug
+        this.toolsConfig.updatePrevTool(defaultPen)
+        this.toolsConfig.updatePrevTool(defaultEraser)
+
+        this.setState({
+          loading: false,
+          currTool: defaultPen
+        })
+      }).catch(err => {
+        console.error(err)
+        console.log(err.message)
+        this.setState({
+          loading: false
+        })
+        this.props.history.push('/') // change current location programmatically in case of error
+      })
   }
 
-  addFavorite = (tool) => {
+  addFavorite (tool) {
     this.setState(() => this.state.favorites.push(tool)) // not needed to change prevState
   }
   removeFavorite = (tool) => {
@@ -84,33 +111,43 @@ export default class Board extends React.Component {
     this.setState({currTool: tool})
   }
   cleanCanvas = () => {
-    grid.clean(this.canvasContext)
+    window.localStorage.setItem('figures', '[]')
+    window.localStorage.setItem('currFigureId', '-1')
+    this.grid.clean(this.canvasContext)
     this.toggleCleanModal()
   }
   toggleCleanModal = () => {
-    window.alert(2)
     this.setState(prevState => { return { showCleanModal: !prevState.showCleanModal } })
+  }
+
+  toggleShareModal = () => {
+    this.setState(prevState => { return { showShareModal: !prevState.showShareModal } })
   }
 
   refCallback = (ref) => {
     this.canvasContext = ref.canvas.getContext('2d')
   }
 
+  updateBoardId = (id) => {
+    console.info('current board id: ' + this.props.match.params.board)
+    this.persist.connect(id)
+  }
+
   render () {
     return (
-      <Router>
-        <div className={styles.xpto}>
-          <SideBarOverlay grid={grid} changeCurrentTool={this.changeCurrentTool} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
-            currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite}
-            removeFavorite={this.removeFavorite} toggleUserModal={this.toggleUserModal}>
-            <Canvas ref={this.refCallback} width={1200} height={800} {...this.listeners}>
-              HTML5 Canvas not supported
-            </Canvas>
-          </SideBarOverlay>
-          <CleanBoardModal cleanCanvas={this.cleanCanvas} closeModal={this.toggleCleanModal} visible={this.state.showCleanModal} />
-          <Route path='/signin' component={EnterUserModal} />
-        </div>
-      </Router>
+      <div onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.xpto}>
+        <SideBarOverlay grid={this.grid} changeCurrentTool={this.changeCurrentTool.bind(this)} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
+          currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite.bind(this)}
+          removeFavorite={this.removeFavorite.bind(this)} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}>
+          <Canvas ref={this.refCallback} width={1200} height={800} {...this.listeners}>
+            HTML5 Canvas not supported
+          </Canvas>
+        </SideBarOverlay>
+        <CleanBoardModal cleanCanvas={this.cleanCanvas} closeModal={this.toggleCleanModal} visible={this.state.showCleanModal} />
+        <ShareBoardModal boardId={this.persist.boardId} visible={this.state.showShareModal} closeModal={this.toggleShareModal} updateCurrentBoard={this.updateBoardId} />
+        <Route path='/signin' component={EnterUserModal} />
+        <Loader active={this.state.loading} content='Fetching Data ...' />
+      </div>
     )
   }
 }

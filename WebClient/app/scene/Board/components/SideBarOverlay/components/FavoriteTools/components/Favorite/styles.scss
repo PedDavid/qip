@@ -1,5 +1,4 @@
 .fav {
-    width: 40px;
     height: 40px;
     display: inline-block;
 }
@@ -10,10 +9,10 @@
 
 // for some reason, when favorite is being rotated, icon and font are moving. Therefore, this compensates child elements 
 .fav:hover > .iconStyle {
-  left: 7px;
+  left: 13px;
 }
 .fav:hover > .fontStyle {
-  bottom: 0px;
+  bottom: 1px;
 }
 
 .favMenu {
@@ -28,11 +27,12 @@
 
 .fontStyle {
   position: absolute;
-  bottom: 5px;
+  bottom: 1px;
 }
 
 .iconStyle {
   position: absolute;
   top: 10px;
-  left: 25px;
+  left: 30px;
+  margin: 0px;
 }
