@@ -12,6 +12,13 @@ as
 
 			if exists(select * from @points)begin
 
+				-- verificar se o estilo dos pontos é um json válido
+				declare @pointStyle varchar(max)
+				select @pointStyle=pointStyle from @points
+				if(ISJSON(@pointStyle) < 1)
+					throw 51000, 'Point Style is not a valid JSON', 1;  
+
+
 				--filtrar os pontos que já existem e adicionar os restantes à tabela de Point
 				insert into dbo.Point(x, y) select newPoints.x, newPoints.y 
 												from @points as newPoints
@@ -24,8 +31,8 @@ as
 					where figureId=@figureId
 
 				--inserir na tabela Figure_Point os pontos associados à linha inserida, assim como o estilo de cada ponto
-				insert into dbo.Line_Point (figureId, boardId, pointId, pointIdx, pointStyleId)
-										select @figureId, @boardId, points.id, figPoints.idx, figPoints.pointStyleId 
+				insert into dbo.Line_Point (figureId, boardId, pointId, pointIdx, pointStyle)
+										select @figureId, @boardId, points.id, figPoints.idx, figPoints.pointStyle
 											from dbo.Point as points
 											inner join @points as figPoints
 											on(points.x=figPoints.x and points.y = figPoints.y)

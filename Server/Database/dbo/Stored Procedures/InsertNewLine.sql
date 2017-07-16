@@ -3,7 +3,14 @@ as
 	begin try
 		set transaction isolation level serializable
 		begin tran
-			--verificar se já existe um objeto figureStyle com width dada. se já existir, é possível reutilizar
+			
+			-- verificar se o estilo dos pontos é um json válido
+			declare @pointStyle varchar(max)
+			select @pointStyle=pointStyle from @points
+			if(ISJSON(@pointStyle) < 1)
+				throw 51000, 'Point Style is not a valid JSON', 1;  
+
+			--verificar se já existe um objeto lineStyle com width dada. se já existir, é possível reutilizar
 			declare @styleId bigint
 			select @styleId=lineStyleId from dbo.LineStyle where color = @color
 			if @styleId is null
@@ -24,8 +31,8 @@ as
 											from dbo.Point points
 
 			--inserir na tabela Figure_Point os pontos associados à figura inserida, assim como o estilo de cada ponto
-			insert into dbo.Line_Point (figureId, boardId, pointId, pointIdx, pointStyleId)
-										select @figureId, @boardId, points.id, figPoints.idx, figPoints.pointStyleId 
+			insert into dbo.Line_Point (figureId, boardId, pointId, pointIdx, pointStyle)
+										select @figureId, @boardId, points.id, figPoints.idx, figPoints.pointStyle
 											from dbo.Point as points
 											inner join @points as figPoints
 											on(points.x=figPoints.x and points.y = figPoints.y)
@@ -38,3 +45,5 @@ as
 			rollback;
 		throw
 	end catch
+
+	-- drop proc dbo.InsertNewLine

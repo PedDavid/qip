@@ -7,7 +7,7 @@ as
 				full outer join dbo.[Image] as img
 					on(img.figureId = fig.id and img.boardId = @boardId)
 				full outer join 
-				(select lin.figureId, lin.boardId, lin.isClosedForm, fStyle.color, point.x as linePointX, point.y as linePointY, pStyle.width as pointWidth 
+				(select lin.figureId, lin.boardId, lin.isClosedForm, fStyle.color, point.x as linePointX, point.y as linePointY, (SELECT JSON_VALUE(figP.pointStyle, '$.width') as int) as pointWidth 
 					from dbo.Line as lin
 					inner join dbo.LineStyle as fStyle
 						on (fStyle.lineStyleId = lin.lineStyleId)
@@ -15,8 +15,6 @@ as
 						on (figP.figureId = lin.figureId and figP.boardId = @boardId)
 							inner join dbo.Point as point
 								on(figP.pointId = point.id)
-							inner join dbo.PointStyle as pStyle
-								on(figP.pointStyleId = pStyle.pointStyleId)
 						
 				) as lineX
 				on(lineX.figureId = fig.id and lineX.boardId = @boardId)
