@@ -55,5 +55,8 @@
     "moduleNameMapper": {
       "\\.s?css$": "identity-obj-proxy"
     }
+  },
+  "dependencies": {
+    "express": "^4.15.3"
   }
 }
