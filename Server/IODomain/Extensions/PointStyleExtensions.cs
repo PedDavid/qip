@@ -10,7 +10,6 @@ namespace IODomain.Extensions {
     public static class PointStyleExtensions {
         public static OutPointStyle Out(this PointStyle pointStyle) {
             return new OutPointStyle() {
-                Id = pointStyle.Id.Value,
                 Width = pointStyle.Width.Value
             };
         }

@@ -17,7 +17,6 @@ import styles from './styles.scss'
 
 import Pen from './../../model/tools/Pen'
 import Eraser from './../../model/tools/Eraser'
-import Grid from './../../model/Grid'
 import ToolsConfig from './../../model/ToolsConfig'
 import defaultToolsConfig from './../../public/configFiles/defaultTools'
 import {Persist, PersistType} from './../../util/Persist'
@@ -27,7 +26,6 @@ import {Persist, PersistType} from './../../util/Persist'
 
 export default class Board extends React.Component {
   // check if these default tools are necessary
-  grid = new Grid([], -1)
   persist = {boardId: null} // this is necessary because the first time render occurs, there is no this.persist object
 
   state = {
@@ -65,11 +63,14 @@ export default class Board extends React.Component {
     // get initial board from server or from local storage
     this.persist.getInitialBoardAsync(boardId)
       .then(grid => {
+        this.grid = grid
+        this.persist.grid = this.grid
+
         if (persistType === PersistType().WebSockets) {
           // todo update board id and start web socket connection
           this.updateBoardId(boardId)
         }
-        this.grid = grid
+
         // draw initial grid
         this.grid.draw(this.canvasContext, 1)
 

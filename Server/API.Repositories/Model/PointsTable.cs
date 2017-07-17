@@ -29,7 +29,7 @@ namespace API.Repositories.Model {
                 new SqlMetaData("x", SqlDbType.Int),
                 new SqlMetaData("y", SqlDbType.Int),
                 new SqlMetaData("idx", SqlDbType.Int),
-                new SqlMetaData("pointStyleId", SqlDbType.BigInt),
+                new SqlMetaData("pointStyle", SqlDbType.VarChar, SqlMetaData.Max) // varchar(max)
             };
         }
 
@@ -59,7 +59,7 @@ namespace API.Repositories.Model {
             row.SetInt32(0, point.X.Value);
             row.SetInt32(1, point.Y.Value);
             row.SetInt32(2, point.Idx.Value);
-            row.SetInt64(3, point.Style.Id.Value);
+            row.SetString(3, point.Style.ToJson());
 
             rows.Add(row);
         }

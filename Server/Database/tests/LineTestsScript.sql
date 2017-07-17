@@ -17,21 +17,18 @@ begin tran
 	declare @figureId int = 1
 
 	if type_id('dbo.Points')  is null
-		create type dbo.Points as table(x int, y int, idx int, pointStyleId int)
-	
-	insert into dbo.Board values('test_board')
+		create type dbo.Points as table(x int, y int, idx int, pointStyle varchar(max))
+
+	insert into dbo.Board values('test_board', 0)
 	declare @boardIdx int = IDENT_CURRENT('dbo.Board')
 
-	insert into dbo.PointStyle values(5)
-	declare @pointStyleId int = IDENT_CURRENT('dbo.PointStyle')
-	
 	declare @pointsTable dbo.Points
-	insert into @pointsTable values(10, 10, 0, @pointStyleId)
-	insert into @pointsTable values(12, 10, 1, @pointStyleId)
-	insert into @pointsTable values(14, 10, 2, @pointStyleId)
-	insert into @pointsTable values(16, 10, 3, @pointStyleId)
-	insert into @pointsTable values(18, 10, 4, @pointStyleId)
-	insert into @pointsTable values(20, 10, 5, @pointStyleId)
+	insert into @pointsTable values(10, 10, 0, N'{"width": 5}')
+	insert into @pointsTable values(12, 10, 1, N'{"width": 5}')
+	insert into @pointsTable values(16, 10, 3, N'{"width": 5}')
+	insert into @pointsTable values(18, 10, 4, N'{"width": 5}')
+	insert into @pointsTable values(20, 10, 5, N'{"width": 5}')
+	insert into @pointsTable values(14, 10, 2, N'{"width": 5}')
 
 	exec dbo.InsertNewLine @figureId=@figureId, @boardId=@boardIdx, @color='green', @points = @pointsTable
 
@@ -45,21 +42,28 @@ begin tran
 	if exists (select * from dbo.Line where figureId = @figureId)
 		set @testResult = @testResult+1
 
-	if exists (select * from dbo.LineStyle as style inner join dbo.Line as line on style.figureStyleId = line.figureStyleId  and line.figureId = @figureId)
+	if exists (select * from dbo.LineStyle as style inner join dbo.Line as line on style.lineStyleId = line.lineStyleId  and line.figureId = @figureId)
 		set @testResult = @testResult+1
 
 	if (select count(figureId) from dbo.Line_Point where figureId = @figureId) = 6
+		set @testResult = @testResult+1
+
+	if (select count(figureId) from dbo.Line_Point where figureId=@figureId and ((SELECT JSON_VALUE(pointStyle, '$.width') as int) = 5)) = 6
 		set @testResult = @testResult+1
 	
 	if (select count(id) from dbo.Point where x=10 and y=10 or x=12 and y=10 or x=14 and y=10 or x=16 and y=10 or x=18 and y=10 or x=20 and y=10 or y=10 and y=10) = 6
 		set @testResult = @testResult+1
 
-	if @testResult = 6
+	if @testResult = 7
 		print 'Test Passed'
-	else
-		print 'Test Failed'
+	else begin
+		rollback;
+		throw 51000, 'Test Failed', 1;	
+		return;
+	end
 
 rollback
+
 
 --teste com pontos anteriormente inseridos
 
@@ -69,24 +73,21 @@ begin tran
 	declare @figureId int = 1
 
 	if type_id('dbo.Points')  is null
-		create type dbo.Points as table(x int, y int, idx int, pointStyleId int)
+		create type dbo.Points as table(x int, y int, idx int, pointStyle varchar(max))
 	
 	insert into dbo.Point values (5, 10)
 	insert into dbo.Point values (0, 10)
 
-	insert into dbo.Board values('test_board')
+	insert into dbo.Board values('test_board', 0)
 	declare @boardIdx int = IDENT_CURRENT('dbo.Board')
 
-	insert into dbo.PointStyle values(5)
-	declare @pointStyleId int = IDENT_CURRENT('dbo.PointStyle')
-	
 	declare @pointsTable dbo.Points
-	insert into @pointsTable values(10, 10, 0, @pointStyleId)
-	insert into @pointsTable values(12, 10, 1, @pointStyleId)
-	insert into @pointsTable values(14, 10, 2, @pointStyleId)
-	insert into @pointsTable values(16, 10, 3, @pointStyleId)
-	insert into @pointsTable values(18, 10, 4, @pointStyleId)
-	insert into @pointsTable values(20, 10, 5, @pointStyleId)
+	insert into @pointsTable values(10, 10, 0, N'{"width": 5}')
+	insert into @pointsTable values(12, 10, 1, N'{"width": 5}')
+	insert into @pointsTable values(16, 10, 3, N'{"width": 5}')
+	insert into @pointsTable values(18, 10, 4, N'{"width": 5}')
+	insert into @pointsTable values(20, 10, 5, N'{"width": 5}')
+	insert into @pointsTable values(14, 10, 2, N'{"width": 5}')
 
 	exec dbo.InsertNewLine @figureId=@figureId, @boardId=@boardIdx, @color='green', @points = @pointsTable
 
@@ -100,19 +101,25 @@ begin tran
 	if exists (select * from dbo.Line where figureId = @figureId)
 		set @testResult = @testResult+1
 
-	if exists (select * from dbo.LineStyle as style inner join dbo.Line as line on style.figureStyleId = line.figureStyleId  and line.figureId = @figureId)
+	if exists (select * from dbo.LineStyle as style inner join dbo.Line as line on style.lineStyleId = line.lineStyleId  and line.figureId = @figureId)
 		set @testResult = @testResult+1
 
 	if (select count(figureId) from dbo.Line_Point where figureId = @figureId) = 6
+		set @testResult = @testResult+1
+
+	if (select count(figureId) from dbo.Line_Point where figureId=@figureId and ((SELECT JSON_VALUE(pointStyle, '$.width') as int) = 5)) = 6
 		set @testResult = @testResult+1
 	
 	if (select count(id) from dbo.Point where x=5 and y=10 or x=0 and y=10 or x=10 and y=10 or x=12 and y=10 or x=14 and y=10 or x=16 and y=10 or x=18 and y=10 or x=20 and y=10 or y=10 and y=10) = 8
 		set @testResult = @testResult+1
 
-	if @testResult = 6
+	if @testResult = 7
 		print 'Test Passed'
-	else
-		print 'Test Failed'
+	else begin
+		rollback;
+		throw 51000, 'Test Failed', 1;	
+		return;
+	end
 
 rollback
 
@@ -124,24 +131,21 @@ begin tran
 	declare @figureId int = 1
 
 	if type_id('dbo.Points')  is null
-		create type dbo.Points as table(x int, y int, idx int, pointStyleId int)
+		create type dbo.Points as table(x int, y int, idx int, pointStyle varchar(max))
 	
 	insert into dbo.Point values (10, 10)
 	insert into dbo.Point values (12, 10)
 
-	insert into dbo.Board values('test_board')
+	insert into dbo.Board values('test_board', 0)
 	declare @boardIdx int = IDENT_CURRENT('dbo.Board')
 
-	insert into dbo.PointStyle values(5)
-	declare @pointStyleId int = IDENT_CURRENT('dbo.PointStyle')
-	
 	declare @pointsTable dbo.Points
-	insert into @pointsTable values(10, 10, 0, @pointStyleId)
-	insert into @pointsTable values(12, 10, 1, @pointStyleId)
-	insert into @pointsTable values(14, 10, 2, @pointStyleId)
-	insert into @pointsTable values(16, 10, 3, @pointStyleId)
-	insert into @pointsTable values(18, 10, 4, @pointStyleId)
-	insert into @pointsTable values(20, 10, 5, @pointStyleId)
+	insert into @pointsTable values(10, 10, 0, N'{"width": 5}')
+	insert into @pointsTable values(12, 10, 1, N'{"width": 5}')
+	insert into @pointsTable values(16, 10, 3, N'{"width": 5}')
+	insert into @pointsTable values(18, 10, 4, N'{"width": 5}')
+	insert into @pointsTable values(20, 10, 5, N'{"width": 5}')
+	insert into @pointsTable values(14, 10, 2, N'{"width": 5}')
 
 	exec dbo.InsertNewLine @figureId=@figureId, @boardId=@boardIdx, @color='green', @points = @pointsTable
 
@@ -155,19 +159,25 @@ begin tran
 	if exists (select * from dbo.Line where figureId = @figureId)
 		set @testResult = @testResult+1
 
-	if exists (select * from dbo.LineStyle as style inner join dbo.Line as line on style.figureStyleId = line.figureStyleId  and line.figureId = @figureId)
+	if exists (select * from dbo.LineStyle as style inner join dbo.Line as line on style.lineStyleId = line.lineStyleId and line.figureId = @figureId)
 		set @testResult = @testResult+1
 
 	if (select count(figureId) from dbo.Line_Point where figureId = @figureId) = 6
 		set @testResult = @testResult+1
 	
+	if (select count(figureId) from dbo.Line_Point where figureId=@figureId and ((SELECT JSON_VALUE(pointStyle, '$.width') as int) = 5)) = 6
+		set @testResult = @testResult+1
+	
 	if (select count(id) from dbo.Point where x=10 and y=10 or x=12 and y=10 or x=14 and y=10 or x=16 and y=10 or x=18 and y=10 or x=20 and y=10 or y=10 and y=10) = 6
 		set @testResult = @testResult+1
 
-	if @testResult = 6
+	if @testResult = 7
 		print 'Test Passed'
-	else
-		print 'Test Failed'
+	else begin
+		rollback;
+		throw 51000, 'Test Failed', 1;	
+		return;
+	end
 
 rollback
 
@@ -179,21 +189,18 @@ begin tran
 	declare @figureId2 bigint = 2
 
 	if type_id('dbo.Points')  is null
-		create type dbo.Points as table(x int, y int, pointStyleId int)
+		create type dbo.Points as table(x int, y int, idx int, pointStyle varchar(max))
 
-	insert into dbo.Board values('test_board')
+	insert into dbo.Board values('test_board', 0)
 	declare @boardIdx int = IDENT_CURRENT('dbo.Board')
 
-	insert into dbo.PointStyle values(5)
-	declare @pointStyleId int = IDENT_CURRENT('dbo.PointStyle')
-	
 	declare @pointsTable dbo.Points
-	insert into @pointsTable values(10, 10, 0, @pointStyleId)
-	insert into @pointsTable values(12, 10, 1, @pointStyleId)
-	insert into @pointsTable values(14, 10, 2, @pointStyleId)
-	insert into @pointsTable values(16, 10, 3, @pointStyleId)
-	insert into @pointsTable values(18, 10, 4, @pointStyleId)
-	insert into @pointsTable values(20, 10, 5, @pointStyleId)
+	insert into @pointsTable values(10, 10, 0, N'{"width": 5}')
+	insert into @pointsTable values(12, 10, 1, N'{"width": 5}')
+	insert into @pointsTable values(16, 10, 3, N'{"width": 5}')
+	insert into @pointsTable values(18, 10, 4, N'{"width": 5}')
+	insert into @pointsTable values(20, 10, 5, N'{"width": 5}')
+	insert into @pointsTable values(14, 10, 2, N'{"width": 5}')
 	
 	exec dbo.InsertNewLine @figureId=@figureId, @boardId=@boardIdx, @color='green', @points = @pointsTable
 	
@@ -216,8 +223,11 @@ begin tran
 
 	if @testResult = 6
 		print 'Test Passed'
-	else
-		print 'Test Failed'
+	else begin
+		rollback;
+		throw 51000, 'Test Failed', 1;	
+		return;
+	end
 
 rollback
 
@@ -230,21 +240,18 @@ begin tran
 	declare @figureId bigint = 1
 
 	if type_id('dbo.Points')  is null
-		create type dbo.Points as table(x int, y int, pointStyleId int)
+		create type dbo.Points as table(x int, y int, idx int, pointStyle varchar(max))
 
-	insert into dbo.Board values('test_board')
+	insert into dbo.Board values('test_board', 0)
 	declare @boardIdx int = IDENT_CURRENT('dbo.Board')
 
-	insert into dbo.PointStyle values(5)
-	declare @pointStyleId int = IDENT_CURRENT('dbo.PointStyle')
-	
 	declare @pointsTable dbo.Points
-	insert into @pointsTable values(10, 10, 0, @pointStyleId)
-	insert into @pointsTable values(12, 10, 1, @pointStyleId)
-	insert into @pointsTable values(14, 10, 2, @pointStyleId)
-	insert into @pointsTable values(16, 10, 3, @pointStyleId)
-	insert into @pointsTable values(18, 10, 4, @pointStyleId)
-	insert into @pointsTable values(20, 10, 5, @pointStyleId)
+	insert into @pointsTable values(10, 10, 0, N'{"width": 5}')
+	insert into @pointsTable values(12, 10, 1, N'{"width": 5}')
+	insert into @pointsTable values(16, 10, 3, N'{"width": 5}')
+	insert into @pointsTable values(18, 10, 4, N'{"width": 5}')
+	insert into @pointsTable values(20, 10, 5, N'{"width": 5}')
+	insert into @pointsTable values(14, 10, 2, N'{"width": 5}')
 	
 	exec dbo.InsertNewLine @figureId=@figureId, @boardId=@boardIdx, @color='green', @points = @pointsTable
 	
@@ -255,10 +262,15 @@ begin tran
 
 	select * from dbo.GetLinesInfo(@boardIdx)
 
+	--todo: this test is doing nothing
+
 	if @testResult = 1
 		print 'Test Passed'
-	else
-		print 'Test Failed'
+	else begin
+		rollback;
+		throw 51000, 'Test Failed', 1;	
+		return;
+	end
 
 rollback
 
@@ -270,31 +282,28 @@ begin tran
 	declare @figureId2 bigint = 2
 
 	if type_id('dbo.Points')  is null
-		create type dbo.Points as table(x int, y int, pointStyleId int)
+		create type dbo.Points as table(x int, y int, idx int, pointStyle varchar(max))
 
-	insert into dbo.Board values('test_board')
+	insert into dbo.Board values('test_board', 0)
 	declare @boardIdx int = IDENT_CURRENT('dbo.Board')
 
-	insert into dbo.PointStyle values(5)
-	declare @pointStyleId int = IDENT_CURRENT('dbo.PointStyle')
-	
 	declare @pointsTable dbo.Points
-	insert into @pointsTable values(10, 10, 0, @pointStyleId)
-	insert into @pointsTable values(12, 10, 1, @pointStyleId)
-	insert into @pointsTable values(14, 10, 2, @pointStyleId)
-	insert into @pointsTable values(16, 10, 3, @pointStyleId)
-	insert into @pointsTable values(18, 10, 4, @pointStyleId)
-	insert into @pointsTable values(20, 10, 5, @pointStyleId)
-	
+	insert into @pointsTable values(10, 10, 0, N'{"width": 5}')
+	insert into @pointsTable values(12, 10, 1, N'{"width": 5}')
+	insert into @pointsTable values(16, 10, 3, N'{"width": 5}')
+	insert into @pointsTable values(18, 10, 4, N'{"width": 5}')
+	insert into @pointsTable values(20, 10, 5, N'{"width": 5}')
+	insert into @pointsTable values(14, 10, 2, N'{"width": 5}')
+
 	exec dbo.InsertNewLine @figureId=@figureId, @boardId=@boardIdx, @color='green', @points = @pointsTable
 
 	declare @pointsTableUpdated dbo.Points
-	insert into @pointsTableUpdated values(12, 15, 0, @pointStyleId)
-	insert into @pointsTableUpdated values(14, 15, 1, @pointStyleId)
-	insert into @pointsTableUpdated values(16, 15, 2, @pointStyleId)
-	insert into @pointsTableUpdated values(18, 15, 3, @pointStyleId)
-	insert into @pointsTableUpdated values(20, 15, 4, @pointStyleId)
-	insert into @pointsTableUpdated values(22, 15, 5, @pointStyleId)
+	insert into @pointsTableUpdated values(12, 15, 0, N'{"width": 5}')
+	insert into @pointsTableUpdated values(14, 15, 1, N'{"width": 5}')
+	insert into @pointsTableUpdated values(16, 15, 2, N'{"width": 5}')
+	insert into @pointsTableUpdated values(18, 15, 3, N'{"width": 5}')
+	insert into @pointsTableUpdated values(20, 15, 4, N'{"width": 5}')
+	insert into @pointsTableUpdated values(22, 15, 5, N'{"width": 5}')
 
 	exec dbo.UpdateLine @boardId=@boardIdx, @figureId=@figureId, @points=@pointsTableUpdated
 	
@@ -310,8 +319,11 @@ begin tran
 
 	if @testResult = 1
 		print 'Test Passed'
-	else
-		print 'Test Failed'
+	else begin
+		rollback;
+		throw 51000, 'Test Failed', 1;	
+		return;
+	end
 
 rollback
 
@@ -322,21 +334,18 @@ begin tran
 	declare @figureId bigint = 1
 
 	if type_id('dbo.Points')  is null
-		create type dbo.Points as table(x int, y int, pointStyleId int)
+		create type dbo.Points as table(x int, y int, idx int, pointStyle varchar(max))
 
-	insert into dbo.Board values('test_board')
+	insert into dbo.Board values('test_board', 0)
 	declare @boardIdx int = IDENT_CURRENT('dbo.Board')
 
-	insert into dbo.PointStyle values(5)
-	declare @pointStyleId int = IDENT_CURRENT('dbo.PointStyle')
-	
 	declare @pointsTable dbo.Points
-	insert into @pointsTable values(10, 10, 0, @pointStyleId)
-	insert into @pointsTable values(12, 10, 1, @pointStyleId)
-	insert into @pointsTable values(14, 10, 2, @pointStyleId)
-	insert into @pointsTable values(16, 10, 3, @pointStyleId)
-	insert into @pointsTable values(18, 10, 4, @pointStyleId)
-	insert into @pointsTable values(20, 10, 5, @pointStyleId)
+	insert into @pointsTable values(10, 10, 0, N'{"width": 5}')
+	insert into @pointsTable values(12, 10, 1, N'{"width": 5}')
+	insert into @pointsTable values(16, 10, 3, N'{"width": 5}')
+	insert into @pointsTable values(18, 10, 4, N'{"width": 5}')
+	insert into @pointsTable values(20, 10, 5, N'{"width": 5}')
+	insert into @pointsTable values(14, 10, 2, N'{"width": 5}')
 	
 	exec dbo.InsertNewLine @figureId=@figureId, @boardId=@boardIdx, @color='green', @points = @pointsTable
 
@@ -345,13 +354,16 @@ begin tran
 	declare @testResult int = 0
 	
 	--verificar se o estilo da linha tem a nova cor
-	if exists (select fs.color from dbo.Line lin inner join dbo.LineStyle as fs on lin.figureStyleId=fs.figureStyleId where fs.color='red')
+	if exists (select fs.color from dbo.Line lin inner join dbo.LineStyle as fs on lin.lineStyleId=fs.lineStyleId where fs.color='red')
 			set @testResult = @testResult+1
 
 	if @testResult = 1
 		print 'Test Passed'
-	else
-		print 'Test Failed'
+	else begin
+		rollback;
+		throw 51000, 'Test Failed', 1;	
+		return;
+	end
 
 rollback
 
@@ -362,31 +374,28 @@ begin tran
 	declare @figureId2 bigint = 2
 
 	if type_id('dbo.Points')  is null
-		create type dbo.Points as table(x int, y int, pointStyleId int)
+		create type dbo.Points as table(x int, y int, idx int, pointStyle varchar(max))
 
-	insert into dbo.Board values('test_board')
+	insert into dbo.Board values('test_board', 0)
 	declare @boardIdx int = IDENT_CURRENT('dbo.Board')
 
-	insert into dbo.PointStyle values(5)
-	declare @pointStyleId int = IDENT_CURRENT('dbo.PointStyle')
-	
 	declare @pointsTable dbo.Points
-	insert into @pointsTable values(10, 10, 0, @pointStyleId)
-	insert into @pointsTable values(12, 10, 1, @pointStyleId)
-	insert into @pointsTable values(14, 10, 2, @pointStyleId)
-	insert into @pointsTable values(16, 10, 3, @pointStyleId)
-	insert into @pointsTable values(18, 10, 4, @pointStyleId)
-	insert into @pointsTable values(20, 10, 5, @pointStyleId)
+	insert into @pointsTable values(10, 10, 0, N'{"width": 5}')
+	insert into @pointsTable values(12, 10, 1, N'{"width": 5}')
+	insert into @pointsTable values(16, 10, 3, N'{"width": 5}')
+	insert into @pointsTable values(18, 10, 4, N'{"width": 5}')
+	insert into @pointsTable values(20, 10, 5, N'{"width": 5}')
+	insert into @pointsTable values(14, 10, 2, N'{"width": 5}')
 	
 	exec dbo.InsertNewLine @figureId=@figureId, @boardId=@boardIdx, @color='green', @points = @pointsTable
 
 	declare @pointsTableUpdated dbo.Points
-	insert into @pointsTableUpdated values(12, 15, 0, @pointStyleId)
-	insert into @pointsTableUpdated values(14, 15, 1, @pointStyleId)
-	insert into @pointsTableUpdated values(16, 15, 2, @pointStyleId)
-	insert into @pointsTableUpdated values(18, 15, 3, @pointStyleId)
-	insert into @pointsTableUpdated values(20, 15, 4, @pointStyleId)
-	insert into @pointsTableUpdated values(22, 15, 5, @pointStyleId)
+	insert into @pointsTableUpdated values(12, 15, 0, N'{"width": 5}')
+	insert into @pointsTableUpdated values(14, 15, 1, N'{"width": 5}')
+	insert into @pointsTableUpdated values(16, 15, 2, N'{"width": 5}')
+	insert into @pointsTableUpdated values(18, 15, 3, N'{"width": 5}')
+	insert into @pointsTableUpdated values(20, 15, 4, N'{"width": 5}')
+	insert into @pointsTableUpdated values(22, 15, 5, N'{"width": 5}')
 
 	exec dbo.UpdateLine @boardId=@boardIdx, @figureId=@figureId, @color='red', @points=@pointsTableUpdated
 	
@@ -402,13 +411,16 @@ begin tran
 
 
 	--verificar se o estilo da linha tem a nova cor
-	if exists (select fs.color from dbo.Line lin inner join dbo.LineStyle as fs on lin.figureStyleId=fs.figureStyleId where fs.color='red')
+	if exists (select fs.color from dbo.Line lin inner join dbo.LineStyle as fs on lin.lineStyleId=fs.lineStyleId where fs.color='red')
 			set @testResult = @testResult+1
 
 	if @testResult = 2
 		print 'Test Passed'
-	else
-		print 'Test Failed'
+	else begin
+		rollback;
+		throw 51000, 'Test Failed', 1;	
+		return;
+	end
 
 rollback
 
