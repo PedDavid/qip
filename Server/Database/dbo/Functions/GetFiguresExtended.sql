@@ -18,4 +18,5 @@ as
 						
 				) as lineX
 				on(lineX.figureId = fig.id and lineX.boardId = @boardId)
+			where (fig.boardId = @boardId)
 	)
