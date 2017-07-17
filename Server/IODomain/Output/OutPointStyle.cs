@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 namespace IODomain.Output {
     public class OutPointStyle {
-        public long Id { get; set; }
         public int Width { get; set; }
     }
 }

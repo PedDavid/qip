@@ -14,7 +14,6 @@ namespace API.Repositories.Extensions.DependencyInjection {
             services.AddScoped<IImageRepository, ImageRepository>();
             services.AddScoped<ILineRepository, LineRepository>();
             services.AddScoped<ILineStyleRepository, LineStyleRepository>();
-            services.AddScoped<IPointStyleRepository, PointStyleRepository>();
             services.AddScoped<IUsersBoardsRepository, UsersBoardsRepository>();
 
             return services;
