@@ -17,22 +17,25 @@ import styles from './styles.scss'
 
 import Pen from './../../model/tools/Pen'
 import Eraser from './../../model/tools/Eraser'
+import Grid from './../../model/Grid'
 import ToolsConfig from './../../model/ToolsConfig'
 import defaultToolsConfig from './../../public/configFiles/defaultTools'
 import {Persist, PersistType} from './../../util/Persist'
 // import {Figure, FigureStyle} from './../../model/Figure'
 
-// check if it's authenticated
+const defaultGrid = new Grid([], 0)
+const defaultPen = new Pen(defaultGrid, 'black', 5)
 
 export default class Board extends React.Component {
   // check if these default tools are necessary
+
   persist = {boardId: null} // this is necessary because the first time render occurs, there is no this.persist object
 
   state = {
     showCleanModal: false,
     showUserModal: false,
     showShareModal: false,
-    currTool: null,
+    currTool: defaultPen,
     favorites: [], // obtain favorites from server
     loading: true
   }
@@ -48,6 +51,11 @@ export default class Board extends React.Component {
 
   componentDidMount () {
     const boardId = this.props.match.params.board
+
+    this.getInitialBoard(boardId)
+  }
+
+  getInitialBoard (boardId) {
     let persistType = null
 
     // if there isn't a specific board, or if the user is not authenticated, get persisted data from local storage
@@ -66,7 +74,7 @@ export default class Board extends React.Component {
         this.grid = grid
         this.persist.grid = this.grid
 
-        if (persistType === PersistType().WebSockets) {
+        if (this.persist.persistType === PersistType().WebSockets) {
           // todo update board id and start web socket connection
           this.updateBoardId(boardId)
         }
@@ -89,6 +97,9 @@ export default class Board extends React.Component {
       }).catch(err => {
         console.error(err)
         console.log(err.message)
+        // this must be done because when an error occurs and history is set, initialBoard
+        // is not set anymore
+        this.getInitialBoard(null)
         this.setState({
           loading: false
         })
