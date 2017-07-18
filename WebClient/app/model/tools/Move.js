@@ -1,4 +1,6 @@
+// todo: change all instances of Point to SimplePoint
 import { Point } from './../Point'
+import {SimplePoint} from './../SimplePoint'
 import { Rect } from './../Rect'
 import { Figure } from './../Figure'
 import Line from './../Line'
@@ -63,20 +65,48 @@ export default class Move implements Tool {
     this.movingLine = new Line(this.movingLine.start, {x, y}) // always preserve start point and update final point
   }
 
-  onPressUp (event) {
-    this.onOut(event)
+  onPressUp (event, persist) {
+    this.onOut(event, persist)
   }
 
-  onOut (event) {
+  onOut (event, persist) {
     // const canvasContext = event.target.getContext('2d')
     // const scale = 1  // TODO(simaovii): eliminate this when using sockets
     // if (this.lastPoint!=null && this.currentFigureMoving instanceof FigureImage) {
       // send by websockets currentFigureMoving(id), destPoint, scale?
     // }
+
     if (this.movingLine != null && this.currentFigureMoving instanceof Figure) {
-      // const offsetPoint = new Point(this.movingLine.end.x - this.movingLine.start.x, this.movingLine.end.y - this.movingLine.start.y)
-      // this.grid.moveFigure(this.currentFigureMoving, offsetPoint, canvasContext, scale) // TODO(simaovii): eliminate this when using sockets
-      // send by websockets currentFigureMoving(id), offsetPoint, scale
+      const offsetPoint = new Point(this.movingLine.end.x - this.movingLine.start.x, this.movingLine.end.y - this.movingLine.start.y)
+
+      // map currentFigure's points to a data object
+      const currentFigureTwin = Object.assign({}, this.currentFigureMoving) // Object.assign() method only copies enumerable and own properties from a source object to a target object
+      currentFigureTwin.points = this.currentFigureMoving.points.map((point, idx) => {
+        return new SimplePoint(point.x, point.y, point.getStyleOf(this.currentFigureMoving.id), idx)
+      })
+
+      // map object so it can be parsed by api
+      // todo: change model to join this
+      currentFigureTwin.tempId = currentFigureTwin.id
+      delete currentFigureTwin.id
+      currentFigureTwin.style = currentFigureTwin.figureStyle
+      delete currentFigureTwin.figureStyle
+      currentFigureTwin.clientId = persist.boardId // todo: why i have to pass this??
+
+      if (persist.connected) {
+        const objToSend = {
+          type: 'ALTER_LINE',
+          clientId: parseInt(persist.boardId),
+          payload: JSON.stringify(currentFigureTwin)
+        }
+        persist.socket.send(JSON.stringify(objToSend))
+      } else {
+        // move from localstorage
+        const dataFigure = JSON.parse(window.localStorage.getItem('figures'))
+        let figIdx = dataFigure.findIndex(f => f.tempId === currentFigureTwin.tempId)
+        dataFigure[figIdx] = currentFigureTwin
+        window.localStorage.setItem('figures', JSON.stringify(dataFigure))
+      }
     }
     this.movingLine = null
     this.currentFigureMoving = null

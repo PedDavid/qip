@@ -112,8 +112,10 @@ export default class Board extends React.Component {
     this.setState({currTool: tool})
   }
   cleanCanvas = () => {
-    window.localStorage.setItem('figures', '[]')
-    window.localStorage.setItem('currFigureId', '-1')
+    if (!this.persist.connected) {
+      window.localStorage.setItem('figures', '[]')
+      window.localStorage.setItem('currFigureId', '-1')
+    }
     this.grid.clean(this.canvasContext)
     this.toggleCleanModal()
   }
