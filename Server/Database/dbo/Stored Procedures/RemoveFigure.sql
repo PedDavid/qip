@@ -9,10 +9,16 @@ as
 			declare @figStyleId bigint
 			--apagar a figura específica			
 			if(@figType='line') begin
-				--apagar primeiro o FigureStyle associado à Line
 				select @figStyleId = lineStyleId from dbo.Line where figureId = @figureId
+				declare @lineStyleCount int
+				select @lineStyleCount = count(figureId) from dbo.Line where lineStyleId = @figStyleId
+
+				--apagar primeiro o FigureStyle associado à Line
 				delete from dbo.Line where boardId=@boardId and figureId = @figureId
-				delete from dbo.LineStyle where lineStyleId = @figStyleId
+
+				-- apagar o estilo correspondente à linha só se houver apenas uma associação
+				if @lineStyleCount = 1
+					delete from dbo.LineStyle where lineStyleId = @figStyleId
 			end
 			else 
 				delete from dbo.[Image] where boardId=@boardId and figureId = @figureId
@@ -30,3 +36,5 @@ as
 			rollback;
 		throw
 	end catch
+
+-- drop proc dbo.RemoveFigure
