@@ -77,16 +77,16 @@ export default class Pen implements Tool {
 
     // map object so it can be parsed by api
     // todo: change model to join this
-    currentFigureTwin.tempId = currentFigureTwin.id
-    delete currentFigureTwin.id
     currentFigureTwin.style = currentFigureTwin.figureStyle
     delete currentFigureTwin.figureStyle
-    currentFigureTwin.clientId = persist.boardId // todo: why i have to pass this??
 
     if (persist.connected) {
+      currentFigureTwin.tempId = currentFigureTwin.id
+      delete currentFigureTwin.id
+
       const objToSend = {
         type: 'CREATE_LINE',
-        owner: parseInt(persist.boardId),
+        owner: parseInt(persist.boardId), // todo: retirar isto daqui
         payload: currentFigureTwin
       }
       persist.socket.send(JSON.stringify(objToSend))

@@ -53,7 +53,7 @@ export default class Eraser implements Tool {
         const objToSend = {
           type: 'DELETE_LINE',
           owner: parseInt(persist.boardId),
-          payload: JSON.stringify(fig.id)
+          payload: {'id': fig.id}
         }
         persist.socket.send(JSON.stringify(objToSend))
       } else {

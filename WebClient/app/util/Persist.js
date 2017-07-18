@@ -43,10 +43,22 @@ export class Persist {
       switch (type) {
         case 'CREATE_LINE':
           // update maxFigureId
-          this.grid.updateCurrentFigIdIfGreater(payload.id)
+          // this.grid.updateCurrentFigIdIfGreater(payload.id)
           if (payload.tempId != null) {
+            // update figure
+            const prevFigure = this.grid.getFigure(payload.tempId)
+            // update point's figures of updated figures
+            prevFigure.points.forEach(point => {
+              const pointStyle = point.getStyleOf(payload.tempId)
+              point.removeFigure(payload.tempId)
+              point.addFigure(payload.id, pointStyle)
+            })
             // update figure id
-            this.grid.getFigure(payload.tempId).id = payload.id
+            prevFigure.id = payload.id
+
+            // update grid map of figures
+            this.grid.updateMapFigure(payload.tempId, prevFigure)
+
             console.log('updated line with id ' + payload.tempId + ' to id ' + payload.id)
             return
           }
@@ -95,7 +107,7 @@ export class Persist {
       return responses[0].json()
     }).then(figures => {
       const lines = figures
-      let maxId = 5
+      let maxId = -1
       console.log('lines fetched from initial board:')
       console.log(figures)
       // todo: make possible to get images too
@@ -115,7 +127,7 @@ export class Persist {
       // if it's not authenticated or not sharing board, get data from localstorage
       if (window.localStorage.getItem('figures') === null && window.localStorage.getItem('pen') === null && window.localStorage.getItem('eraser') === null) {
         const tempGrid = new Grid([], -1)
-        window.localStorage.setItem('figures', JSON.stringify(tempGrid.getFigures()))
+        window.localStorage.setItem('figures', JSON.stringify(tempGrid.getFiguresArray()))
         window.localStorage.setItem('currFigureId', JSON.stringify(tempGrid.getCurrentFigureId()))
         window.localStorage.setItem('pen', JSON.stringify(new Pen(tempGrid, 'black', 5)))
         window.localStorage.setItem('eraser', JSON.stringify(new Eraser(tempGrid, 20)))

@@ -77,7 +77,7 @@ export default class Move implements Tool {
     // }
 
     if (this.movingLine != null && this.currentFigureMoving instanceof Figure) {
-      const offsetPoint = new Point(this.movingLine.end.x - this.movingLine.start.x, this.movingLine.end.y - this.movingLine.start.y)
+      // const offsetPoint = new Point(this.movingLine.end.x - this.movingLine.start.x, this.movingLine.end.y - this.movingLine.start.y)
 
       // map currentFigure's points to a data object
       const currentFigureTwin = Object.assign({}, this.currentFigureMoving) // Object.assign() method only copies enumerable and own properties from a source object to a target object
@@ -87,17 +87,14 @@ export default class Move implements Tool {
 
       // map object so it can be parsed by api
       // todo: change model to join this
-      currentFigureTwin.tempId = currentFigureTwin.id
-      delete currentFigureTwin.id
       currentFigureTwin.style = currentFigureTwin.figureStyle
       delete currentFigureTwin.figureStyle
-      currentFigureTwin.clientId = persist.boardId // todo: why i have to pass this??
 
       if (persist.connected) {
         const objToSend = {
           type: 'ALTER_LINE',
-          clientId: parseInt(persist.boardId),
-          payload: JSON.stringify(currentFigureTwin)
+          owner: parseInt(persist.boardId), // todo: retirar isto daqui
+          payload: currentFigureTwin
         }
         persist.socket.send(JSON.stringify(objToSend))
       } else {
