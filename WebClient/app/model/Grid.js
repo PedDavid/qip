@@ -8,12 +8,13 @@ export default function Grid (initialFigures, currIdx) {
   let currFigureId = currIdx
 
   // return the new figure idx. If there is already the next idx, return the idx plus 0.1. This is because the concurrency
+  // Estão a ser usados id's negativos pois se este id for maior que o id retornado pelo servidor vai gerar colisões com outras figuras
   this.getNewFigureIdx = function () {
-    let toRet = currFigureId + 1
+    let toRet = currFigureId - 1
     while (this.hasFigure(toRet)) {
-      toRet += 0.1
+      toRet -= 0.1
     }
-    currFigureId++
+    currFigureId--
     return toRet
   }
 
@@ -206,8 +207,13 @@ export default function Grid (initialFigures, currIdx) {
         .forEach((figure) => figure.draw(context, currScale))
   }
 
-  this.getFigures = function () {
+  this.getFiguresArray = function () {
     return Array.from(figures.values())
+  }
+
+  this.updateMapFigure = function (previousId, figure) {
+    figures.delete(previousId)
+    figures.set(figure.id, figure)
   }
 
   this.getImageFigures = function () {
@@ -248,7 +254,7 @@ export default function Grid (initialFigures, currIdx) {
   // map initial figures to Figure Objects and add them to figure array
   initialFigures.forEach(initFig => {
     const figStyle = new FigureStyle(initFig.style.color, initFig.style.scale)
-    const newFigure = new Figure(figStyle, initFig.tempId)
+    const newFigure = new Figure(figStyle, initFig.id)
     newFigure.points = initFig.points
     this.addFigure(newFigure)
   })
