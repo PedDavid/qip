@@ -4,7 +4,7 @@ import { Figure, FigureStyle } from './Figure'
 import { SimplePoint } from './SimplePoint'
 
 export default function Grid (initialFigures, currIdx) {
-  let figures = []    // TODO(simaovii): Change to hashmap
+  let figures = new Map()    // TODO(simaovii): Change to hashmap
   let currFigureId = currIdx
 
   // return the new figure idx. If there is already the next idx, return the idx plus 0.1. This is because the concurrency
@@ -36,12 +36,6 @@ export default function Grid (initialFigures, currIdx) {
   const maxLinePartThreshold = 20
 
   let grid = [] // dynamic width
-
-  this.export = function () {
-    const fig = figures[5]
-    fig.points = fig.points.map(point => point.exports())
-    console.log(JSON.stringify(fig))
-  }
 
   this.updateMaxLinePart = function (point1, point2, currentFigure, pointStyle) {
     if (point1 === null || point2 === null) { return }
@@ -134,12 +128,12 @@ export default function Grid (initialFigures, currIdx) {
   }
 
   this.getFigure = function (figureId) {
-    return figures[figureId]
+    return figures.get(figureId)
   }
 
   this.clean = function (context) {
     const { width, height } = context.canvas
-    figures = {}
+    figures = new Map()
     currFigureId = 0
     grid = []
     context.clearRect(0, 0, width, height)
@@ -162,11 +156,11 @@ export default function Grid (initialFigures, currIdx) {
       this.updateMaxLinePart(prev, gridPoint, figure, pointStyle)
       prev = gridPoint
     })
-    figures[figure.id] = figure
+    figures.set(figure.id, figure)
   }
 
   this.removeFigureFromGrid = function (figureId) {
-    delete figures[figureId]
+    figures.delete(figureId)
   }
 
   this.removeFigure = function (figure, context, currScale) {
@@ -207,15 +201,13 @@ export default function Grid (initialFigures, currIdx) {
     const { width, height } = context.canvas
     context.clearRect(0, 0, width, height)
 
-    Object.entries(figures) // devolve um array (length = soma de todas as propriedades do objeto) de arrays de [key, value].
-                            // Cada array [key, value] tem a chave do atributo assim como o valor guardado nesse atributo
-                            // nota: não usar localecompare. não tem o efeito desejado
-        .sort(([K1], [K2]) => K1 - K2) // são passados à função sort o 1º e 2º índices do array, que por sua vez, são arrays. Ao usar destructors, apenas são obtidos as chaves de cada array
-        .forEach(([id, f]) => f.draw(context, currScale))
+    Array.from(figures.values())
+        .sort((fig1, fig2) => fig1.id - fig2.id)
+        .forEach((figure) => figure.draw(context, currScale))
   }
 
   this.getFigures = function () {
-    return figures
+    return Array.from(figures.values())
   }
 
   this.getImageFigures = function () {
@@ -225,7 +217,7 @@ export default function Grid (initialFigures, currIdx) {
   }
 
   this.hasFigure = function (figureId) {
-    return figures[figureId] != null
+    return figures.has(figureId)
   }
 
   this.getNearestFigures = function (pointX, pointY) {
@@ -250,13 +242,13 @@ export default function Grid (initialFigures, currIdx) {
         heightNode.getFigureIds().forEach(pointFigure => figuresToRet.add(pointFigure))
       }
     }
-    return Array.from(figuresToRet.values()).map(figureId => figures[figureId])
+    return Array.from(figuresToRet.values()).map(figureId => figures.get(figureId))
   }
 
   // map initial figures to Figure Objects and add them to figure array
   initialFigures.forEach(initFig => {
     const figStyle = new FigureStyle(initFig.style.color, initFig.style.scale)
-    const newFigure = new Figure(figStyle, initFig.id)
+    const newFigure = new Figure(figStyle, initFig.tempId)
     newFigure.points = initFig.points
     this.addFigure(newFigure)
   })
