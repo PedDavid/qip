@@ -34,7 +34,7 @@ namespace WebSockets.Operations {
             payload["id"] = id;
 
             InImage inImage = payload.ToObject<InImage>();
-            Image image = new Image(boardId, inImage.Id.Value).In(inImage);
+            Image image = new Image(boardId, id).In(inImage);
             Task store = _imageRepository.AddAsync(image); //TODO Nota: Fazer com async await para o que for cpu-bound ser feito sincronamente
             //TODO Testar se a Task is completed or faulted, in this cases do result for get the result/exception
             //Fazer alguma coisa em caso de excepções
