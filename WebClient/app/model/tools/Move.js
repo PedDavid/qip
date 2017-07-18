@@ -77,7 +77,7 @@ export default class Move implements Tool {
     // }
 
     if (this.movingLine != null && this.currentFigureMoving instanceof Figure) {
-      // const offsetPoint = new Point(this.movingLine.end.x - this.movingLine.start.x, this.movingLine.end.y - this.movingLine.start.y)
+      const offsetPoint = new Point(this.movingLine.end.x - this.movingLine.start.x, this.movingLine.end.y - this.movingLine.start.y)
 
       // map currentFigure's points to a data object
       const currentFigureTwin = Object.assign({}, this.currentFigureMoving) // Object.assign() method only copies enumerable and own properties from a source object to a target object
@@ -91,6 +91,7 @@ export default class Move implements Tool {
       delete currentFigureTwin.figureStyle
 
       if (persist.connected) {
+        currentFigureTwin.offsetPoint = offsetPoint
         const objToSend = {
           type: 'ALTER_LINE',
           owner: parseInt(persist.boardId), // todo: retirar isto daqui

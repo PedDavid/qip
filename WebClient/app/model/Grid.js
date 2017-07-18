@@ -165,10 +165,10 @@ export default function Grid (initialFigures, currIdx) {
   }
 
   this.removeFigure = function (figure, context, currScale) {
-    this.removeFigureFromGrid(figure.id)
-    this.draw(context, currScale)
     // remove figure from all points
     figure.points.forEach(point => point.removeFigure(figure.id))
+    this.removeFigureFromGrid(figure.id)
+    this.draw(context, currScale)
   }
 
   this.moveImage = function (img, newSrcPoint, context, currScale) {

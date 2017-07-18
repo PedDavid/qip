@@ -68,6 +68,20 @@ export class Persist {
           this.grid.addFigure(newFigure)
           this.grid.draw(this.canvasContext, 1)
           console.log('received new line with id ' + payload.id)
+          break
+        case 'DELETE_LINE':
+          const figureToDelete = this.grid.getFigure(payload.id)
+          this.grid.removeFigure(figureToDelete, this.canvasContext, 1)
+          break
+        case 'ALTER_LINE':
+          // todo: por estes comentários em vez de apagar e criar a figura quando o servidor estiver a enviar o offsetPoint
+          // const figureToMove = this.grid.getFigure(payload.id)
+          // this.grid.moveFigure(figureToMove, payload.offsetPoint, this.canvasContext, 1)
+          const figureToMove = this.grid.getFigure(payload.id)
+          this.grid.removeFigure(figureToMove, this.canvasContext, 1)
+          figureToMove.points = payload.points
+          this.grid.addFigure(figureToMove)
+          this.grid.draw(this.canvasContext, 1)
       }
     }
   }
