@@ -29,11 +29,6 @@ namespace WebSockets.StringWebSockets {
 
                 JObject info = JObject.Parse(msg);
 
-                if(!(info.TryGetValue("owner", StringComparison.OrdinalIgnoreCase, out JToken infoOwner) && infoOwner.Type == JTokenType.Integer)) {
-
-                    continue;//TODO REVER
-                }
-
                 if(!(info.TryGetValue("type", StringComparison.OrdinalIgnoreCase, out JToken infoType) && infoType.Type == JTokenType.String)) {
 
                     continue;//TODO REVER
