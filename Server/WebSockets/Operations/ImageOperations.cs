@@ -3,11 +3,13 @@ using API.Interfaces.IRepositories;
 using API.Services;
 using IODomain.Extensions;
 using IODomain.Input;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebSockets.StringWebSockets;
 
 namespace WebSockets.Operations {
     public class ImageOperations {
@@ -19,46 +21,58 @@ namespace WebSockets.Operations {
             _idGen = idGen;
         }
 
-        public OperationResult CreateImage(JObject payload) {//TODO Rever se não pomos os checks aos ids e outros como nos controlers
+        public async Task CreateImage(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject payload) {//TODO Rever se não pomos os checks aos ids e outros como nos controlers
             if(!(payload.TryGetValue("tempId", StringComparison.OrdinalIgnoreCase, out JToken payload_tempId) && payload_tempId.Type == JTokenType.Integer)) {
-                return OperationResult.EMPTY;
+                return;//TODO REVER
             }
-
             long tempId = payload["tempId"].Value<long>();
-            payload.Remove("tempId");
 
             long boardId = payload["clientId"].Value<long>();
-            payload.Remove("clientId");
 
             long id = _idGen.NewId();
-            payload["id"] = id;
 
             InImage inImage = payload.ToObject<InImage>();
-            Image image = new Image(boardId, inImage.Id.Value).In(inImage);
-            Task store = _imageRepository.AddAsync(image); //TODO Nota: Fazer com async await para o que for cpu-bound ser feito sincronamente
-            //TODO Testar se a Task is completed or faulted, in this cases do result for get the result/exception
-            //Fazer alguma coisa em caso de excepções
+            inImage.Id = id;
+            Image image = new Image(boardId, id).In(inImage);
+            Task store = _imageRepository.AddAsync(image);
+            OperationUtils.ResolveTaskContinuation(store);
 
-            return new OperationResult(
-                    broadcastMessage: payload,
-                    response: JObject.FromObject(
-                            new {id = id, tempId = tempId }
-                        )
-                );
+            string jsonRes = JsonConvert.SerializeObject(
+                new {
+                    type = Models.Action.CREATE_IMAGE,
+                    payload = new { id = id, tempId = tempId }
+                }
+            );
+            Task response =  stringWebSocket.SendAsync(jsonRes);
+
+            string jsonBroadcast = JsonConvert.SerializeObject(
+                new {
+                    type = Models.Action.CREATE_IMAGE,
+                    payload = new { figure = inImage } // Usado o InImage porque os WebSockets estão a servir de espelho ao enviado pelo cliente
+                }
+            );
+            Task broadcast = session.BroadcastAsync(jsonBroadcast);
+
+            await Task.WhenAll(response, broadcast);
         }
 
-        public OperationResult UpdateImage(JObject payload) {
-
+        public async Task UpdateImage(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject payload) {
             long boardId = payload["clientId"].Value<long>();
-            payload.Remove("clientId");
 
             long id = payload["id"].Value<long>();
 
             InImage inImage = payload.ToObject<InImage>();
 
             Task store = StoreUpdateImage(id, boardId, inImage);
+            OperationUtils.ResolveTaskContinuation(store);
 
-            return new OperationResult(broadcastMessage: payload);
+            string jsonBroadcast = JsonConvert.SerializeObject(
+                new {
+                    type = Models.Action.ALTER_IMAGE,
+                    payload = new { figure = inImage } // Usado o InImage porque os WebSockets estão a servir de espelho ao enviado pelo cliente
+                }
+            );
+            await session.BroadcastAsync(jsonBroadcast);
         }
 
         private async Task StoreUpdateImage(long id, long boardId, InImage inImage) {
@@ -72,16 +86,21 @@ namespace WebSockets.Operations {
             await _imageRepository.UpdateAsync(image);
         }
 
-        public OperationResult DeleteImage(JObject payload) {
-
+        public async Task DeleteImage(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject payload) {
             long boardId = payload["clientId"].Value<long>();
-            payload.Remove("clientId");
 
             long id = payload["id"].Value<long>();
 
             Task store = StoreDeleteImage(id, boardId);
+            OperationUtils.ResolveTaskContinuation(store);
 
-            return new OperationResult(broadcastMessage: payload);
+            string jsonBroadcast = JsonConvert.SerializeObject(
+                new {
+                    type = Models.Action.DELETE_IMAGE,
+                    payload = new {id = id}
+                }
+            );
+            await session.BroadcastAsync(jsonBroadcast);
         }
 
         private async Task StoreDeleteImage(long id, long boardId) {

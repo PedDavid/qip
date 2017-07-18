@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
+using WebSockets.StringWebSockets;
 
 namespace WebSockets.Operations
 {
-    public delegate OperationResult Operation(JObject playload);
+    public delegate Task Operation(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject payload);
 }

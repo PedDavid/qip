@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-
 using WebSockets.Operations;
-
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace WebSockets.StringWebSockets {
@@ -46,34 +43,12 @@ namespace WebSockets.StringWebSockets {
 
                 infoPayload["clientId"] = _roomId;
 
-                OperationResult res = _operations[type]((JObject)infoPayload);
+                await _operations[type](_stringWebSocket, _session, (JObject)infoPayload);
 
-                await Task.WhenAll(
-                    SendReponse(infoOwner, infoType, res.Response),
-                    SendBroadcast(infoOwner, infoType, res.BroadcastMessage)
-                );
-                
             } while(!_stringWebSocket.CloseStatus.HasValue);
 
             _session.Exit();
             await _stringWebSocket.CloseAsync(_stringWebSocket.CloseStatus.Value, _stringWebSocket.CloseStatusDescription, CancellationToken.None);
-        }
-
-        // TODO(peddavid): WebSocket Response?
-        private async Task SendReponse(JToken owner, JToken type, JToken response) {
-            if(response != null) {
-                dynamic res = new { owner = owner, type = type, payload = response };
-                string jsonRes = await JsonConvert.SerializeObjectAsync(res);
-                await _stringWebSocket.SendAsync(jsonRes);
-            }
-        }
-
-        private async Task SendBroadcast(JToken owner, JToken type, JObject broadcast) {
-            if(_session != null && broadcast != null) {
-                dynamic res = new { owner = owner, type = type, payload = broadcast };
-                string jsonRes = await JsonConvert.SerializeObjectAsync(res);
-                await _session.BroadcastAsync(jsonRes);
-            }
         }
     }
 }
