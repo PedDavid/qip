@@ -28,6 +28,8 @@ export class Persist {
       this._configureWSProtocol()
       this.connected = true
       this.boardId = boardId
+      this.persistType = PersistType().WebSockets
+      this._persistBoardByWS()
     }
 
     this.socket.onerror = (event) => {
@@ -43,10 +45,22 @@ export class Persist {
       switch (type) {
         case 'CREATE_LINE':
           // update maxFigureId
-          this.grid.updateCurrentFigIdIfGreater(payload.id)
+          // this.grid.updateCurrentFigIdIfGreater(payload.id)
           if (payload.tempId != null) {
+            // update figure
+            const prevFigure = this.grid.getFigure(payload.tempId)
+            // update point's figures of updated figures
+            prevFigure.points.forEach(point => {
+              const pointStyle = point.getStyleOf(payload.tempId)
+              point.removeFigure(payload.tempId)
+              point.addFigure(payload.id, pointStyle)
+            })
             // update figure id
-            this.grid.getFigure(payload.tempId).id = payload.id
+            prevFigure.id = payload.id
+
+            // update grid map of figures
+            this.grid.updateMapFigure(payload.tempId, prevFigure)
+
             console.log('updated line with id ' + payload.tempId + ' to id ' + payload.id)
             return
           }
@@ -56,6 +70,21 @@ export class Persist {
           this.grid.addFigure(newFigure)
           this.grid.draw(this.canvasContext, 1)
           console.log('received new line with id ' + payload.id)
+          break
+        case 'DELETE_LINE':
+          const figureToDelete = this.grid.getFigure(payload.id)
+          this.grid.removeFigure(figureToDelete, this.canvasContext, 1)
+          break
+        case 'ALTER_LINE':
+          // todo: por estes comentários em vez de apagar e criar a figura quando o servidor estiver a enviar o offsetPoint
+          // const figureToMove = this.grid.getFigure(payload.id)
+          // this.grid.moveFigure(figureToMove, payload.offsetPoint, this.canvasContext, 1)
+          const figureToMove = this.grid.getFigure(payload.id)
+          this.grid.removeFigure(figureToMove, this.canvasContext, 1)
+          figureToMove.points = payload.points
+          this.grid.addFigure(figureToMove)
+          this.grid.draw(this.canvasContext, 1)
+          break
       }
     }
   }
@@ -95,7 +124,7 @@ export class Persist {
       return responses[0].json()
     }).then(figures => {
       const lines = figures
-      let maxId = 5
+      let maxId = -1
       console.log('lines fetched from initial board:')
       console.log(figures)
       // todo: make possible to get images too
@@ -114,11 +143,7 @@ export class Persist {
     return new Promise((resolve, reject) => {
       // if it's not authenticated or not sharing board, get data from localstorage
       if (window.localStorage.getItem('figures') === null && window.localStorage.getItem('pen') === null && window.localStorage.getItem('eraser') === null) {
-        const tempGrid = new Grid([], -1)
-        window.localStorage.setItem('figures', JSON.stringify(tempGrid.getFigures()))
-        window.localStorage.setItem('currFigureId', JSON.stringify(tempGrid.getCurrentFigureId()))
-        window.localStorage.setItem('pen', JSON.stringify(new Pen(tempGrid, 'black', 5)))
-        window.localStorage.setItem('eraser', JSON.stringify(new Eraser(tempGrid, 20)))
+        this._resetLocalStorage()
       }
 
       const figures = JSON.parse(window.localStorage.getItem('figures'))
@@ -130,6 +155,54 @@ export class Persist {
       // const eraser = new Eraser(grid, tempEraser.width)
 
       resolve(grid)
+    })
+  }
+
+  _resetLocalStorage = function () {
+    const tempGrid = new Grid([], -1)
+    window.localStorage.setItem('figures', JSON.stringify(tempGrid.getFiguresArray()))
+    window.localStorage.setItem('currFigureId', JSON.stringify(tempGrid.getCurrentFigureId()))
+    window.localStorage.setItem('pen', JSON.stringify(new Pen(tempGrid, 'black', 5)))
+    window.localStorage.setItem('eraser', JSON.stringify(new Eraser(tempGrid, 20)))
+  }
+
+  _persistBoardByWS = function () {
+    if (this.connected) {
+      const figures = JSON.parse(window.localStorage.getItem('figures'))
+      figures.forEach(fig => {
+        fig.tempId = fig.id
+        delete fig.id
+        const objToSend = {
+          type: 'CREATE_LINE',
+          owner: parseInt(this.boardId), // todo: retirar isto daqui
+          payload: fig
+        }
+        this.socket.send(JSON.stringify(objToSend))
+      })
+    }
+
+    this._resetLocalStorage()
+  }
+
+  cleanCanvas = function () {
+    if (this.persistType === PersistType().WebSockets) {
+      return this._cleanCanvasWS()
+    } else if (this.persistType === PersistType().LocalStorage) {
+      return this._resetLocalStorage()
+    }
+  }
+
+  _cleanCanvasWS = function () {
+    // todo: add an action in server to clean board
+    this.grid.getFiguresArray().forEach(fig => {
+      if (this.connected) {
+        const objToSend = {
+          type: 'DELETE_LINE',
+          owner: parseInt(this.boardId), // todo: retirar isto
+          payload: {'id': fig.id}
+        }
+        this.socket.send(JSON.stringify(objToSend))
+      }
     })
   }
 }

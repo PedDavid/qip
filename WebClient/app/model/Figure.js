@@ -1,3 +1,5 @@
+import {SimplePoint} from './SimplePoint'
+
 // Figure: function (id, isClosedForm = false) {
 export function Figure (figureStyle, id = null) {
   this.id = id
@@ -99,6 +101,43 @@ export function Figure (figureStyle, id = null) {
 
   function newSubId (id) {
     return id + 1 / Math.pow(2, this.subFigureLevel)
+  }
+
+  this.exportWS = function (boardId, extraFunc) {
+    const toExportFig = this._export()
+    toExportFig.tempId = toExportFig.id
+    delete toExportFig.id
+
+    if (extraFunc != null) {
+      extraFunc(toExportFig)
+    }
+
+    const objToSend = {
+      type: 'CREATE_LINE',
+      owner: parseInt(boardId), // todo: retirar isto daqui
+      payload: toExportFig
+    }
+
+    return JSON.stringify(objToSend)
+  }
+
+  this.exportLS = function () {
+    return this._export()
+  }
+
+  this._export = function () {
+    // map currentFigure's points to a data object
+    const currentFigureTwin = Object.assign({}, this) // Object.assign() method only copies enumerable and own properties from a source object to a target object
+    currentFigureTwin.points = this.points.map((point, idx) => {
+      return new SimplePoint(point.x, point.y, point.getStyleOf(this.id), idx)
+    })
+
+    // map object so it can be parsed by api
+    // todo: change model to join this
+    currentFigureTwin.style = currentFigureTwin.figureStyle
+    delete currentFigureTwin.figureStyle
+
+    return currentFigureTwin
   }
 }
 

@@ -2,8 +2,6 @@ import React from 'react'
 import styles from './styles.scss'
 
 export default class Canvas extends React.Component {
-  canvas
-
   componentDidMount () {
     if (this.props.onDown != null) {
       this.canvas.addEventListener('pointerdown', this.props.onDown, false)
