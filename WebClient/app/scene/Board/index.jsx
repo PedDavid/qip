@@ -29,7 +29,7 @@ const defaultPen = new Pen(defaultGrid, 'black', 5)
 export default class Board extends React.Component {
   // check if these default tools are necessary
 
-  persist = {boardId: null} // this is necessary because the first time render occurs, there is no this.persist object
+  persist = {} // this is necessary because the first time render occurs, there is no this.persist object
 
   state = {
     showCleanModal: false,
@@ -158,7 +158,7 @@ export default class Board extends React.Component {
           </Canvas>
         </SideBarOverlay>
         <CleanBoardModal cleanCanvas={this.cleanCanvas} closeModal={this.toggleCleanModal} visible={this.state.showCleanModal} />
-        <ShareBoardModal boardId={this.persist.boardId} visible={this.state.showShareModal} closeModal={this.toggleShareModal} updateCurrentBoard={this.updateBoardId} />
+        <ShareBoardModal location={this.props.location} history={this.props.history} persist={this.persist} visible={this.state.showShareModal} closeModal={this.toggleShareModal} updateCurrentBoard={this.updateBoardId} />
         <Route path='/signin' component={EnterUserModal} />
         <Loader active={this.state.loading} content='Fetching Data ...' />
       </div>

@@ -82,6 +82,7 @@ export class Persist {
           figureToMove.points = payload.points
           this.grid.addFigure(figureToMove)
           this.grid.draw(this.canvasContext, 1)
+          break
       }
     }
   }

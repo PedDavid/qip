@@ -6,7 +6,7 @@ const baseUrl = 'http://localhost:8080/'
 
 export default class ShareBoardModal extends React.Component {
   state = {
-    boardUrl: this.props.boardId != null ? baseUrl + this.props.boardId : '',
+    boardUrl: this.props.persist.boardId != null ? baseUrl + this.props.persist.boardId : '',
     loading: false,
     error: false
   }
@@ -42,6 +42,7 @@ export default class ShareBoardModal extends React.Component {
         loading: false,
         error: false
       })
+      this.props.history.push('/'+board.id)
     }).catch(err => {
       console.log(err)
       this.setState({
@@ -57,10 +58,13 @@ export default class ShareBoardModal extends React.Component {
   }
 
   componentWillReceiveProps (nexProps) {
-    const boardId = this.props.boardId
-    if (boardId !== nexProps.boardUrl) {
+    const boardId = this.state.boardUrl
+    if (this.state.boardUrl !== '' && !this.state.error) {
+      return
+    }
+    if (boardId !== baseUrl + nexProps.persist.boardId) {
       this.setState({
-        boardUrl: boardId != null ? baseUrl + this.props.boardId : ''
+        boardUrl: nexProps.persist.boardId != null ? baseUrl + nexProps.persist.boardId : ''
       })
     }
   }
