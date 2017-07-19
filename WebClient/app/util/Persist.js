@@ -167,11 +167,19 @@ export class Persist {
   }
 
   _persistBoardByWS = function () {
-    this.grid.getFiguresArray().forEach(fig => {
-      if (this.connected) {
-        this.socket.send(fig.exportWS(this.boardId))
-      }
-    })
+    if (this.connected) {
+      const figures = JSON.parse(window.localStorage.getItem('figures'))
+      figures.forEach(fig => {
+        fig.tempId = fig.id
+        delete fig.id
+        const objToSend = {
+          type: 'CREATE_LINE',
+          owner: parseInt(this.boardId), // todo: retirar isto daqui
+          payload: fig
+        }
+        this.socket.send(JSON.stringify(objToSend))
+      })
+    }
 
     this._resetLocalStorage()
   }
