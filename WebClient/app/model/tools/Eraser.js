@@ -9,6 +9,7 @@ export default class Eraser implements Tool {
     this.width = width
     this.grid = grid
     this.eraseLine = null
+    this.erasedFigures = []
   }
 
   onPress (event, currScale) {
@@ -37,11 +38,34 @@ export default class Eraser implements Tool {
     this.erase(coord.x, coord.y, currScale, event.target)
   }
 
-  onPressUp () {
-    this.onOut()
+  onPressUp (event, persist) {
+    this.onOut(event, persist)
   }
 
-  onOut () {
+  onOut (event, persist) {
+    const canvas = event.target
+    const canvasContext = canvas.getContext('2d')
+
+    this.erasedFigures.forEach(fig => {
+      this.grid.removeFigure(fig, canvasContext, 1)
+
+      if (persist.connected) {
+        const objToSend = {
+          type: 'DELETE_LINE',
+          owner: parseInt(persist.boardId),
+          payload: {'id': fig.id}
+        }
+        persist.socket.send(JSON.stringify(objToSend))
+      } else {
+        // remove from localstorage
+        const dataFigure = JSON.parse(window.localStorage.getItem('figures'))
+        const figIdx = dataFigure.findIndex(f => f.tempId === fig.id)
+        dataFigure.splice(figIdx, 1) // use splice (not delete) beacause this way the array updated and reindexed
+        window.localStorage.setItem('figures', JSON.stringify(dataFigure))
+      }
+    })
+
+    this.erasedFigures = []
     this.eraseLine = null // TODO(simaovii): this will throw error if user draws back in the canvas. insert a check in onSwipe
   }
 
@@ -84,6 +108,7 @@ export default class Eraser implements Tool {
           // TODO(simaovii): não verifica se toda a área da borracha interseta a linha desenhada
           if (this.intersectsLine(this.eraseLine, prev, currPoint)) {
             grid.removeFigure(figure, canvasContext, currScale)
+            this.erasedFigures.push(figure)
             return
           }
         } else {
@@ -92,6 +117,7 @@ export default class Eraser implements Tool {
             for (let l = liy > 0 ? liy : 0; l < canvasHeight && l < lsy; ++l) {
               if (rect.contains({ x: c, y: l })) {
                 grid.removeFigure(figure, canvasContext, currScale)
+                this.erasedFigures.push(figure)
                 return
               }
             }

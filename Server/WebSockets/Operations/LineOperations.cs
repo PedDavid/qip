@@ -34,7 +34,7 @@ namespace WebSockets.Operations {
             payload["id"] = id;
 
             InLine inLine = payload.ToObject<InLine>();
-            Line line = new Line(boardId, inLine.Id.Value).In(inLine);
+            Line line = new Line(boardId, id).In(inLine);
             Task store = _lineRepository.AddAsync(line);
             //TODO Testar se a Task is completed or faulted, in this cases do result for get the result/exception
             //Fazer alguma coisa em caso de excepções

@@ -195,7 +195,7 @@ namespace API.Repositories {
 
         //SQL Functions
         private static readonly string SELECT_ALL_LINES = "SELECT id, boardId, isClosedForm, lineStyleId, lineColor FROM dbo.GetLinesInfo(@boardId) ORDER BY id";
-        private static readonly string SELECT_ALL_LINES_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointWidth FROM dbo.GetLinesPoints(@boardId) ORDER BY id";
+        private static readonly string SELECT_ALL_LINES_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointWidth FROM dbo.GetLinesPoints(@boardId) ORDER BY linePointIdx";
 
         private static readonly string SELECT_LINES = "SELECT id, boardId, isClosedForm, lineStyleId, lineColor FROM dbo.GetLinesInfo(@boardId) WHERE id=@id";
         private static readonly string SELECT_LINES_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointWidth FROM dbo.GetLinesPoints(@boardId) WHERE id=@id";
