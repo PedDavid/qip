@@ -96,4 +96,8 @@ export default class Pen implements Tool {
     const figStyle = new FigureStyle(this.color)
     this.currentFigure = new Figure(figStyle)
   }
+
+  equals (pen) {
+    return pen instanceof Pen && this.width === pen.width && this.color === pen.color
+  }
 }
