@@ -90,6 +90,10 @@ export default class Move implements Tool {
     this.currentFigureMoving = null
   }
 
+  equals (move) {
+    return move instanceof Move
+  }
+
   // todo: this function should be in Image Class
   imgContainsPoint = function (img, point, event) {
     const canvasContext = event.target.getContext('2d')
