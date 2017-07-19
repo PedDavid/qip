@@ -1,6 +1,7 @@
 import {Figure, FigureStyle} from './../model/Figure'
 import fetch from 'isomorphic-fetch'
 import Grid from './../model/Grid'
+import {SimplePoint} from './../model/SimplePoint'
 import Pen from './../model/tools/Pen'
 import Eraser from './../model/tools/Eraser'
 
@@ -28,6 +29,7 @@ export class Persist {
       this._configureWSProtocol()
       this.connected = true
       this.boardId = boardId
+      this._persistBoardByWS()
     }
 
     this.socket.onerror = (event) => {
@@ -141,11 +143,7 @@ export class Persist {
     return new Promise((resolve, reject) => {
       // if it's not authenticated or not sharing board, get data from localstorage
       if (window.localStorage.getItem('figures') === null && window.localStorage.getItem('pen') === null && window.localStorage.getItem('eraser') === null) {
-        const tempGrid = new Grid([], -1)
-        window.localStorage.setItem('figures', JSON.stringify(tempGrid.getFiguresArray()))
-        window.localStorage.setItem('currFigureId', JSON.stringify(tempGrid.getCurrentFigureId()))
-        window.localStorage.setItem('pen', JSON.stringify(new Pen(tempGrid, 'black', 5)))
-        window.localStorage.setItem('eraser', JSON.stringify(new Eraser(tempGrid, 20)))
+        this._resetLocalStorage()
       }
 
       const figures = JSON.parse(window.localStorage.getItem('figures'))
@@ -158,6 +156,42 @@ export class Persist {
 
       resolve(grid)
     })
+  }
+
+  _resetLocalStorage = function () {
+    const tempGrid = new Grid([], -1)
+    window.localStorage.setItem('figures', JSON.stringify(tempGrid.getFiguresArray()))
+    window.localStorage.setItem('currFigureId', JSON.stringify(tempGrid.getCurrentFigureId()))
+    window.localStorage.setItem('pen', JSON.stringify(new Pen(tempGrid, 'black', 5)))
+    window.localStorage.setItem('eraser', JSON.stringify(new Eraser(tempGrid, 20)))
+  }
+
+  _persistBoardByWS = function () {
+    const figs = this.grid.getFiguresArray()
+    
+    this.grid.getFiguresArray().forEach(fig => {
+      const currentFigureTwin = Object.assign({}, fig) // Object.assign() method only copies enumerable and own properties from a source object to a target object
+      currentFigureTwin.points = fig.points.map((point, idx) => {
+        return new SimplePoint(point.x, point.y, point.getStyleOf(fig.id), idx)
+      })
+
+      currentFigureTwin.style = currentFigureTwin.figureStyle
+      delete currentFigureTwin.figureStyle
+      
+      if (this.connected) {
+        currentFigureTwin.tempId = currentFigureTwin.id
+        delete currentFigureTwin.id
+
+        const objToSend = {
+          type: 'CREATE_LINE',
+          owner: parseInt(this.boardId), // todo: retirar isto daqui
+          payload: currentFigureTwin
+        }
+        this.socket.send(JSON.stringify(objToSend))
+      }
+    })
+
+    this._resetLocalStorage()
   }
 }
 
