@@ -18,6 +18,7 @@ import styles from './styles.scss'
 import Pen from './../../model/tools/Pen'
 import Eraser from './../../model/tools/Eraser'
 import Grid from './../../model/Grid'
+import {Image} from './../../model/Image'
 import ToolsConfig from './../../model/ToolsConfig'
 import defaultToolsConfig from './../../public/configFiles/defaultTools'
 import {Persist, PersistType} from './../../util/Persist'
@@ -118,6 +119,11 @@ export default class Board extends React.Component {
       }
     })
   }
+  drawImage = (imageSrc) => {
+    const newImage = new Image({x: 10, y: 10}, imageSrc, 200, 200)
+    this.grid.addImage(newImage)
+    this.grid.draw(this.canvasContext, 1)
+  }
   changeCurrentTool = (tool) => {
     this.toolsConfig.updatePrevTool(this.state.currTool)
     this.setState({currTool: tool})
@@ -149,7 +155,8 @@ export default class Board extends React.Component {
       <div onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.xpto}>
         <SideBarOverlay grid={this.grid} changeCurrentTool={this.changeCurrentTool.bind(this)} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
           currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite.bind(this)}
-          removeFavorite={this.removeFavorite.bind(this)} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}>
+          removeFavorite={this.removeFavorite.bind(this)} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}
+          drawImage={this.drawImage}>
           <Canvas ref={this.refCallback} width={1200} height={800} {...this.listeners}>
             HTML5 Canvas not supported
           </Canvas>

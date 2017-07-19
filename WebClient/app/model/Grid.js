@@ -160,6 +160,14 @@ export default function Grid (initialFigures, currIdx) {
     figures.set(figure.id, figure)
   }
 
+  this.addImage = function (image) {
+    if (image.id === null) {
+      image.id = this.getNewFigureIdx()
+    }
+
+    figures.set(image.id, image)
+  }
+
   this.removeFigureFromGrid = function (figureId) {
     figures.delete(figureId)
   }
