@@ -67,33 +67,15 @@ export default class Pen implements Tool {
   }
 
   onPressUp (event, persist) {
+    // todo: passar persistencia para o onOut
     this.grid.addFigure(this.currentFigure)
 
-    // map currentFigure's points to a data object
-    const currentFigureTwin = Object.assign({}, this.currentFigure) // Object.assign() method only copies enumerable and own properties from a source object to a target object
-    currentFigureTwin.points = this.currentFigure.points.map((point, idx) => {
-      return new SimplePoint(point.x, point.y, point.getStyleOf(this.currentFigure.id), idx)
-    })
-
-    // map object so it can be parsed by api
-    // todo: change model to join this
-    currentFigureTwin.style = currentFigureTwin.figureStyle
-    delete currentFigureTwin.figureStyle
-
     if (persist.connected) {
-      currentFigureTwin.tempId = currentFigureTwin.id
-      delete currentFigureTwin.id
-
-      const objToSend = {
-        type: 'CREATE_LINE',
-        owner: parseInt(persist.boardId), // todo: retirar isto daqui
-        payload: currentFigureTwin
-      }
-      persist.socket.send(JSON.stringify(objToSend))
+      persist.socket.send(this.currentFigure.exportWS(persist.boardId))
     } else {
       // add to localstorage
       const dataFigure = JSON.parse(window.localStorage.getItem('figures'))
-      dataFigure.push(currentFigureTwin) // it can be push instead of dataFigure[id] because it will not have crashes with external id's because it's only used when there is no connection
+      dataFigure.push(this.currentFigure.exportLS()) // it can be push instead of dataFigure[id] because it will not have crashes with external id's because it's only used when there is no connection
       window.localStorage.setItem('figures', JSON.stringify(dataFigure))
       window.localStorage.setItem('currFigureId', JSON.stringify(this.grid.getCurrentFigureId()))
     }

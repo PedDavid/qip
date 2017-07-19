@@ -42,7 +42,7 @@ export default class ShareBoardModal extends React.Component {
         loading: false,
         error: false
       })
-      this.props.history.push('/'+board.id)
+      this.props.history.push('/' + board.id)
     }).catch(err => {
       console.log(err)
       this.setState({

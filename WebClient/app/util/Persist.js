@@ -167,8 +167,6 @@ export class Persist {
   }
 
   _persistBoardByWS = function () {
-    const figs = this.grid.getFiguresArray()
-    
     this.grid.getFiguresArray().forEach(fig => {
       const currentFigureTwin = Object.assign({}, fig) // Object.assign() method only copies enumerable and own properties from a source object to a target object
       currentFigureTwin.points = fig.points.map((point, idx) => {
@@ -177,7 +175,7 @@ export class Persist {
 
       currentFigureTwin.style = currentFigureTwin.figureStyle
       delete currentFigureTwin.figureStyle
-      
+
       if (this.connected) {
         currentFigureTwin.tempId = currentFigureTwin.id
         delete currentFigureTwin.id
