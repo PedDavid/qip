@@ -1,7 +1,6 @@
 import {Figure, FigureStyle} from './../model/Figure'
 import fetch from 'isomorphic-fetch'
 import Grid from './../model/Grid'
-import {SimplePoint} from './../model/SimplePoint'
 import Pen from './../model/tools/Pen'
 import Eraser from './../model/tools/Eraser'
 
@@ -29,6 +28,7 @@ export class Persist {
       this._configureWSProtocol()
       this.connected = true
       this.boardId = boardId
+      this.persistType = PersistType().WebSockets
       this._persistBoardByWS()
     }
 
@@ -168,28 +168,34 @@ export class Persist {
 
   _persistBoardByWS = function () {
     this.grid.getFiguresArray().forEach(fig => {
-      const currentFigureTwin = Object.assign({}, fig) // Object.assign() method only copies enumerable and own properties from a source object to a target object
-      currentFigureTwin.points = fig.points.map((point, idx) => {
-        return new SimplePoint(point.x, point.y, point.getStyleOf(fig.id), idx)
-      })
-
-      currentFigureTwin.style = currentFigureTwin.figureStyle
-      delete currentFigureTwin.figureStyle
-
       if (this.connected) {
-        currentFigureTwin.tempId = currentFigureTwin.id
-        delete currentFigureTwin.id
-
-        const objToSend = {
-          type: 'CREATE_LINE',
-          owner: parseInt(this.boardId), // todo: retirar isto daqui
-          payload: currentFigureTwin
-        }
-        this.socket.send(JSON.stringify(objToSend))
+        this.socket.send(fig.exportWS(this.boardId))
       }
     })
 
     this._resetLocalStorage()
+  }
+
+  cleanCanvas = function () {
+    if (this.persistType === PersistType().WebSockets) {
+      return this._cleanCanvasWS()
+    } else if (this.persistType === PersistType().LocalStorage) {
+      return this._resetLocalStorage()
+    }
+  }
+
+  _cleanCanvasWS = function () {
+    // todo: add an action in server to clean board
+    this.grid.getFiguresArray().forEach(fig => {
+      if (this.connected) {
+        const objToSend = {
+          type: 'DELETE_LINE',
+          owner: parseInt(this.boardId), // todo: retirar isto
+          payload: {'id': fig.id}
+        }
+        this.socket.send(JSON.stringify(objToSend))
+      }
+    })
   }
 }
 

@@ -107,8 +107,10 @@ export function Figure (figureStyle, id = null) {
     const toExportFig = this._export()
     toExportFig.tempId = toExportFig.id
     delete toExportFig.id
-
-    extraFunc(toExportFig)
+    
+    if (extraFunc != null) {
+      extraFunc(toExportFig)
+    }
 
     const objToSend = {
       type: 'CREATE_LINE',
