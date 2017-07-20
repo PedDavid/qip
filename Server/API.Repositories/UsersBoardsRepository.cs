@@ -30,7 +30,7 @@ namespace API.Repositories {
                 .Add("@permission", SqlDbType.TinyInt)
                 .Value = (byte)userBoard.Permission;
 
-            return _queryTemplate.QueryAsync(INSERT_USER_BOARD, parameters);
+            return _queryTemplate.CommandAsync(INSERT_USER_BOARD, parameters);
         }
 
         public Task<UserBoard> FindAsync(long boardId, long userId) {
@@ -86,7 +86,7 @@ namespace API.Repositories {
 
             parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
 
-            return _queryTemplate.QueryAsync(DELETE_USER_BOARD, parameters);
+            return _queryTemplate.CommandAsync(DELETE_USER_BOARD, parameters);
         }
 
         public Task UpdateAsync(UserBoard userBoard) {
@@ -104,7 +104,7 @@ namespace API.Repositories {
                     .Add("@permission", SqlDbType.TinyInt)
                 .Value = (byte)userBoard.Permission;
 
-            return _queryTemplate.QueryAsync(UPDATE_USER_BOARD, parameters);
+            return _queryTemplate.CommandAsync(UPDATE_USER_BOARD, parameters);
         }
 
         //SQL Commands

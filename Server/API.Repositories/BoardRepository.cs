@@ -48,7 +48,7 @@ namespace API.Repositories {
 
             parameters.Add("@id", SqlDbType.BigInt).Value = id;
 
-            return _queryTemplate.QueryAsync(DELETE_BOARD, parameters);
+            return _queryTemplate.CommandAsync(DELETE_BOARD, parameters);
         }
 
         public Task UpdateAsync(Board board) {
@@ -66,7 +66,7 @@ namespace API.Repositories {
                 .Add("@maxDistPoints", SqlDbType.TinyInt)
                 .Value = board.MaxDistPoints.Value;
 
-            return _queryTemplate.QueryAsync(UPDATE_BOARD, parameters);
+            return _queryTemplate.CommandAsync(UPDATE_BOARD, parameters);
         }
 
         public Task PartialUpdateAsync(Board board) {
@@ -84,7 +84,7 @@ namespace API.Repositories {
                 .Add("@maxDistPoints", SqlDbType.TinyInt)
                 .Value = board.MaxDistPoints ?? SqlByte.Null;
 
-            return _queryTemplate.QueryAsync(UPDATE_BOARD, parameters);
+            return _queryTemplate.CommandAsync(UPDATE_BOARD, parameters);
         }
 
         //SQL Commands

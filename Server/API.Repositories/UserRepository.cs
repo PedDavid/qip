@@ -63,7 +63,7 @@ namespace API.Repositories {
 
             parameters.Add("@id", SqlDbType.BigInt).Value = id;
 
-            return _queryTemplate.QueryAsync(DELETE_USER, parameters);
+            return _queryTemplate.CommandAsync(DELETE_USER, parameters);
         }
 
         public Task UpdateAsync(User user) {
@@ -97,7 +97,7 @@ namespace API.Repositories {
                 .Add("@penColors", SqlDbType.VarChar)
                 .Value = user.PenColors;
 
-            return _queryTemplate.QueryAsync(UPDATE_USER, parameters);
+            return _queryTemplate.CommandAsync(UPDATE_USER, parameters);
         }
 
         //Note: This method can't alter favorites and penColors for null
@@ -133,7 +133,7 @@ namespace API.Repositories {
                 .Add("@penColors", SqlDbType.VarChar)
                 .Value = user.PenColors ?? SqlString.Null;
 
-            return _queryTemplate.QueryAsync(UPDATE_USER, parameters);
+            return _queryTemplate.CommandAsync(UPDATE_USER, parameters);
         }
 
         //SQL Commands

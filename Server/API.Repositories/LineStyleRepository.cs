@@ -43,7 +43,7 @@ namespace API.Repositories {
 
             parameters.Add("@id", SqlDbType.BigInt).Value = id;
 
-            return _queryTemplate.QueryAsync(DELETE_LINE_STYLE, parameters);
+            return _queryTemplate.CommandAsync(DELETE_LINE_STYLE, parameters);
         }
 
         public Task UpdateAsync(LineStyle lineStyle) {
@@ -57,7 +57,7 @@ namespace API.Repositories {
                     .Add("@color", SqlDbType.VarChar)
                 .Value = lineStyle.Color;
 
-            return _queryTemplate.QueryAsync(UPDATE_LINE_STYLE, parameters);
+            return _queryTemplate.CommandAsync(UPDATE_LINE_STYLE, parameters);
         }
 
         public Task PartialUpdateAsync(LineStyle lineStyle) {
@@ -71,7 +71,7 @@ namespace API.Repositories {
                     .Add("@color", SqlDbType.VarChar)
                 .Value = lineStyle.Color ?? SqlString.Null;
 
-            return _queryTemplate.QueryAsync(UPDATE_LINE_STYLE, parameters);
+            return _queryTemplate.CommandAsync(UPDATE_LINE_STYLE, parameters);
         }
 
         //SQL Commands
