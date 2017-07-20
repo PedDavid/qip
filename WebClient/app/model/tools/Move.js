@@ -1,8 +1,11 @@
 // todo: change all instances of Point to SimplePoint
 import { Point } from './../Point'
+import { SimplePoint } from './../SimplePoint'
 import { Rect } from './../Rect'
 import { Figure } from './../Figure'
 import Line from './../Line'
+import { Image } from './../Image'
+
 // import { FigureImage } from './../FigureImage'
 
 import Tool from './Tool'
@@ -25,13 +28,12 @@ export default class Move implements Tool {
       .filter(lin => this.figureContainsPoint(lin, {x, y}, event, scale)) // todo: change {x,y} to simple point obj
 
     // get image figures
-    /*
-    const images = this.grid.getImageFigures()
-      .filter(img => this.imgContainsPoint(img, {x,y}, event))
-    */
+    const images = this.grid.getImagesArray()
+      .filter(img => this.imgContainsPoint(img, {x, y}, event))
+
     // juntar linhas e imagens
     // ordenar linhas e imagens
-    const figures = lines// .concat(images)
+    const figures = lines.concat(images)
       .sort((fig1, fig2) => fig2.id - fig1.id) // inverse order to remove the newest first
 
     this.currentFigureMoving = figures[0]
@@ -47,19 +49,15 @@ export default class Move implements Tool {
     const y = event.offsetY
     const canvasContext = event.target.getContext('2d')
 
-    /*
-    if (this.movingLine!=null && this.currentFigureMoving instanceof FigureImage) {
+    if (this.movingLine != null && this.currentFigureMoving instanceof Image) {
       const srcPoint = this.currentFigureMoving.getSrcPoint()
-      const destPoint = new Point(
-        srcPoint + (x - this.movingLine.end.x),
-        srcPoint + (y - this.movingLine.end.y))
+      const destPoint = new SimplePoint(
+        srcPoint.x + (x - this.movingLine.end.x),
+        srcPoint.y + (y - this.movingLine.end.y))
       this.grid.moveImage(this.currentFigureMoving, destPoint, canvasContext, scale)
-    }
-    else
-    */
-    if (this.movingLine != null && this.currentFigureMoving instanceof Figure) {
-      const offsetPoint = new Point(x - this.movingLine.end.x, y - this.movingLine.end.y)
-      this.grid.moveFigure(this.currentFigureMoving, offsetPoint, canvasContext, scale)
+    } else if (this.movingLine != null && this.currentFigureMoving instanceof Figure) {
+      const offsetPoint = new SimplePoint(x - this.movingLine.end.x, y - this.movingLine.end.y)
+      this.grid.moveLine(this.currentFigureMoving, offsetPoint, canvasContext, scale)
     }
     this.movingLine = new Line(this.movingLine.start, {x, y}) // always preserve start point and update final point
   }

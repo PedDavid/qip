@@ -120,7 +120,7 @@ export default class Board extends React.Component {
     })
   }
   drawImage = (imageSrc) => {
-    const newImage = new Image({x: 10, y: 10}, imageSrc, 200, 200)
+    const newImage = new Image({x: 80, y: 80}, imageSrc)
     this.grid.addImage(newImage)
     this.grid.draw(this.canvasContext, 1)
   }

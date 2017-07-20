@@ -12,8 +12,10 @@ export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null) {
     const auxImg = document.createElement('img')
     // const auxImg = new Image()
     auxImg.src = src
-    width === undefined && (width = auxImg.width === 0 ? 200 : auxImg.width)
-    height === undefined && (height = auxImg.height === 0 ? 200 : auxImg.height)
+    // scale image
+    const scale = auxImg.width / 200 // 200 is de default width
+    width === undefined && (width = auxImg.width === 0 ? 200 : auxImg.width / scale)
+    height === undefined && (height = auxImg.height === 0 ? 200 : auxImg.height / scale)
   }
 
   createImage()
