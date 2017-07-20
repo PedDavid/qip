@@ -8,6 +8,9 @@ using API.Domain;
 using IODomain.Input;
 using IODomain.Extensions;
 using IODomain.Output;
+using Microsoft.Extensions.Caching.Memory;
+using API.Services;
+using API.Extensions;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -15,9 +18,13 @@ namespace API.Controllers {
     [Route("api/boards/{boardId}/figures/[controller]")]
     public class ImagesController : Controller {
         private readonly IImageRepository _imageRepository;
+        private readonly IFigureIdRepository _figureIdRepository;
+        private readonly IMemoryCache _memoryCache;
 
-        public ImagesController(IImageRepository imageRepository) {
+        public ImagesController(IImageRepository imageRepository, IFigureIdRepository figureIdRepository, IMemoryCache memoryCache) {
             this._imageRepository = imageRepository;
+            _memoryCache = memoryCache;
+            _figureIdRepository = figureIdRepository;
         }
 
         [HttpGet]
@@ -38,11 +45,13 @@ namespace API.Controllers {
 
         [HttpPost]
         public async Task<IActionResult> Create(long boardId, [FromBody] InImage inputImage) {
-            if(inputImage == null || inputImage.BoardId != boardId || !inputImage.Id.HasValue) {
+            if(inputImage == null || inputImage.BoardId != boardId) {
                 return BadRequest();
             }
 
-            Image image = new Image(boardId, inputImage.Id.Value).In(inputImage);
+            FigureIdGenerator idGen = await _memoryCache.GetFigureIdGenerator(_figureIdRepository, boardId);
+
+            Image image = new Image(boardId, idGen.NewId()).In(inputImage);
             long id = await _imageRepository.AddAsync(image);
 
             inputImage.Id = id;
