@@ -39,6 +39,14 @@ namespace API.Repositories {
             return _queryTemplate.QueryForObjectAsync(SELECT_BOARD, parameters, GetBoard);
         }
 
+        public Task<bool> ExistsAsync(long id) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@id", SqlDbType.BigInt).Value = id;
+
+            return _queryTemplate.QueryForScalarAsync<bool>(BOARD_EXISTS, parameters);
+        }
+
         public Task<IEnumerable<Board>> GetAllAsync() {
             return _queryTemplate.QueryAsync(SELECT_ALL, GetBoard);
         }
@@ -88,6 +96,7 @@ namespace API.Repositories {
         }
 
         //SQL Commands
+        private static readonly string BOARD_EXISTS = "SELECT CAST(count(id) as BIT) FROM dbo.Board WHERE id = @id";
         private static readonly string SELECT_ALL = "SELECT id, name, maxDistPoints FROM dbo.Board";
         private static readonly string SELECT_BOARD = "SELECT id, name, maxDistPoints FROM dbo.Board WHERE id = @id";
         private static readonly string INSERT_BOARD = "INSERT INTO dbo.Board (name, maxDistPoints) VALUES (@name, @maxDistPoints); " +
