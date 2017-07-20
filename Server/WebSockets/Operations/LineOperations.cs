@@ -3,22 +3,24 @@ using API.Interfaces.IRepositories;
 using API.Services;
 using IODomain.Extensions;
 using IODomain.Input;
+using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using WebSockets.Extensions;
 using WebSockets.StringWebSockets;
 
 namespace WebSockets.Operations {
     public class LineOperations {
         private readonly ILineRepository _lineRepository;
-        private readonly FigureIdGenerator _idGen;
+        private readonly IMemoryCache _memoryCache;
+        private readonly IFigureIdRepository _figureIdRepository;
 
-        public LineOperations(ILineRepository lineRepository, FigureIdGenerator idGen) {
+        public LineOperations(ILineRepository lineRepository, IMemoryCache memoryCache, IFigureIdRepository figureIdRepository) {
             _lineRepository = lineRepository;
-            _idGen = idGen;
+            _memoryCache = memoryCache;
+            _figureIdRepository = figureIdRepository;
         }
 
         public async Task CreateLine(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject payload) {//TODO Rever se não pomos os checks aos ids e outros como nos controlers
@@ -29,7 +31,8 @@ namespace WebSockets.Operations {
 
             long boardId = payload["clientId"].Value<long>();
 
-            long id = _idGen.NewId();
+            FigureIdGenerator idGen = await _memoryCache.GetFigureIdGenerator(_figureIdRepository, boardId);
+            long id = idGen.NewId();
 
             InLine inLine = payload.ToObject<InLine>();
             inLine.Id = id;
@@ -105,7 +108,7 @@ namespace WebSockets.Operations {
             string jsonBroadcast = JsonConvert.SerializeObject(
                 new {
                     type = Models.Action.DELETE_LINE,
-                    payload = new {id = id}
+                    payload = new { id = id }
                 }
             );
             await session.BroadcastAsync(jsonBroadcast);

@@ -3,22 +3,24 @@ using API.Interfaces.IRepositories;
 using API.Services;
 using IODomain.Extensions;
 using IODomain.Input;
+using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using WebSockets.Extensions;
 using WebSockets.StringWebSockets;
 
 namespace WebSockets.Operations {
     public class ImageOperations {
         private readonly IImageRepository _imageRepository;
-        private readonly FigureIdGenerator _idGen;
+        private readonly IMemoryCache _memoryCache;
+        private readonly IFigureIdRepository _figureIdRepository;
 
-        public ImageOperations(IImageRepository imageRepository, FigureIdGenerator idGen) {
+        public ImageOperations(IImageRepository imageRepository, IMemoryCache memoryCache, IFigureIdRepository figureIdRepository) {
             _imageRepository = imageRepository;
-            _idGen = idGen;
+            _memoryCache = memoryCache;
+            _figureIdRepository = figureIdRepository;
         }
 
         public async Task CreateImage(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject payload) {//TODO Rever se não pomos os checks aos ids e outros como nos controlers
@@ -29,7 +31,8 @@ namespace WebSockets.Operations {
 
             long boardId = payload["clientId"].Value<long>();
 
-            long id = _idGen.NewId();
+            FigureIdGenerator idGen = await _memoryCache.GetFigureIdGenerator(_figureIdRepository, boardId);
+            long id = idGen.NewId();
 
             InImage inImage = payload.ToObject<InImage>();
             inImage.Id = id;

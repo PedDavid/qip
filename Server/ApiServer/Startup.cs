@@ -44,6 +44,9 @@ namespace ApiServer {
             // Configure using a sub-section of the appsettings.json file.
             services.Configure<RepositoriesOptions>(Configuration.GetSection("ConnectionStrings"));
 
+            //Add Memory Cache
+            services.AddMemoryCache();
+
             // Add framework services.
             services.AddMvc();
 
