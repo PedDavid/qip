@@ -13,7 +13,7 @@ namespace IODomain.Extensions {
                 Id = line.Id,
                 BoardId = line.BoardId,
                 Points = line.Points.Select(LinePointExtensions.Out),
-                Closed = line.Closed.Value,
+                Closed = line.Closed,
                 Style = line.Style.Out()
             };
         }
