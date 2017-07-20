@@ -1,10 +1,12 @@
-﻿using System;
+﻿using API.Services;
+using Microsoft.Extensions.Caching.Memory;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace WebSockets.Operations {
-    public class OperationUtils {
+    public static class OperationUtils {
         public static void ResolveTaskContinuation(Task task) {
             if(task.IsCompleted) {//Testa se a Task foi completada sincronamente
                 try {//Tratando o resultado imediatamente nesse caso
