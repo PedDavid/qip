@@ -1,4 +1,5 @@
 import {SimplePoint} from './SimplePoint'
+import {Rect} from './Rect'
 
 // Figure: function (id, isClosedForm = false) {
 export function Figure (figureStyle, id = null) {
@@ -10,6 +11,34 @@ export function Figure (figureStyle, id = null) {
 
   this.getId = function () {
     return this.id.toString()
+  }
+
+  this.getTopLeftPoint = function () {
+    let mostUpperLeftPointX = null
+    let mostUpperLeftPointY = null
+    this.points.forEach(point => {
+      if (mostUpperLeftPointX == null || (point.x < mostUpperLeftPointX)) {
+        mostUpperLeftPointX = point.x
+      }
+      if (mostUpperLeftPointY == null || (point.y < mostUpperLeftPointY)) {
+        mostUpperLeftPointY = point.y
+      }
+    })
+    return new SimplePoint(mostUpperLeftPointX, mostUpperLeftPointY)
+  }
+
+  this.getBottomRightPoint = function () {
+    let mostBottomRightPointX = null
+    let mostBottomRightPointY = null
+    this.points.forEach(point => {
+      if (mostBottomRightPointX == null || (point.x > mostBottomRightPointX)) {
+        mostBottomRightPointX = point.x
+      }
+      if (mostBottomRightPointY == null || (point.y > mostBottomRightPointY)) {
+        mostBottomRightPointY = point.y
+      }
+    })
+    return new SimplePoint(mostBottomRightPointX, mostBottomRightPointY)
   }
 
   this.addPoint = function (point) {
@@ -138,6 +167,48 @@ export function Figure (figureStyle, id = null) {
     delete currentFigureTwin.figureStyle
 
     return currentFigureTwin
+  }
+
+  this.containsPoint = function (coord, event, grid, scale) {
+    const canvasContext = event.target.getContext('2d')
+    const points = this.getNearPoints(coord.x / scale, coord.y / scale, grid.getMaxLinePart())
+
+    if (this.points == null) {
+      return
+    }
+
+    let prev = points[0]
+    for (let k = 0; k <= points.length; k++) {
+      let currPoint = points[k]
+      if (currPoint == null) {
+        break
+      }
+
+      prev.x = prev.x * scale
+      prev.y = prev.y * scale
+      currPoint.x = currPoint.x * scale
+      currPoint.y = currPoint.y * scale
+      const width = currPoint.getStyleOf(this.id).width
+      const rect = new Rect(prev, currPoint, width, canvasContext)
+
+      const canvasWidth = canvasContext.canvas.width
+      const canvasHeight = canvasContext.canvas.height
+
+      // check if coord is inside line, adding some margin
+      for (let c = (coord.x - 10) > 0 ? (coord.x - 10) : 0; c < canvasWidth && c < coord.x + 10; ++c) {
+        for (let l = (coord.y - 10) > 0 ? (coord.y - 10) : 0; l < canvasHeight && l < (coord.y + 10); ++l) {
+          if (rect.contains({ x: c, y: l })) {
+            return true
+          }
+        }
+      }
+      prev = currPoint
+    }
+    return false
+  }
+
+  this.scale = function (scaleType, offsetPoint) {
+
   }
 }
 

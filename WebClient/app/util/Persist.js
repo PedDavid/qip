@@ -147,7 +147,7 @@ export class Persist {
       }
 
       const figures = JSON.parse(window.localStorage.getItem('figures'))
-      const nextFigureId = JSON.parse(window.localStorage.getItem('currFigureId')) + 1
+      const nextFigureId = JSON.parse(window.localStorage.getItem('currFigureId'))
       const grid = new Grid(figures, nextFigureId)
       // const tempPen = JSON.parse(window.localStorage.getItem('pen'))
       // const pen = new Pen(grid, tempPen.color, tempPen.width)

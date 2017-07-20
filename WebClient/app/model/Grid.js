@@ -145,6 +145,7 @@ export default function Grid (initialFigures, currIdx) {
     if (figure.id === null) {
       figure.id = this.getNewFigureIdx()
     }
+
     let prev = null
     const auxPoints = figure.points
     figure.points = [] // must be that way because in forEach updateMaxLinePart is also adding points to figure
@@ -159,6 +160,7 @@ export default function Grid (initialFigures, currIdx) {
       prev = gridPoint
     })
     figures.set(figure.id, figure)
+    console.log('inserted new figure with id ' + figure.id)
   }
 
   this.addImage = function (image) {
@@ -212,7 +214,7 @@ export default function Grid (initialFigures, currIdx) {
     context.clearRect(0, 0, width, height)
 
     Array.from(figures.values())
-        .sort((fig1, fig2) => fig1.id - fig2.id)
+        .sort((fig1, fig2) => Math.abs(fig1.id) - Math.abs(fig2.id))
         .forEach((figure) => figure.draw(context, currScale))
   }
 
