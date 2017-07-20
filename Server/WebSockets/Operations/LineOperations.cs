@@ -1,6 +1,7 @@
 ﻿using API.Domain;
 using API.Interfaces.IRepositories;
 using API.Services;
+using API.Services.Extensions;
 using IODomain.Extensions;
 using IODomain.Input;
 using Microsoft.Extensions.Caching.Memory;
@@ -8,7 +9,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
-using WebSockets.Extensions;
 using WebSockets.StringWebSockets;
 
 namespace WebSockets.Operations {

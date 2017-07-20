@@ -10,7 +10,7 @@ using API.Interfaces.IRepositories;
 using API.Domain;
 using Microsoft.Extensions.Caching.Memory;
 using API.Services;
-using API.Extensions;
+using API.Services.Extensions;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
