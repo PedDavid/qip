@@ -1,4 +1,4 @@
-﻿create proc dbo.InsertNewLine @figureId bigint, @boardId bigint, @color varchar(30), @points dbo.Points readonly
+﻿create proc dbo.InsertNewLine @figureId bigint, @boardId bigint, @color varchar(30), @points dbo.Points readonly, @isClosedForm bit = 0
 as
 	begin try
 		set transaction isolation level serializable
@@ -21,7 +21,7 @@ as
 
 			insert into dbo.Figure (id, figureType, boardId) values(@figureId, 'line', @boardId)
 
-			insert into dbo.Line (figureId, boardId, lineStyleId) values (@figureId, @boardId, @styleId)
+			insert into dbo.Line (figureId, boardId, isClosedForm, lineStyleId) values (@figureId, @boardId, @isClosedForm, @styleId)
 	
 			--filtrar os pontos que já existem e adicionar os restantes à tabela de Point
 			insert into dbo.Point(x, y) select figPoints.x, figPoints.y 

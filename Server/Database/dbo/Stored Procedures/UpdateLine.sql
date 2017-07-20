@@ -4,7 +4,7 @@
 * Update Line Procedure
 *
 */
-create proc dbo.UpdateLine @boardId bigint, @figureId bigint, @color varchar(30) = null, @points dbo.Points readonly
+create proc dbo.UpdateLine @boardId bigint, @figureId bigint, @color varchar(30) = null, @points dbo.Points readonly, @isClosedForm bit = 0
 as
 	begin try
 		set transaction isolation level serializable
@@ -43,6 +43,8 @@ as
 			update dbo.LineStyle 
 				set color = isnull(@color, color)
 				where lineStyleId = (select lineStyleId from dbo.Line where @boardId=boardId and @figureId = figureId)
+
+			update dbo.Line set isClosedForm = @isClosedForm
 
 		commit
 	end try

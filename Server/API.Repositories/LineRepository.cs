@@ -44,6 +44,10 @@ namespace API.Repositories {
                 .Add("@points", SqlDbType.Structured)
                 .Value = points;
 
+            parameters
+                .Add("@isClosedForm", SqlDbType.Bit)
+                .Value = line.Closed;
+
             await _queryTemplate.StoredProcedureAsync(INSERT_LINE, parameters);
 
             return lineId;
@@ -183,6 +187,10 @@ namespace API.Repositories {
             parameters
                 .Add("@points", SqlDbType.Structured)
                 .Value = points;
+
+            parameters
+                .Add("@isClosedForm", SqlDbType.Bit)
+                .Value = line.Closed;
 
             return _queryTemplate.StoredProcedureAsync(UPDATE_LINE, parameters);
         }
