@@ -69,6 +69,10 @@ export default class Eraser implements Tool {
     this.eraseLine = null // TODO(simaovii): this will throw error if user draws back in the canvas. insert a check in onSwipe
   }
 
+  equals (eraser) {
+    return eraser instanceof Eraser && this.width === eraser.width
+  }
+
   erase (x, y, currScale, canvas) {
     const grid = this.grid
     // calcular limites da area a apagar
