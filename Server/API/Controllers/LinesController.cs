@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using IODomain.Output;
 using IODomain.Input;
 using IODomain.Extensions;
 using API.Interfaces.IRepositories;
@@ -17,21 +15,27 @@ using API.Services.Extensions;
 namespace API.Controllers {
     [Route("api/boards/{boardId}/figures/[controller]")]
     public class LinesController : Controller {
+        private readonly IBoardRepository _boardRepository;
         private readonly ILineRepository _lineRepository;
         private readonly IFigureIdRepository _figureIdRepository;
         private readonly IMemoryCache _memoryCache;
 
-        public LinesController(ILineRepository lineRepository, IFigureIdRepository figureIdRepository, IMemoryCache memoryCache) {
-            this._lineRepository = lineRepository;
+        public LinesController(IBoardRepository boardRepository, ILineRepository lineRepository, IFigureIdRepository figureIdRepository, IMemoryCache memoryCache) {
+            _boardRepository = boardRepository;
+            _lineRepository = lineRepository;
             _memoryCache = memoryCache;
             _figureIdRepository = figureIdRepository;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<OutLine>> GetAll(long boardId) {
+        public async Task<IActionResult> GetAll(long boardId) {
+            if(!await _boardRepository.ExistsAsync(boardId)) {
+                return NotFound();
+            }
+
             IEnumerable<Line> lines = await _lineRepository.GetAllAsync(boardId);
 
-            return lines.Select(LineExtensions.Out);
+            return Json(lines.Select(LineExtensions.Out));
         }
 
         [HttpGet("{id}", Name = "GetLine")]

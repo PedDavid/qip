@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +6,6 @@ using API.Interfaces.IRepositories;
 using API.Domain;
 using IODomain.Input;
 using IODomain.Extensions;
-using IODomain.Output;
 using Microsoft.Extensions.Caching.Memory;
 using API.Services;
 using API.Services.Extensions;
@@ -17,21 +15,27 @@ using API.Services.Extensions;
 namespace API.Controllers {
     [Route("api/boards/{boardId}/figures/[controller]")]
     public class ImagesController : Controller {
+        private readonly IBoardRepository _boardRepository;
         private readonly IImageRepository _imageRepository;
         private readonly IFigureIdRepository _figureIdRepository;
         private readonly IMemoryCache _memoryCache;
 
-        public ImagesController(IImageRepository imageRepository, IFigureIdRepository figureIdRepository, IMemoryCache memoryCache) {
-            this._imageRepository = imageRepository;
+        public ImagesController(IBoardRepository boardRepository, IImageRepository imageRepository, IFigureIdRepository figureIdRepository, IMemoryCache memoryCache) {
+            _boardRepository = boardRepository;
+            _imageRepository = imageRepository;
             _memoryCache = memoryCache;
             _figureIdRepository = figureIdRepository;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<OutImage>> GetAll(long boardId) {
+        public async Task<IActionResult> GetAll(long boardId) {
+            if(!await _boardRepository.ExistsAsync(boardId)) {
+                return NotFound();
+            }
+
             IEnumerable<Image> images = await _imageRepository.GetAllAsync(boardId);
 
-            return images.Select(ImageExtensions.Out);
+            return Json(images.Select(ImageExtensions.Out));
         }
 
         [HttpGet("{id}", Name = "GetImage")]
