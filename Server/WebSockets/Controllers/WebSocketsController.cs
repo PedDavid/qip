@@ -14,19 +14,22 @@ using Microsoft.Extensions.Caching.Memory;
 namespace WebSockets.Controllers {
     [Route("ws")]
     public class WebSocketsController : Controller {
-        private StringWebSocketsSessionManager _sessionManager;
+        private readonly IBoardRepository _boardRepository;
+        private readonly StringWebSocketsSessionManager _sessionManager;
         private readonly LineOperations _lineOperations;
         private readonly ImageOperations _imageOperations;
 
         private readonly Dictionary<Models.Action, Operation> _operations;  // TODO(peddavid): Should this be immutable?
 
         public WebSocketsController(
+            IBoardRepository boardRepository,
             StringWebSocketsSessionManager sessionManager, 
             IFigureIdRepository figureIdRepository, 
             IImageRepository imageRepository, 
             ILineRepository lineRepository, 
             IMemoryCache memoryCache
         ) {
+            _boardRepository = boardRepository;
             _sessionManager = sessionManager;
             _imageOperations = new ImageOperations(imageRepository, memoryCache, figureIdRepository);
             _lineOperations = new LineOperations(lineRepository, memoryCache, figureIdRepository);
@@ -43,7 +46,7 @@ namespace WebSockets.Controllers {
 
         [HttpGet("{roomId}")]
         public async Task Index(long roomId) {
-            if(HttpContext.WebSockets.IsWebSocketRequest) {
+            if(HttpContext.WebSockets.IsWebSocketRequest && await _boardRepository.ExistsAsync(roomId)) {
                 StringWebSocket webSocket = await HttpContext.WebSockets.AcceptStringWebSocketAsync();
 
                 var session = _sessionManager.Register(roomId, webSocket);
