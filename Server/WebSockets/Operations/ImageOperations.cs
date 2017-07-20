@@ -42,7 +42,7 @@ namespace WebSockets.Operations {
 
             string jsonRes = JsonConvert.SerializeObject(
                 new {
-                    type = Models.Action.CREATE_IMAGE,
+                    type = Models.Action.CREATE_IMAGE.ToString(),
                     payload = new { id = id, tempId = tempId }
                 }
             );
@@ -50,7 +50,7 @@ namespace WebSockets.Operations {
 
             string jsonBroadcast = JsonConvert.SerializeObject(
                 new {
-                    type = Models.Action.CREATE_IMAGE,
+                    type = Models.Action.CREATE_IMAGE.ToString(),
                     payload = new { figure = inImage } // Usado o InImage porque os WebSockets estão a servir de espelho ao enviado pelo cliente
                 }
             );
@@ -71,7 +71,7 @@ namespace WebSockets.Operations {
 
             string jsonBroadcast = JsonConvert.SerializeObject(
                 new {
-                    type = Models.Action.ALTER_IMAGE,
+                    type = Models.Action.ALTER_IMAGE.ToString(),
                     payload = new { figure = inImage } // Usado o InImage porque os WebSockets estão a servir de espelho ao enviado pelo cliente
                 }
             );
@@ -99,7 +99,7 @@ namespace WebSockets.Operations {
 
             string jsonBroadcast = JsonConvert.SerializeObject(
                 new {
-                    type = Models.Action.DELETE_IMAGE,
+                    type = Models.Action.DELETE_IMAGE.ToString(),
                     payload = new {id = id}
                 }
             );

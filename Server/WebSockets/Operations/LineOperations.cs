@@ -43,7 +43,7 @@ namespace WebSockets.Operations {
 
             string jsonRes = JsonConvert.SerializeObject(
                 new {
-                    type = Models.Action.CREATE_LINE,
+                    type = Models.Action.CREATE_LINE.ToString(),
                     payload = new { id = id, tempId = tempId }
                 }
             );
@@ -51,7 +51,7 @@ namespace WebSockets.Operations {
 
             string jsonBroadcast = JsonConvert.SerializeObject(
                 new {
-                    type = Models.Action.CREATE_LINE,
+                    type = Models.Action.CREATE_LINE.ToString(),
                     payload = new { figure = inLine } // Usado o InLine porque os WebSockets estão a servir de espelho ao enviado pelo cliente
                 }
             );
@@ -74,7 +74,7 @@ namespace WebSockets.Operations {
 
             string jsonBroadcast = JsonConvert.SerializeObject(
                 new {
-                    type = Models.Action.ALTER_LINE,
+                    type = Models.Action.ALTER_LINE.ToString(),
                     payload = new {
                         offsetPoint = offsetPoint,
                         figure = inLine // Usado o InLine porque os WebSockets estão a servir de espelho ao enviado pelo cliente
@@ -107,7 +107,7 @@ namespace WebSockets.Operations {
 
             string jsonBroadcast = JsonConvert.SerializeObject(
                 new {
-                    type = Models.Action.DELETE_LINE,
+                    type = Models.Action.DELETE_LINE.ToString(),
                     payload = new { id = id }
                 }
             );
