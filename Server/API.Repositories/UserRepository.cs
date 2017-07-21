@@ -64,6 +64,21 @@ namespace API.Repositories {
             return _queryTemplate.QueryAsync(SELECT_ALL, parameters, GetUser);
         }
 
+        public Task<IEnumerable<User>> GetAllAsync(string search, long index, long size) {
+            if(search == null)
+                return GetAllAsync(index, size);
+
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@take", SqlDbType.BigInt).Value = size;
+
+            parameters.Add("@skip", SqlDbType.BigInt).Value = index * size;
+
+            parameters.Add("@search", SqlDbType.NVarChar).Value = search;
+
+            return _queryTemplate.QueryAsync(SELECT_SEARCH, parameters, GetUser);
+        }
+
         public Task RemoveAsync(long id) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
@@ -143,13 +158,18 @@ namespace API.Repositories {
         }
 
         //SQL Commands
-        private static readonly string SELECT_ALL = "SELECT id, username, pwdHash, pwdSalt, name, favorites, penColors " +
+        private static readonly string SELECT_ALL = "SELECT id, username, pwdHash, pwdSalt, [name], favorites, penColors " +
                                                     "FROM dbo.[User]" +
                                                     "ORDER BY id " +
                                                     "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
-        private static readonly string SELECT_USER = "SELECT id, username, pwdHash, pwdSalt, name, favorites, penColors FROM dbo.[User] " +
+        private static readonly string SELECT_SEARCH = "SELECT id, username, pwdHash, pwdSalt, [name], favorites, penColors " +
+                                                       "FROM dbo.[User]" +
+                                                       "WHERE CONTAINS((username, [name]), @search) " +
+                                                       "ORDER BY id " +
+                                                       "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
+        private static readonly string SELECT_USER = "SELECT id, username, pwdHash, pwdSalt, [name], favorites, penColors FROM dbo.[User] " +
                                                      "WHERE id = @id";
-        private static readonly string INSERT_USER = "INSERT INTO dbo.[User] (name, pwdHash, pwdSalt, username, favorites, penColors) " +
+        private static readonly string INSERT_USER = "INSERT INTO dbo.[User] ([name], pwdHash, pwdSalt, username, favorites, penColors) " +
                                                                     "VALUES (@name, @pwdHash, @pwdSalt, @username, @favorites, @penColors); " +
                                                      "SELECT CAST(SCOPE_IDENTITY() AS BIGINT)";
         private static readonly string DELETE_USER = "DELETE FROM dbo.[User] WHERE id = @id";
@@ -157,7 +177,7 @@ namespace API.Repositories {
                                                     "SET username = isnull(@username, username), " +
                                                         "pwdHash= isnull(@pwdHash, pwdHash), " +
                                                         "pwdSalt= isnull(@pwdSalt, pwdSalt), " +
-                                                        "name= isnull(@name, name), " +
+                                                        "[name]= isnull(@name, [name]), " +
                                                         "favorites= @favorites, " +
                                                         "penColors= @penColors " +
                                                     "WHERE id = @id";

@@ -5,6 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace API.Interfaces.IRepositories {
-    public interface IUserRepository : IDefaultRepository<User> {
+    public interface IUserRepository : IDefaultSearchableRepository<User> {
     }
 }

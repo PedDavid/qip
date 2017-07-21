@@ -23,8 +23,8 @@ namespace API.Controllers {
         }
 
         [HttpGet]
-        public async Task<IEnumerable<OutUser>> GetAll(long index = 0, long size = 10) {
-            IEnumerable<User> users = await _userRepository.GetAllAsync(index, size);
+        public async Task<IEnumerable<OutUser>> GetAll(string search, long index = 0, long size = 10) {
+            IEnumerable<User> users = await _userRepository.GetAllAsync(search, index, size);
 
             return users.Select(UserExtensions.Out);
         }
@@ -80,8 +80,8 @@ namespace API.Controllers {
         }
 
         [HttpGet("{userId}/boards")]
-        public async Task<IEnumerable<OutUserBoard_Board>> GetAll(long userId, long index = 0, long size = 10) {
-            IEnumerable<UserBoard_Board> userBoards = await _userBoardsRepository.GetAllBoardsAsync(userId, index, size);
+        public async Task<IEnumerable<OutUserBoard_Board>> GetAll(long userId, string search, long index = 0, long size = 10) {
+            IEnumerable<UserBoard_Board> userBoards = await _userBoardsRepository.GetAllBoardsAsync(userId, index, size, search);
 
             return userBoards.Select(UserBoard_BoardExtensions.Out);
         }

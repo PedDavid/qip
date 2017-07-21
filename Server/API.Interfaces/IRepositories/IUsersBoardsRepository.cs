@@ -16,7 +16,11 @@ namespace API.Interfaces.IRepositories {
 
         Task<IEnumerable<UserBoard_Board>> GetAllBoardsAsync(long userId, long index, long size);
 
+        Task<IEnumerable<UserBoard_Board>> GetAllBoardsAsync(long userId, long index, long size, string search);
+
         Task<IEnumerable<UserBoard_User>> GetAllUsersAsync(long boardId, long index, long size);
+
+        Task<IEnumerable<UserBoard_User>> GetAllUsersAsync(long boardId, long index, long size, string search);
 
         Task RemoveAsync(long boardId, long userId);
 
