@@ -63,18 +63,26 @@ namespace API.Repositories {
                 return _queryTemplate.QueryForObjectAsync(SELECT_USER, parameters, GetUser);
         }
 
-        public Task<IEnumerable<UserBoard_Board>> GetAllBoardsAsync(long userId) {
+        public Task<IEnumerable<UserBoard_Board>> GetAllBoardsAsync(long userId, long index, long size) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters.Add("@userId", SqlDbType.BigInt).Value = userId;
 
+            parameters.Add("@take", SqlDbType.BigInt).Value = size;
+
+            parameters.Add("@skip", SqlDbType.BigInt).Value = index * size;
+
             return _queryTemplate.QueryAsync(SELECT_ALL_BOARDS, parameters, GetBoard);
         }
 
-        public Task<IEnumerable<UserBoard_User>> GetAllUsersAsync(long boardId) {
+        public Task<IEnumerable<UserBoard_User>> GetAllUsersAsync(long boardId, long index, long size) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
+
+            parameters.Add("@take", SqlDbType.BigInt).Value = size;
+
+            parameters.Add("@skip", SqlDbType.BigInt).Value = index * size;
 
             return _queryTemplate.QueryAsync(SELECT_ALL_USERS, parameters, GetUser);
         }
@@ -108,8 +116,14 @@ namespace API.Repositories {
         }
 
         //SQL Commands
-        private static readonly string SELECT_ALL_USERS = "SELECT permission, userId, username, [name] FROM dbo.Full_User_Board WHERE boardId=@boardId";
-        private static readonly string SELECT_ALL_BOARDS = "SELECT permission, boardId, boardName, maxDistPoints FROM dbo.Full_User_Board WHERE userId=@userId";
+        private static readonly string SELECT_ALL_USERS = "SELECT permission, userId, username, [name] " +
+                                                          "FROM dbo.Full_User_Board WHERE boardId=@boardId" +
+                                                          "ORDER BY userId " +
+                                                          "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
+        private static readonly string SELECT_ALL_BOARDS = "SELECT permission, boardId, boardName, maxDistPoints " +
+                                                           "FROM dbo.Full_User_Board WHERE userId=@userId" +
+                                                           "ORDER BY boardId " +
+                                                           "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
         private static readonly string SELECT_USER_BOARD = "SELECT permission, boardId, userId FROM dbo.User_Board WHERE boardId=@boardId and userId=@userId";
         private static readonly string SELECT_USER = "SELECT permission, userId, username, [name] FROM dbo.Full_User_Board WHERE boardId=@boardId and userId=@userId";
         private static readonly string SELECT_BOARD = "SELECT permission, boardId, boardName, maxDistPoints FROM dbo.Full_User_Board WHERE userId=@userId and boardId=@boardId";
@@ -147,6 +161,5 @@ namespace API.Repositories {
                 UserId = dr.GetInt64(2)
             };
         }
-
     }
 }

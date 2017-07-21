@@ -21,8 +21,8 @@ namespace API.Controllers {
         }
 
         [HttpGet]
-        public async Task<IEnumerable<OutBoard>> GetAll() {
-            IEnumerable<Board> boards = await _boardRepository.GetAllAsync();
+        public async Task<IEnumerable<OutBoard>> GetAll(long index = 0, long size = 10) {
+            IEnumerable<Board> boards = await _boardRepository.GetAllAsync(index,size);
 
             return boards.Select(BoardExtensions.Out);
         }

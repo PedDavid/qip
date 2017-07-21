@@ -34,8 +34,14 @@ namespace API.Repositories {
             return _queryTemplate.QueryForObjectAsync(SELECT_LINE_STYLE, parameters, GetLineStyle);
         }
 
-        public Task<IEnumerable<LineStyle>> GetAllAsync() {
-            return _queryTemplate.QueryAsync(SELECT_ALL, GetLineStyle);
+        public Task<IEnumerable<LineStyle>> GetAllAsync(long index, long size) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@take", SqlDbType.BigInt).Value = size;
+
+            parameters.Add("@skip", SqlDbType.BigInt).Value = index * size;
+
+            return _queryTemplate.QueryAsync(SELECT_ALL, parameters, GetLineStyle);
         }
 
         public Task RemoveAsync(long id) {
@@ -75,7 +81,10 @@ namespace API.Repositories {
         }
 
         //SQL Commands
-        private static readonly string SELECT_ALL = "SELECT lineStyleId, color FROM dbo.LineStyle";
+        private static readonly string SELECT_ALL = "SELECT lineStyleId, color " +
+                                                    "FROM dbo.LineStyle" +
+                                                    "ORDER BY lineStyleId " +
+                                                    "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
         private static readonly string SELECT_LINE_STYLE = "SELECT lineStyleId, color FROM dbo.LineStyle WHERE lineStyleId = @id";
         private static readonly string INSERT_LINE_STYLE = "INSERT INTO dbo.LineStyle (color) VALUES (@color); " +
                                                      "SELECT CAST(SCOPE_IDENTITY() AS BIGINT)";

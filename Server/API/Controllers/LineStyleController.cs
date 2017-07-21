@@ -21,8 +21,8 @@ namespace API.Controllers {
         }
 
         [HttpGet]
-        public async Task<IEnumerable<OutLineStyle>> GetAll() {
-            IEnumerable<LineStyle> lineStyles = await _lineStyleRepository.GetAllAsync();
+        public async Task<IEnumerable<OutLineStyle>> GetAll(long index = 0, long size = 10) {
+            IEnumerable<LineStyle> lineStyles = await _lineStyleRepository.GetAllAsync(index, size);
 
             return lineStyles.Select(LineStyleExtensions.Out);
         }
