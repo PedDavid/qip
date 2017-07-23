@@ -9,8 +9,4 @@
     <ProjectReference Include="..\IODomain\IODomain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="IServices\" />
-  </ItemGroup>
-
 </Project>
