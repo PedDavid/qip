@@ -18,7 +18,7 @@ namespace IODomain.Extensions {
 
         public static LinePoint In(this LinePoint point, InLinePoint inPoint) {
             ((Point)point).In(inPoint);
-            point.Style = (point.Style ?? new PointStyle(inPoint.Style.Id)).In(inPoint.Style);
+            point.Style = (point.Style ?? new PointStyle()).In(inPoint.Style);
             point.Idx = inPoint.Idx;
             return point;
         }

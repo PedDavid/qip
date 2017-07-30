@@ -23,18 +23,19 @@ import defaultToolsConfig from './../../public/configFiles/defaultTools'
 import {Persist, PersistType} from './../../util/Persist'
 // import {Figure, FigureStyle} from './../../model/Figure'
 
-// check if it's authenticated
+const defaultGrid = new Grid([], 0)
+const defaultPen = new Pen(defaultGrid, 'black', 5)
 
 export default class Board extends React.Component {
   // check if these default tools are necessary
-  grid = new Grid([], -1)
-  persist = {boardId: null} // this is necessary because the first time render occurs, there is no this.persist object
+
+  persist = {} // this is necessary because the first time render occurs, there is no this.persist object
 
   state = {
     showCleanModal: false,
     showUserModal: false,
     showShareModal: false,
-    currTool: null,
+    currTool: defaultPen,
     favorites: [], // obtain favorites from server
     loading: true
   }
@@ -50,6 +51,11 @@ export default class Board extends React.Component {
 
   componentDidMount () {
     const boardId = this.props.match.params.board
+
+    this.getInitialBoard(boardId)
+  }
+
+  getInitialBoard (boardId) {
     let persistType = null
 
     // if there isn't a specific board, or if the user is not authenticated, get persisted data from local storage
@@ -65,11 +71,14 @@ export default class Board extends React.Component {
     // get initial board from server or from local storage
     this.persist.getInitialBoardAsync(boardId)
       .then(grid => {
-        if (persistType === PersistType().WebSockets) {
+        this.grid = grid
+        this.persist.grid = this.grid
+
+        if (this.persist.persistType === PersistType().WebSockets) {
           // todo update board id and start web socket connection
           this.updateBoardId(boardId)
         }
-        this.grid = grid
+
         // draw initial grid
         this.grid.draw(this.canvasContext, 1)
 
@@ -88,6 +97,9 @@ export default class Board extends React.Component {
       }).catch(err => {
         console.error(err)
         console.log(err.message)
+        // this must be done because when an error occurs and history is set, initialBoard
+        // is not set anymore
+        this.getInitialBoard(null)
         this.setState({
           loading: false
         })
@@ -111,8 +123,7 @@ export default class Board extends React.Component {
     this.setState({currTool: tool})
   }
   cleanCanvas = () => {
-    window.localStorage.setItem('figures', '[]')
-    window.localStorage.setItem('currFigureId', '-1')
+    this.persist.cleanCanvas()
     this.grid.clean(this.canvasContext)
     this.toggleCleanModal()
   }
@@ -144,7 +155,7 @@ export default class Board extends React.Component {
           </Canvas>
         </SideBarOverlay>
         <CleanBoardModal cleanCanvas={this.cleanCanvas} closeModal={this.toggleCleanModal} visible={this.state.showCleanModal} />
-        <ShareBoardModal boardId={this.persist.boardId} visible={this.state.showShareModal} closeModal={this.toggleShareModal} updateCurrentBoard={this.updateBoardId} />
+        <ShareBoardModal location={this.props.location} history={this.props.history} persist={this.persist} visible={this.state.showShareModal} closeModal={this.toggleShareModal} updateCurrentBoard={this.updateBoardId} />
         <Route path='/signin' component={EnterUserModal} />
         <Loader active={this.state.loading} content='Fetching Data ...' />
       </div>

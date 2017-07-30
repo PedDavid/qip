@@ -1,3 +1,4 @@
+// todo: change all instances of Point to SimplePoint
 import { Point } from './../Point'
 import { Rect } from './../Rect'
 import { Figure } from './../Figure'
@@ -63,23 +64,34 @@ export default class Move implements Tool {
     this.movingLine = new Line(this.movingLine.start, {x, y}) // always preserve start point and update final point
   }
 
-  onPressUp (event) {
-    this.onOut(event)
+  onPressUp (event, persist) {
+    this.onOut(event, persist)
   }
 
-  onOut (event) {
-    // const canvasContext = event.target.getContext('2d')
-    // const scale = 1  // TODO(simaovii): eliminate this when using sockets
-    // if (this.lastPoint!=null && this.currentFigureMoving instanceof FigureImage) {
-      // send by websockets currentFigureMoving(id), destPoint, scale?
-    // }
+  onOut (event, persist) {
     if (this.movingLine != null && this.currentFigureMoving instanceof Figure) {
-      // const offsetPoint = new Point(this.movingLine.end.x - this.movingLine.start.x, this.movingLine.end.y - this.movingLine.start.y)
-      // this.grid.moveFigure(this.currentFigureMoving, offsetPoint, canvasContext, scale) // TODO(simaovii): eliminate this when using sockets
-      // send by websockets currentFigureMoving(id), offsetPoint, scale
+      if (persist.connected) {
+        const offsetPoint = new Point(this.movingLine.end.x - this.movingLine.start.x, this.movingLine.end.y - this.movingLine.start.y)
+        const toSend = this.currentFigure.exportWS(
+          persist.boardId,
+          fig => { fig.offsetPoint = offsetPoint }
+        )
+        persist.socket.send(toSend)
+      } else {
+        // move from localstorage
+        const dataFigure = JSON.parse(window.localStorage.getItem('figures'))
+        const toPersist = this.currentFigureMoving.exportLS()
+        let figIdx = dataFigure.findIndex(f => f.tempId === toPersist.tempId)
+        dataFigure[figIdx] = toPersist
+        window.localStorage.setItem('figures', JSON.stringify(dataFigure))
+      }
     }
     this.movingLine = null
     this.currentFigureMoving = null
+  }
+
+  equals (move) {
+    return move instanceof Move
   }
 
   // todo: this function should be in Image Class

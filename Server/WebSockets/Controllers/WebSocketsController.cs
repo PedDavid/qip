@@ -9,6 +9,7 @@ using WebSockets.Operations;
 
 using API.Interfaces.IRepositories;
 using API.Services;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace WebSockets.Controllers {
     [Route("ws")]
@@ -24,11 +25,11 @@ namespace WebSockets.Controllers {
             IFigureIdRepository figureIdRepository, 
             IImageRepository imageRepository, 
             ILineRepository lineRepository, 
-            FigureIdGenerator idGenerator
+            IMemoryCache memoryCache
         ) {
             _sessionManager = sessionManager;
-            _imageOperations = new ImageOperations(imageRepository, idGenerator);
-            _lineOperations = new LineOperations(lineRepository, idGenerator);
+            _imageOperations = new ImageOperations(imageRepository, memoryCache, figureIdRepository);
+            _lineOperations = new LineOperations(lineRepository, memoryCache, figureIdRepository);
 
             _operations = new Dictionary<Models.Action, Operation>() {
                 { Models.Action.CREATE_IMAGE, _imageOperations.CreateImage },

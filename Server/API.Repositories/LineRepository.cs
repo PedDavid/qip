@@ -191,12 +191,14 @@ namespace API.Repositories {
             throw new NotImplementedException();
         }
 
+        // todo (simaovii): alterar a pointWidth para pointStyle, que recebe um json com o estilo. Desta forma, se quisermos alterar o estilo, é só alterar no modelo
+
         //SQL Functions
         private static readonly string SELECT_ALL_LINES = "SELECT id, boardId, isClosedForm, lineStyleId, lineColor FROM dbo.GetLinesInfo(@boardId) ORDER BY id";
-        private static readonly string SELECT_ALL_LINES_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointStyleId, pointWidth FROM dbo.GetLinesPoints(@boardId) ORDER BY id";
+        private static readonly string SELECT_ALL_LINES_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointWidth FROM dbo.GetLinesPoints(@boardId) ORDER BY linePointIdx";
 
         private static readonly string SELECT_LINES = "SELECT id, boardId, isClosedForm, lineStyleId, lineColor FROM dbo.GetLinesInfo(@boardId) WHERE id=@id";
-        private static readonly string SELECT_LINES_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointStyleId, pointWidth FROM dbo.GetLinesPoints(@boardId) WHERE id=@id";
+        private static readonly string SELECT_LINES_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointWidth FROM dbo.GetLinesPoints(@boardId) WHERE id=@id";
 
         //SQL Stored Procedures
         private static readonly string INSERT_LINE = "dbo.InsertNewLine";
@@ -241,8 +243,8 @@ namespace API.Repositories {
                 X = dr.GetInt32(2),
                 Y = dr.GetInt32(3),
                 Idx = dr.GetInt32(4),
-                Style = new PointStyle(dr.GetInt64(5)) {
-                    Width = dr.GetInt32(6)
+                Style = new PointStyle() {
+                    Width = int.Parse(dr.GetString(5))
                 }
             };
         }

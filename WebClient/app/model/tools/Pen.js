@@ -67,33 +67,15 @@ export default class Pen implements Tool {
   }
 
   onPressUp (event, persist) {
+    // todo: passar persistencia para o onOut
     this.grid.addFigure(this.currentFigure)
 
-    // map currentFigure's points to a data object
-    const currentFigureTwin = Object.assign({}, this.currentFigure) // Object.assign() method only copies enumerable and own properties from a source object to a target object
-    currentFigureTwin.points = this.currentFigure.points.map((point, idx) => {
-      return new SimplePoint(point.x, point.y, point.getStyleOf(this.currentFigure.id), idx)
-    })
-
-    // map object so it can be parsed by api
-    // todo: change model to join this
-    currentFigureTwin.tempId = currentFigureTwin.id
-    delete currentFigureTwin.id
-    currentFigureTwin.style = currentFigureTwin.figureStyle
-    delete currentFigureTwin.figureStyle
-    currentFigureTwin.clientId = persist.boardId // todo: why i have to pass this??
-
     if (persist.connected) {
-      const objToSend = {
-        type: 'CREATE_LINE',
-        owner: parseInt(persist.boardId),
-        payload: currentFigureTwin
-      }
-      persist.socket.send(JSON.stringify(objToSend))
+      persist.socket.send(this.currentFigure.exportWS(persist.boardId))
     } else {
       // add to localstorage
       const dataFigure = JSON.parse(window.localStorage.getItem('figures'))
-      dataFigure.push(currentFigureTwin) // it can be push instead of dataFigure[id] because it will not have crashes with external id's because it's only used when there is no connection
+      dataFigure.push(this.currentFigure.exportLS()) // it can be push instead of dataFigure[id] because it will not have crashes with external id's because it's only used when there is no connection
       window.localStorage.setItem('figures', JSON.stringify(dataFigure))
       window.localStorage.setItem('currFigureId', JSON.stringify(this.grid.getCurrentFigureId()))
     }
@@ -113,5 +95,9 @@ export default class Pen implements Tool {
     // Desta forma, se o utilizador voltar à área do canvas com o ponteiro premido, irá desenhar uma nova figura
     const figStyle = new FigureStyle(this.color)
     this.currentFigure = new Figure(figStyle)
+  }
+
+  equals (pen) {
+    return pen instanceof Pen && this.width === pen.width && this.color === pen.color
   }
 }
