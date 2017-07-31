@@ -17,12 +17,20 @@ export default class Canvas extends React.Component {
     }
   }
 
-  shouldComponentUpdate () {
+  shouldComponentUpdate (nexProps) {
+    // if window size increases, canvas size must be updated
+    if (nexProps.width > this.props.width || nexProps.height > this.props.height) {
+      return true
+    }
     return false
   }
 
   render () {
+    const dynamicCanvasSize = {
+      height: this.props.height - 2,
+      width: this.props.width - 2
+    }
     const {onDown, onUp, onMove, onOut, ...props} = this.props
-    return <canvas ref={(canvas) => { this.canvas = canvas }} className={styles.debug} {...props} />
+    return <canvas ref={(canvas) => { this.canvas = canvas }} className={styles.debug} style={dynamicCanvasSize} {...props} />
   }
 }
