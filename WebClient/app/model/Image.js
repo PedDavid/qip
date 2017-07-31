@@ -13,11 +13,11 @@ export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null) {
     const auxImg = document.createElement('img')
     // const auxImg = new Image()
     auxImg.src = src
-    // scale image
-    const scale = auxImg.width / 200 // 200 is de default width
-    width === undefined && (width = auxImg.width === 0 ? 200 : auxImg.width / scale)
-    height === undefined && (height = auxImg.height === 0 ? 200 : auxImg.height / scale)
     auxImg.onload = (e) => {
+      // scale image
+      const scale = auxImg.width / 300 // 200 is de default width
+      width === undefined && (width = auxImg.width === 0 ? 200 : auxImg.width / scale)
+      height === undefined && (height = auxImg.height === 0 ? 200 : auxImg.height / scale)
       img = auxImg
     }
   }
@@ -124,5 +124,48 @@ export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null) {
   }
   this._scaleRight = function (offsetPoint) {
     width = width + offsetPoint.x
+  }
+
+  this.exportWS = function (boardId, extraFunc) {
+    const imageToExport = this.export()
+    imageToExport.tempId = imageToExport.id
+    delete imageToExport.id
+
+    extraFunc != null && extraFunc(imageToExport)
+
+    const objToSend = {
+      type: 'CREATE_IMAGE',
+      owner: parseInt(boardId), // todo: retirar isto daqui
+      payload: imageToExport
+    }
+
+    return JSON.stringify(objToSend)
+  }
+
+  this.exportLS = function () {
+    const imageToExport = this.export()
+    return imageToExport
+  }
+
+  this.export = function () {
+    const currentFigureTwin = Object.assign({}, this) // Object.assign() method only copies enumerable and own properties from a source object to a target object
+    currentFigureTwin.type = 'image'
+    currentFigureTwin.srcPoint = srcPoint
+    currentFigureTwin.src = src
+    currentFigureTwin.width = width
+    currentFigureTwin.height = height
+    return currentFigureTwin
+  }
+
+  this.persist = function (persist, grid) {
+    if (persist.connected) {
+      persist.socket.send(this.exportWS(persist.boardId))
+    } else {
+      // add to localstorage
+      const dataFigure = JSON.parse(window.localStorage.getItem('figures'))
+      dataFigure.push(this.exportLS()) // it can be push instead of dataFigure[id] because it will not have crashes with external id's because it's only used when there is no connection
+      window.localStorage.setItem('figures', JSON.stringify(dataFigure))
+      window.localStorage.setItem('currFigureId', JSON.stringify(grid.getCurrentFigureId()))
+    }
   }
 }

@@ -121,7 +121,9 @@ export default class Board extends React.Component {
   }
   drawImage = (imageSrc) => {
     const newImage = new Image({x: 80, y: 80}, imageSrc)
+    // do not change this order. image must be added to grid first to set the new id
     this.grid.addImage(newImage)
+    newImage.persist(this.persist, this.grid)
     this.grid.draw(this.canvasContext, 1)
   }
   changeCurrentTool = (tool) => {

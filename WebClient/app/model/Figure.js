@@ -13,6 +13,8 @@ export function Figure (figureStyle, id = null) {
     return this.id.toString()
   }
 
+  // todo: por estas duas funções a funcionarem ao mesmo tempo. quando uma é pedida, a outra é feita, evitando
+  // um ciclo por todos os pontos da figura. Quando a figura fôr movida, é necessário fazer reset
   this.getTopLeftPoint = function () {
     let mostUpperLeftPointX = null
     let mostUpperLeftPointY = null
@@ -161,6 +163,8 @@ export function Figure (figureStyle, id = null) {
       return new SimplePoint(point.x, point.y, point.getStyleOf(this.id), idx)
     })
 
+    currentFigureTwin.type = 'figure'
+
     // map object so it can be parsed by api
     // todo: change model to join this
     currentFigureTwin.style = currentFigureTwin.figureStyle
@@ -207,8 +211,80 @@ export function Figure (figureStyle, id = null) {
     return false
   }
 
-  this.scale = function (scaleType, offsetPoint) {
+  this.scale = function (scaleType, offsetPoint, grid, canvasContext) {
+    switch (scaleType) {
+      case 'l':
+        this._scaleHorizontal(offsetPoint, grid, canvasContext, 1)
+        break
+      case 'r':
+        this._scaleHorizontal(offsetPoint, grid, canvasContext, 0)
+        break
+      case 't':
+        this._scaleVertical(offsetPoint, grid, canvasContext, 0)
+        break
+      case 'b':
+        this._scaleVertical(offsetPoint, grid, canvasContext, 1)
+        break
+      case 'tl':
+        this._scaleHorizontal(offsetPoint, grid, canvasContext, 1)
+        this._scaleVertical(offsetPoint, grid, canvasContext, 0)
+        break
+      case 'tr':
+        this._scaleHorizontal(offsetPoint, grid, canvasContext, 0)
+        this._scaleVertical(offsetPoint, grid, canvasContext, 0)
+        break
+      case 'bl':
+        this._scaleHorizontal(offsetPoint, grid, canvasContext, 1)
+        this._scaleVertical(offsetPoint, grid, canvasContext, 1)
+        break
+      case 'br':
+        this._scaleHorizontal(offsetPoint, grid, canvasContext, 0)
+        this._scaleVertical(offsetPoint, grid, canvasContext, 1)
+        break
+    }
+  }
 
+  this._scaleVertical = function (offsetPoint, grid, canvasContext, direction) {
+    // Coordinate x of the farest point to the user's input point
+    let userFarestPointY = direction === 1 ? this.getTopLeftPoint().y : this.getBottomRightPoint().y
+    // Coordinate x of the closest point to the user's input point
+    let userNearestPointY = direction === 1 ? this.getBottomRightPoint().y : this.getTopLeftPoint().y
+    const userInputY = offsetPoint.y + userNearestPointY // X coordinate of point where the user is moving selection
+    const maxDiffBetUserAndNearest = userInputY - userNearestPointY // get the difference between nearest point and the user's input point
+
+    // for each point, it will be applied the rule of three, so it can be calculated the offset each point should move.
+    // if the difference between the X coordinate of the nearest point to user's input, and the farest point D,
+    // we know that points with distance D, to the farest point to user's input, move maxDiffBetUserAndNearest
+    // so the difference between the X coordinate of any other point and the farest point to user's input times maxDiffBetUserAndNearest divided by D
+    // gives the distance each point should move
+    grid.moveLine(this, (point) => {
+      let y = point.y
+      if (point.y - userFarestPointY !== 0) {
+        const scale = ((point.y - userFarestPointY) * maxDiffBetUserAndNearest) / (userNearestPointY - userFarestPointY)
+        y = point.y + scale
+      }
+      return grid.getOrCreatePoint(point.x, y)
+    }, canvasContext, 1)
+  }
+
+  this._scaleHorizontal = function (offsetPoint, grid, canvasContext, direction) {
+    // Coordinate x of the farest point to the user's input point
+    let userFarestPointX = direction === 1 ? this.getTopLeftPoint().x : this.getBottomRightPoint().x
+    // Coordinate x of the closest point to the user's input point
+    let userNearestPointX = direction === 1 ? this.getBottomRightPoint().x : this.getTopLeftPoint().x
+    const userInputX = offsetPoint.x + userNearestPointX // X coordinate of point where the user is moving selection
+    const maxDiffBetUserAndNearest = userInputX - userNearestPointX // get the difference between nearest point and the user's input point
+
+    // for each point, it will be applied the rule of three, so it can be calculated
+    // the offset each point should move
+    grid.moveLine(this, (point) => {
+      let x = point.x
+      if (point.x - userNearestPointX !== 0) {
+        const scale = ((point.x - userNearestPointX) * maxDiffBetUserAndNearest) / (userFarestPointX - userNearestPointX)
+        x = point.x + scale
+      }
+      return grid.getOrCreatePoint(x, point.y)
+    }, canvasContext, 1)
   }
 }
 

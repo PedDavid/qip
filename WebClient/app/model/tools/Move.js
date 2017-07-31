@@ -11,7 +11,6 @@ export default class Move implements Tool {
     this.grid = grid
     this.movingLine = null
     this.currentFigureMoving = null
-    this.lastFigureMoving = null
     this.scaling = false
   }
 
@@ -21,28 +20,40 @@ export default class Move implements Tool {
     const y = event.offsetY
 
     // get line figures
-    const figures = this.grid.getNearestFigures(x / scale, y / scale)
-      .concat(this.grid.getImagesArray())
-      .sort((fig1, fig2) => Math.abs(fig2.id) - Math.abs(fig1.id)) // inverse order to remove the newest first
-      .filter(lin => lin.containsPoint(new SimplePoint(x, y), event, this.grid, scale))
+    if (this.currentFigureMoving === null) {
+      const figures = this.grid.getNearestFigures(x / scale, y / scale)
+        .concat(this.grid.getImagesArray())
+        .sort((fig1, fig2) => Math.abs(fig2.id) - Math.abs(fig1.id)) // inverse order to remove the newest first
+        .filter(lin => lin.containsPoint(new SimplePoint(x, y), event, this.grid, scale))
 
-    this.currentFigureMoving = figures[0]
+      this.currentFigureMoving = figures[0]
+
+      // make selection here so it does not repeat
+      if (this.currentFigureMoving != null) {
+        const canvasContext = event.target.getContext('2d')
+        this.selection = new Selection(this.currentFigureMoving.getTopLeftPoint(), this.currentFigureMoving.getBottomRightPoint(), canvasContext)
+        this.selection.select()
+      }
+    }
+
+    // check if user tap in the scaling circles
     if (this.currentFigureMoving != null) {
-      const canvasContext = event.target.getContext('2d')
-      this.selection = new Selection(this.currentFigureMoving.getTopLeftPoint(), this.currentFigureMoving.getBottomRightPoint(), canvasContext)
-      this.selection.select()
-      // check if user has the pointer inside some point to scale figure
       this.scaling = this.selection.isScaling(new SimplePoint(x, y))
+    }
+
+    if (this.selection != null && this.selection.containsPoint(new SimplePoint(x, y))) {
+      const point = new SimplePoint(x, y)
+      this.movingLine = new Line(point, point)
     } else {
+      this.currentFigureMoving = null
+      this.selection = null
       const canvasContext = event.target.getContext('2d')
       this.grid.draw(canvasContext, 1) // call draw to reset selection rect
     }
-    const point = new SimplePoint(x, y)
-    this.movingLine = new Line(point, point)
   }
 
   onSwipe (event, scale) {
-    if (event.buttons <= 0) {
+    if (event.buttons <= 0 || this.movingLine === null) {
       return
     }
     const x = event.offsetX
@@ -53,7 +64,7 @@ export default class Move implements Tool {
       const offsetPoint = new SimplePoint(
         x - this.movingLine.end.x,
         y - this.movingLine.end.y)
-      this.currentFigureMoving.scale(this.scaling, offsetPoint)
+      this.currentFigureMoving.scale(this.scaling, offsetPoint, this.grid, canvasContext)
       this.grid.draw(canvasContext, 1)
     } else if (this.movingLine != null && this.currentFigureMoving instanceof Image) {
       const srcPoint = this.currentFigureMoving.getSrcPoint()
@@ -63,7 +74,9 @@ export default class Move implements Tool {
       this.grid.moveImage(this.currentFigureMoving, destPoint, canvasContext, scale)
     } else if (this.movingLine != null && this.currentFigureMoving instanceof Figure) {
       const offsetPoint = new SimplePoint(x - this.movingLine.end.x, y - this.movingLine.end.y)
-      this.grid.moveLine(this.currentFigureMoving, offsetPoint, canvasContext, scale)
+      this.grid.moveLine(this.currentFigureMoving, point => {
+        return this.grid.getOrCreatePoint(point.x + offsetPoint.x, point.y + offsetPoint.y)
+      }, canvasContext, scale)
     }
     this.movingLine = new Line(this.movingLine.start, {x, y}) // always preserve start point and update final point
 
@@ -78,7 +91,7 @@ export default class Move implements Tool {
   }
 
   onOut (event, persist) {
-    if (this.movingLine != null && this.currentFigureMoving instanceof Figure) {
+    if (this.movingLine != null) {
       if (persist.connected) {
         const offsetPoint = new SimplePoint(this.movingLine.end.x - this.movingLine.start.x, this.movingLine.end.y - this.movingLine.start.y)
         const toSend = this.currentFigure.exportWS(
@@ -98,8 +111,6 @@ export default class Move implements Tool {
 
     this.movingLine = null
     this.scaling = false
-    this.lastFigureMoving = this.currentFigureMoving
-    this.currentFigureMoving = null
   }
 
   equals (move) {

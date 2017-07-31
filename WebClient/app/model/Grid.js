@@ -73,7 +73,7 @@ export default function Grid (initialFigures, currIdx) {
     let points = []
 
     for (let i = 0; i <= count; ++i) {
-      points.push(new Point(point1.x + i * d * Math.cos(fi), point1.y + i * d * Math.sin(fi)))
+      points.push(new SimplePoint(point1.x + i * d * Math.cos(fi), point1.y + i * d * Math.sin(fi)))
     }
 
     return points
@@ -94,7 +94,7 @@ export default function Grid (initialFigures, currIdx) {
   // This function adds a point to grid if it does not exists already.
   // Therefore, it needs to know what value in the array is nearest to the value that will be inserted
   this.getOrCreatePoint = function (x, y) {
-    const newPoint = new Point(Math.round(x), Math.round(y))
+    const newPoint = new Point(x, y)
     const newGridNode = new GridNode(x, [newPoint])
     if (grid.length === 0) {
       return insertIntoArray(grid, 0, newGridNode).height[0]
@@ -187,9 +187,7 @@ export default function Grid (initialFigures, currIdx) {
     this.draw(context, currScale)
   }
 
-  this.moveLine = function (line, destPoint, context, scale) {
-    const destPointOffsetX = destPoint.x
-    const destPointOffsetY = destPoint.y
+  this.moveLine = function (line, getNewPointFunc, context, scale) {
     // criar todos os novos pontos novamente, com as novas posições
     let pointsClone = line.points.map(point => {
       return new SimplePoint(point.x, point.y, point.getStyleOf(line.id))
@@ -200,7 +198,7 @@ export default function Grid (initialFigures, currIdx) {
     line.points.forEach(point => point.removeFigure(line.id)) // remover figura de todos os seus pontos
 
     pointsClone = pointsClone.map(point => {
-      const newPoint = this.getOrCreatePoint(point.x + destPointOffsetX, point.y + destPointOffsetY)
+      const newPoint = getNewPointFunc(point)
       newPoint.addFigure(line.id, point.style)
       return newPoint
     })
@@ -242,8 +240,8 @@ export default function Grid (initialFigures, currIdx) {
     if (Array.from(figures.values()).filter(fig => fig instanceof Figure).length < 1) {
       return []
     }
-    const x = Math.round(pointX)
-    const y = Math.round(pointY)
+    const x = pointX
+    const y = pointY
     let figuresToRet = new Set()
 
     const minX = findNearest(grid, x - maxLinePart, arrayNode => arrayNode.val)
@@ -267,10 +265,17 @@ export default function Grid (initialFigures, currIdx) {
   }
 
   // map initial figures to Figure Objects and add them to figure array
-  initialFigures.forEach(initFig => {
-    const figStyle = new FigureStyle(initFig.style.color, initFig.style.scale)
-    const newFigure = new Figure(figStyle, initFig.id)
-    newFigure.points = initFig.points
-    this.addFigure(newFigure)
-  })
+  initialFigures
+    .sort((fig1, fig2) => Math.abs(fig1.id) - Math.abs(fig2.id))
+    .forEach(initFig => {
+      if (initFig.type === 'figure') {
+        const figStyle = new FigureStyle(initFig.style.color, initFig.style.scale)
+        const newFigure = new Figure(figStyle, initFig.id)
+        newFigure.points = initFig.points
+        this.addFigure(newFigure)
+      } else if (initFig.type === 'image') {
+        const newImage = new Image(initFig.srcPoint, initFig.src, initFig.width, initFig.height, initFig.id)
+        this.addImage(newImage)
+      }
+    })
 }
