@@ -49,7 +49,8 @@
       "describe",
       "it",
       "expect",
-      "WebSocket"
+      "WebSocket",
+      "FileReader"
     ]
   },
   "jest": {

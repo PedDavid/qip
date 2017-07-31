@@ -2,9 +2,10 @@ import { findNearest } from './../util/Math'
 import { Point, PointStyle } from './Point'
 import { Figure, FigureStyle } from './Figure'
 import { SimplePoint } from './SimplePoint'
+import { Image } from './Image'
 
 export default function Grid (initialFigures, currIdx) {
-  let figures = new Map()    // TODO(simaovii): Change to hashmap
+  let figures = new Map()
   let currFigureId = currIdx
 
   // return the new figure idx. If there is already the next idx, return the idx plus 0.1. This is because the concurrency
@@ -72,7 +73,7 @@ export default function Grid (initialFigures, currIdx) {
     let points = []
 
     for (let i = 0; i <= count; ++i) {
-      points.push(new Point(point1.x + i * d * Math.cos(fi), point1.y + i * d * Math.sin(fi)))
+      points.push(new SimplePoint(point1.x + i * d * Math.cos(fi), point1.y + i * d * Math.sin(fi)))
     }
 
     return points
@@ -93,7 +94,7 @@ export default function Grid (initialFigures, currIdx) {
   // This function adds a point to grid if it does not exists already.
   // Therefore, it needs to know what value in the array is nearest to the value that will be inserted
   this.getOrCreatePoint = function (x, y) {
-    const newPoint = new Point(Math.round(x), Math.round(y))
+    const newPoint = new Point(x, y)
     const newGridNode = new GridNode(x, [newPoint])
     if (grid.length === 0) {
       return insertIntoArray(grid, 0, newGridNode).height[0]
@@ -144,6 +145,7 @@ export default function Grid (initialFigures, currIdx) {
     if (figure.id === null) {
       figure.id = this.getNewFigureIdx()
     }
+
     let prev = null
     const auxPoints = figure.points
     figure.points = [] // must be that way because in forEach updateMaxLinePart is also adding points to figure
@@ -158,6 +160,15 @@ export default function Grid (initialFigures, currIdx) {
       prev = gridPoint
     })
     figures.set(figure.id, figure)
+    console.log('inserted new figure with id ' + figure.id)
+  }
+
+  this.addImage = function (image) {
+    if (image.id === null) {
+      image.id = this.getNewFigureIdx()
+    }
+
+    figures.set(image.id, image)
   }
 
   this.removeFigureFromGrid = function (figureId) {
@@ -176,25 +187,23 @@ export default function Grid (initialFigures, currIdx) {
     this.draw(context, currScale)
   }
 
-  this.moveFigure = function (figure, destPoint, context, scale) {
-    const destPointOffsetX = destPoint.x
-    const destPointOffsetY = destPoint.y
+  this.moveLine = function (line, getNewPointFunc, context, scale) {
     // criar todos os novos pontos novamente, com as novas posições
-    let pointsClone = figure.points.map(point => {
-      return new SimplePoint(point.x, point.y, point.getStyleOf(figure.id))
+    let pointsClone = line.points.map(point => {
+      return new SimplePoint(point.x, point.y, point.getStyleOf(line.id))
     })
 
     // nota: não tentar otimizar sem ver os problemas - é necessário estas variáveis e ordem de operações
     // é necessário este forEach adicional pois as figuras são removidas dos pontos anteriores. Estava a haver conflitos com os pontos criados, que estavam a remover a figura do ponto anterior (mas esse ponto já estava a ser usado na nova figura)
-    figure.points.forEach(point => point.removeFigure(figure.id)) // remover figura de todos os seus pontos
+    line.points.forEach(point => point.removeFigure(line.id)) // remover figura de todos os seus pontos
 
     pointsClone = pointsClone.map(point => {
-      const newPoint = this.getOrCreatePoint(point.x + destPointOffsetX, point.y + destPointOffsetY)
-      newPoint.addFigure(figure.id, point.style)
+      const newPoint = getNewPointFunc(point)
+      newPoint.addFigure(line.id, point.style)
       return newPoint
     })
 
-    figure.points = pointsClone // reset points from figure
+    line.points = pointsClone // reset points from figure
     this.draw(context, scale)
   }
 
@@ -203,7 +212,7 @@ export default function Grid (initialFigures, currIdx) {
     context.clearRect(0, 0, width, height)
 
     Array.from(figures.values())
-        .sort((fig1, fig2) => fig1.id - fig2.id)
+        .sort((fig1, fig2) => Math.abs(fig1.id) - Math.abs(fig2.id))
         .forEach((figure) => figure.draw(context, currScale))
   }
 
@@ -211,26 +220,30 @@ export default function Grid (initialFigures, currIdx) {
     return Array.from(figures.values())
   }
 
+  this.getImagesArray = function () {
+    return Array.from(figures.values())
+      .filter(fig => fig instanceof Image)
+  }
+
   this.updateMapFigure = function (previousId, figure) {
     figures.delete(previousId)
     figures.set(figure.id, figure)
-  }
-
-  this.getImageFigures = function () {
-    /* Object.entries(figures)
-      .map(([figId, fig]) => fig)
-      .filter(fig => fig instanceof FigureImage) */
   }
 
   this.hasFigure = function (figureId) {
     return figures.has(figureId)
   }
 
+  // todo : change algorith to include images. that way is not necessary to call getImages() in Move Tool
   this.getNearestFigures = function (pointX, pointY) {
-    const x = Math.round(pointX)
-    const y = Math.round(pointY)
+    // todo: call getFigures()
+    if (Array.from(figures.values()).filter(fig => fig instanceof Figure).length < 1) {
+      return []
+    }
+    const x = pointX
+    const y = pointY
     let figuresToRet = new Set()
-    // BUG(peddavid): throws error if grid is empty
+
     const minX = findNearest(grid, x - maxLinePart, arrayNode => arrayNode.val)
     if (grid[minX].val < x - maxLinePart * 2) { // margin
       return []
@@ -252,10 +265,17 @@ export default function Grid (initialFigures, currIdx) {
   }
 
   // map initial figures to Figure Objects and add them to figure array
-  initialFigures.forEach(initFig => {
-    const figStyle = new FigureStyle(initFig.style.color, initFig.style.scale)
-    const newFigure = new Figure(figStyle, initFig.id)
-    newFigure.points = initFig.points
-    this.addFigure(newFigure)
-  })
+  initialFigures
+    .sort((fig1, fig2) => Math.abs(fig1.id) - Math.abs(fig2.id))
+    .forEach(initFig => {
+      if (initFig.type === 'figure') {
+        const figStyle = new FigureStyle(initFig.style.color, initFig.style.scale)
+        const newFigure = new Figure(figStyle, initFig.id)
+        newFigure.points = initFig.points
+        this.addFigure(newFigure)
+      } else if (initFig.type === 'image') {
+        const newImage = new Image(initFig.srcPoint, initFig.src, initFig.width, initFig.height, initFig.id)
+        this.addImage(newImage)
+      }
+    })
 }

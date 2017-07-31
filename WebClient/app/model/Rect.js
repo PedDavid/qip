@@ -57,7 +57,7 @@ export function Rect (lineP1, lineP2, width, canvasContext) {
     // calculate angle of rectangle
     const rad = calculateRadsWithX(lineP1, lineP2)
     canvasContext.beginPath()
-    canvasContext.strokeStyle = 'red'
+    canvasContext.strokeStyle = 'rgba(0,0,0,0)'
     canvasContext.save()
     canvasContext.translate(x, y)
     canvasContext.rotate(rad)
