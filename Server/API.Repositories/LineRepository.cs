@@ -140,7 +140,7 @@ namespace API.Repositories {
 
                     return lines;
                 }
-                catch(Exception e) {
+                catch(Exception) {
                     tran.Rollback();
                     throw;
                 }

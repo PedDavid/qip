@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace API.Interfaces.IRepositories {
     public interface IFigureIdRepository {
-        long GetMaxId();
+        Task<long> GetMaxIdAsync();
     }
 }

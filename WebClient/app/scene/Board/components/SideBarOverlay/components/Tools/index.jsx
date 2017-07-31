@@ -20,6 +20,17 @@ export default class Tools extends React.Component {
     top: 25 - halfbtnSize,
     left: this._scaleBtnPosition(this.props.canvasSize)
   }
+  onOpenImage = (event) => {
+    var file = event.target.files[0]
+    if (!file) {
+      return
+    }
+    var reader = new FileReader()
+    reader.onload = (event) => {
+      this.props.drawImage(event.target.result)
+    }
+    reader.readAsDataURL(file)
+  }
   toggleTools = () => this.setState(prev => { return {visible: !prev.visible} })
 
   componentWillReceiveProps (nexProps) {
@@ -69,6 +80,14 @@ export default class Tools extends React.Component {
               </Grid.Column>
             </Grid.Row>
           ))}
+          <Grid.Row columns={1} className={styles.toolRow} style={{padding: '0px'}}>
+            <Grid.Column style={{padding: '0px'}}>
+              <label htmlFor='file-upload'>
+                <GenericTool content='image' />
+              </label>
+              <input accept='image/*' id='file-upload' onChange={this.onOpenImage} style={{zIndex: 1000, visibility: 'hidden'}} type='file' />
+            </Grid.Column>
+          </Grid.Row>
           <Grid.Row columns={1} className={styles.toolRow} style={{padding: '0px'}}>
             <Grid.Column style={{padding: '0px'}}>
               <GenericTool content='trash' onClickTool={this.props.cleanCanvas} />

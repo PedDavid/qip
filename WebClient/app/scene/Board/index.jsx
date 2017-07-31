@@ -18,6 +18,7 @@ import styles from './styles.scss'
 import Pen from './../../model/tools/Pen'
 import Eraser from './../../model/tools/Eraser'
 import Grid from './../../model/Grid'
+import {Image} from './../../model/Image'
 import ToolsConfig from './../../model/ToolsConfig'
 import defaultToolsConfig from './../../public/configFiles/defaultTools'
 import {Persist, PersistType} from './../../util/Persist'
@@ -139,6 +140,13 @@ export default class Board extends React.Component {
         prevState.favorites.splice(index, 1)
       }
     })
+  }
+  drawImage = (imageSrc) => {
+    const newImage = new Image({x: 80, y: 80}, imageSrc)
+    // do not change this order. image must be added to grid first to set the new id
+    this.grid.addImage(newImage)
+    newImage.persist(this.persist, this.grid)
+    this.grid.draw(this.canvasContext, 1)
   }
   changeCurrentTool = (tool) => {
     this.toolsConfig.updatePrevTool(this.state.currTool)

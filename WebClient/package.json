@@ -8,8 +8,10 @@
   "license": "MIT",
   "scripts": {
     "build": "webpack",
-    "start": "webpack-dev-server",
-    "test": "standard && jest"
+    "dev": "webpack-dev-server",
+    "test": "standard && jest",
+    "heroku-postbuild": "webpack -p",
+    "start": "node server.js"
   },
   "devDependencies": {
     "babel-core": "^6.24.1",
@@ -23,10 +25,12 @@
     "enzyme": "^2.8.2",
     "eslint-plugin-flowtype": "^2.33.0",
     "identity-obj-proxy": "^3.0.0",
+    "isomorphic-fetch": "^2.2.1",
     "jest": "^20.0.4",
     "node-sass": "^4.5.3",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
+    "react-router-dom": "^4.1.1",
     "react-test-renderer": "^15.5.4",
     "sass-loader": "^6.0.6",
     "semantic-ui-react": "^0.68.4",
@@ -34,9 +38,7 @@
     "standard-loader": "^6.0.1",
     "style-loader": "^0.18.1",
     "webpack": "^2.6.1",
-    "webpack-dev-server": "^2.4.5",
-    "react-router-dom": "^4.1.1",
-    "isomorphic-fetch": "^2.2.1"
+    "webpack-dev-server": "^2.4.5"
   },
   "standard": {
     "plugins": [
@@ -47,12 +49,16 @@
       "describe",
       "it",
       "expect",
-      "WebSocket"
+      "WebSocket",
+      "FileReader"
     ]
   },
   "jest": {
     "moduleNameMapper": {
       "\\.s?css$": "identity-obj-proxy"
     }
+  },
+  "dependencies": {
+    "express": "^4.15.3"
   }
 }
