@@ -36,6 +36,7 @@ export default class Board extends React.Component {
     showUserModal: false,
     showShareModal: false,
     currTool: defaultPen,
+    canvasSize: {width: 0, height: 0},
     favorites: [], // obtain favorites from server
     loading: true
   }
@@ -49,10 +50,31 @@ export default class Board extends React.Component {
     onOut: event => this.state.currTool.onOut(event, this.persist)
   }
 
+  componentWillMount () {
+    console.log(window.innerWidth)
+    console.log(window.innerHeight)
+    this.setState({
+      canvasSize: {
+        width: window.innerWidth,
+        height: window.innerHeight
+      }
+    })
+  }
+
   componentDidMount () {
     const boardId = this.props.match.params.board
 
     this.getInitialBoard(boardId)
+
+    window.addEventListener('resize', event => {
+      this.setState({
+        canvasSize: {
+          width: window.innerWidth,
+          height: window.innerHeight
+        }
+      })
+      this.grid.draw(this.canvasContext, 1)
+    })
   }
 
   getInitialBoard (boardId) {
@@ -149,8 +171,9 @@ export default class Board extends React.Component {
       <div onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.xpto}>
         <SideBarOverlay grid={this.grid} changeCurrentTool={this.changeCurrentTool.bind(this)} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
           currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite.bind(this)}
-          removeFavorite={this.removeFavorite.bind(this)} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}>
-          <Canvas ref={this.refCallback} width={1200} height={800} {...this.listeners}>
+          removeFavorite={this.removeFavorite.bind(this)} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}
+          canvasSize={this.state.canvasSize}>
+          <Canvas ref={this.refCallback} width={this.state.canvasSize.width} height={this.state.canvasSize.height} {...this.listeners}>
             HTML5 Canvas not supported
           </Canvas>
         </SideBarOverlay>
