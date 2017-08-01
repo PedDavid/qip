@@ -39,6 +39,7 @@ export default class Board extends React.Component {
     showUserModal: false,
     showShareModal: false,
     currTool: defaultPen,
+    canvasSize: {width: 0, height: 0},
     favorites: [], // obtain favorites from server
     loading: true
   }
@@ -52,10 +53,31 @@ export default class Board extends React.Component {
     onOut: event => this.state.currTool.onOut(event, this.persist)
   }
 
+  componentWillMount () {
+    console.log(window.innerWidth)
+    console.log(window.innerHeight)
+    this.setState({
+      canvasSize: {
+        width: window.innerWidth,
+        height: window.innerHeight
+      }
+    })
+  }
+
   componentDidMount () {
     const boardId = this.props.match.params.board
 
     this.getInitialBoard(boardId)
+
+    window.addEventListener('resize', event => {
+      this.setState({
+        canvasSize: {
+          width: window.innerWidth,
+          height: window.innerHeight
+        }
+      })
+      this.grid.draw(this.canvasContext, 1)
+    })
   }
 
   getInitialBoard (boardId) {
@@ -160,8 +182,8 @@ export default class Board extends React.Component {
         <SideBarOverlay grid={this.grid} changeCurrentTool={this.changeCurrentTool.bind(this)} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
           currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite.bind(this)}
           removeFavorite={this.removeFavorite.bind(this)} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}
-          drawImage={this.drawImage} auth={auth}>
-          <Canvas ref={this.refCallback} width={1200} height={800} {...this.listeners}>
+          drawImage={this.drawImage} canvasSize={this.state.canvasSize} auth={auth}>
+          <Canvas ref={this.refCallback} width={this.state.canvasSize.width} height={this.state.canvasSize.height} {...this.listeners}>
             HTML5 Canvas not supported
           </Canvas>
         </SideBarOverlay>

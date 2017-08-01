@@ -17,7 +17,7 @@ export default class Eraser implements Tool {
 
     this.erase(coord.x, coord.y, currScale, event.target)
 
-    const point = new Point(Math.round(coord.x), Math.round(coord.y))
+    const point = new Point(coord.x, coord.y)
     this.eraseLine = new Line(null, point)
   }
 
@@ -33,7 +33,7 @@ export default class Eraser implements Tool {
       return
     }
 
-    const point = new Point(Math.round(coord.x), Math.round(coord.y))
+    const point = new Point(coord.x, coord.y)
     this.eraseLine = new Line(previousPoint, point)
     this.erase(coord.x, coord.y, currScale, event.target)
   }
