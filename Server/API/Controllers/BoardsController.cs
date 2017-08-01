@@ -1,79 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using IODomain.Output;
+﻿using API.Filters;
+using API.Interfaces.IServices;
 using IODomain.Input;
-using IODomain.Extensions;
-using API.Interfaces.IRepositories;
-using API.Domain;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using IODomain.Output;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace API.Controllers {
+    [ServicesExceptionFilter]
     [Route("api/[controller]")]
     public class BoardsController : Controller {
-        private readonly IBoardRepository _boardRepository;
+        private readonly IBoardService _boardService;
 
-        public BoardsController(IBoardRepository boardRepository) {
-            this._boardRepository = boardRepository;
+        public BoardsController(IBoardService boardService) {
+            _boardService = boardService;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<OutBoard>> GetAll(string search, long index = 0, long size = 10) {
-            IEnumerable<Board> boards = await _boardRepository.GetAllAsync(search, index, size);
-
-            return boards.Select(BoardExtensions.Out);
+        public Task<IEnumerable<OutBoard>> GetAllAsync(string search, long index = 0, long size = 10) {
+            return _boardService.GetAllAsync(index, size, search);
         }
 
         [HttpGet("{id}", Name = "GetBoard")]
-        public async Task<IActionResult> GetById(long id) {
-            Board board = await _boardRepository.FindAsync(id);
-            if(board == null) {
-                return NotFound();
-            }
-            return new ObjectResult(board.Out());
+        public Task<OutBoard> GetByIdAsync(long id) {
+            return _boardService.GetAsync(id);
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] InBoard inputBoard) {
-            if(inputBoard == null) {
-                return BadRequest();
-            }
-
-            Board board = new Board().In(inputBoard);
-            long id = await _boardRepository.AddAsync(board);
-
-            inputBoard.Id = id;
-            return CreatedAtRoute("GetBoard", new { id = id }, inputBoard);
+            OutBoard board = await _boardService.CreateAsync(inputBoard);
+            return CreatedAtRoute("GetBoard", new { id = board.Id }, board);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(long id, [FromBody] InBoard inputBoard) {
-            if(inputBoard == null || inputBoard.Id != id) {
-                return BadRequest();
-            }
-
-            Board board = await _boardRepository.FindAsync(id);
-            if(board == null) {
-                return NotFound();
-            }
-
-            board.In(inputBoard);
-
-            await _boardRepository.UpdateAsync(board);
+            await _boardService.UpdateAsync(id, inputBoard);
             return new NoContentResult();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(long id) {
-            Board board = await _boardRepository.FindAsync(id);
-            if(board == null) {
-                return NotFound();
-            }
-
-            await _boardRepository.RemoveAsync(id);
+            await _boardService.DeleteAsync(id);
             return new NoContentResult();
         }
     }

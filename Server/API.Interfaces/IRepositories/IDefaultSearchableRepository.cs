@@ -5,6 +5,6 @@ using System.Threading.Tasks;
 
 namespace API.Interfaces.IRepositories {
     public interface IDefaultSearchableRepository<T> : IDefaultRepository<T> {
-        Task<IEnumerable<T>> GetAllAsync(string search, long index, long size);
+        Task<IEnumerable<T>> GetAllAsync(long index, long size, string search);
     }
 }

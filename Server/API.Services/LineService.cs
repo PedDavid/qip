@@ -1,16 +1,15 @@
-﻿using API.Interfaces.IServices;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using API.Domain;
+using API.Interfaces.IRepositories;
+using API.Interfaces.IServices;
+using API.Interfaces.ServicesExceptions;
+using API.Services.Utils;
+using IODomain.Extensions;
 using IODomain.Input;
 using IODomain.Output;
-using System.Threading.Tasks;
-using API.Interfaces.IRepositories;
-using API.Services.Utils;
-using API.Services.Exceptions;
-using API.Domain;
-using IODomain.Extensions;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace API.Services {
     class LineService : ILineService {

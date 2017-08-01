@@ -57,7 +57,7 @@ namespace API.Repositories {
             return _queryTemplate.QueryAsync(SELECT_ALL, parameters, GetBoard);
         }
 
-        public Task<IEnumerable<Board>> GetAllAsync(string search, long index, long size) {
+        public Task<IEnumerable<Board>> GetAllAsync(long index, long size, string search) {
             if(search == null)
                 return GetAllAsync(index, size);
 

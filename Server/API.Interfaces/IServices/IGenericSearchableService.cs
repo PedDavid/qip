@@ -5,6 +5,6 @@ using System.Threading.Tasks;
 
 namespace API.Interfaces.IServices {
     public interface IGenericSearchableService<I,O> : IGenericService<I, O> {
-        Task<IEnumerable<O>> GetAllAsync(string search, long index, long size);
+        Task<IEnumerable<O>> GetAllAsync(long index, long size, string search);
     }
 }

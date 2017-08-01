@@ -1,16 +1,15 @@
-﻿using API.Interfaces.IServices;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using API.Domain;
+using API.Interfaces.IRepositories;
+using API.Interfaces.IServices;
+using API.Interfaces.ServicesExceptions;
+using API.Services.Utils;
+using IODomain.Extensions;
 using IODomain.Input;
 using IODomain.Output;
-using System.Threading.Tasks;
-using API.Domain;
-using IODomain.Extensions;
-using API.Interfaces.IRepositories;
-using API.Services.Exceptions;
+using System;
+using System.Collections.Generic;
 using System.Linq;
-using API.Services.Utils;
+using System.Threading.Tasks;
 
 namespace API.Services {
     class UsersBoardsService : IUsersBoardsService {
@@ -61,13 +60,13 @@ namespace API.Services {
             await _usersBoardsRepository.RemoveAsync(boardId, userId);
         }
 
-        public async Task<IEnumerable<OutUserBoard_Board>> GetAllBoardsAsync(long userId, string search, long index, long size) {
+        public async Task<IEnumerable<OutUserBoard_Board>> GetAllBoardsAsync(long userId, long index, long size, string search) {
             IEnumerable<UserBoard_Board> userBoards = await _usersBoardsRepository.GetAllBoardsAsync(userId, index, size, search);
 
             return userBoards.Select(UserBoard_BoardExtensions.Out);
         }
 
-        public async Task<IEnumerable<OutUserBoard_User>> GetAllUsersAsync(long boardId, string search, long index, long size) {
+        public async Task<IEnumerable<OutUserBoard_User>> GetAllUsersAsync(long boardId, long index, long size, string search) {
             IEnumerable<UserBoard_User> userBoards = await _usersBoardsRepository.GetAllUsersAsync(boardId, index, size, search);
 
             return userBoards.Select(UserBoard_UserExtensions.Out);

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace API.Interfaces.IServices {
     public interface IUsersBoardsService {
-        Task<IEnumerable<OutUserBoard_User>> GetAllUsersAsync(long boardId, string search, long index, long size);
+        Task<IEnumerable<OutUserBoard_User>> GetAllUsersAsync(long boardId, long index, long size, string search);
 
         Task<OutUserBoard_User> GetUserAsync(long boardId, long userId);
 
@@ -17,7 +17,7 @@ namespace API.Interfaces.IServices {
 
         Task DeleteAsync(long boardId, long userId);
 
-        Task<IEnumerable<OutUserBoard_Board>> GetAllBoardsAsync(long userId, string search, long index, long size);
+        Task<IEnumerable<OutUserBoard_Board>> GetAllBoardsAsync(long userId, long index, long size, string search);
 
         Task<OutUserBoard_Board> GetBoardAsync(long userId, long boardId);
 

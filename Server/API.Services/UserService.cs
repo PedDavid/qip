@@ -1,16 +1,15 @@
-﻿using API.Interfaces.IServices;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using API.Domain;
+using API.Interfaces.IRepositories;
+using API.Interfaces.IServices;
+using API.Interfaces.ServicesExceptions;
+using API.Services.Utils;
+using IODomain.Extensions;
 using IODomain.Input;
 using IODomain.Output;
-using System.Threading.Tasks;
-using API.Domain;
-using IODomain.Extensions;
-using API.Interfaces.IRepositories;
+using System;
+using System.Collections.Generic;
 using System.Linq;
-using API.Services.Exceptions;
-using API.Services.Utils;
+using System.Threading.Tasks;
 
 namespace API.Services {
     public class UserService : IUserService {
@@ -56,16 +55,16 @@ namespace API.Services {
             await _userRepository.RemoveAsync(id);
         }
 
-        public async Task<IEnumerable<OutUser>> GetAllAsync(string search, long index = 0, long size = 10) {
+        public async Task<IEnumerable<OutUser>> GetAllAsync(long index, long size, string search) {
             if(search == null)
                 return await GetAllAsync(index, size);
 
-            IEnumerable<User> users = await _userRepository.GetAllAsync(search, index, size);
+            IEnumerable<User> users = await _userRepository.GetAllAsync(index, size, search);
 
             return users.Select(UserExtensions.Out);
         }
 
-        public async Task<IEnumerable<OutUser>> GetAllAsync(long index = 0, long size = 10) {
+        public async Task<IEnumerable<OutUser>> GetAllAsync(long index, long size) {
             IEnumerable<User> users = await _userRepository.GetAllAsync(index, size);
 
             return users.Select(UserExtensions.Out);

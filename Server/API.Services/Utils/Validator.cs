@@ -1,11 +1,10 @@
-﻿using API.Services.Exceptions;
-using System;
+﻿using API.Interfaces.ServicesExceptions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace API.Services.Utils {
-    public class Validator<T> {
+    public class Validator<T> {//https://docs.microsoft.com/en-us/aspnet/core/mvc/models/validation -> Pensar em usar em vez desta class
         private readonly ValidatorConfiguration<T> _config;
 
         public Validator(ValidatorConfiguration<T> config) {

@@ -72,7 +72,7 @@ namespace API.Repositories {
             return _queryTemplate.QueryAsync(SELECT_ALL, parameters, GetUser);
         }
 
-        public Task<IEnumerable<User>> GetAllAsync(string search, long index, long size) {
+        public Task<IEnumerable<User>> GetAllAsync(long index, long size, string search) {
             if(search == null)
                 return GetAllAsync(index, size);
 
@@ -170,7 +170,7 @@ namespace API.Repositories {
 
             parameters.Add("@username", SqlDbType.VarChar).Value = username;
 
-            return _queryTemplate.QueryForScalarAsync<bool>(USER_EXISTS, parameters);
+            return _queryTemplate.QueryForScalarAsync<bool>(USERNAME_EXISTS, parameters);
         }
 
         //SQL Commands

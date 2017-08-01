@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace API.Services.Exceptions {
-    class InconsistentRequestException : Exception {
+namespace API.Interfaces.ServicesExceptions {
+    public class InconsistentRequestException : Exception {
         public InconsistentRequestException() : base() {
         }
 

@@ -1,16 +1,15 @@
-﻿using API.Interfaces.IServices;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using API.Domain;
+using API.Interfaces.IRepositories;
+using API.Interfaces.IServices;
+using API.Interfaces.ServicesExceptions;
+using API.Services.Utils;
+using IODomain.Extensions;
 using IODomain.Input;
 using IODomain.Output;
-using System.Threading.Tasks;
-using API.Domain;
-using API.Interfaces.IRepositories;
-using API.Services.Exceptions;
-using IODomain.Extensions;
+using System;
+using System.Collections.Generic;
 using System.Linq;
-using API.Services.Utils;
+using System.Threading.Tasks;
 
 namespace API.Services {
     class BoardService : IBoardService {
@@ -50,11 +49,11 @@ namespace API.Services {
             await _boardRepository.RemoveAsync(id);
         }
 
-        public async Task<IEnumerable<OutBoard>> GetAllAsync(string search, long index, long size) {
+        public async Task<IEnumerable<OutBoard>> GetAllAsync(long index, long size, string search) {
             if(search == null)
                 return await GetAllAsync(index, size);
 
-            IEnumerable<Board> boards = await _boardRepository.GetAllAsync(search, index, size);
+            IEnumerable<Board> boards = await _boardRepository.GetAllAsync(index, size, search);
 
             return boards.Select(BoardExtensions.Out);
         }

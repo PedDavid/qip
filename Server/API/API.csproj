@@ -15,8 +15,4 @@
     <ProjectReference Include="..\IODomain\IODomain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Attributes\" />
-  </ItemGroup>
-
 </Project>
