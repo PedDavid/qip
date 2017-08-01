@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace API.Interfaces.IRepositories {
     public interface IUsersBoardsRepository {
+        Task<bool> ExistsAsync(long boardId, long userId);
+
         Task AddAsync(UserBoard userBoard);
 
         Task<UserBoard> FindAsync(long boardId, long userId);

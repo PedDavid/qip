@@ -27,7 +27,9 @@ namespace API.Services {
 
             Validator<InUser>.Valid(inputUser, GetCreateValidationConfigurations());
 
-            //TODO Check if username is unique
+            if(await _userRepository.UsernameExistsAsync(inputUser.UserName)) {
+                throw new InvalidFieldsException($"The Username {inputUser.UserName} already exists");
+            }
 
             User user = new User().In(inputUser);
             long id = await _userRepository.AddAsync(user);
@@ -47,9 +49,7 @@ namespace API.Services {
         }
 
         public async Task DeleteAsync(long id) {
-            User user = await _userRepository.FindAsync(id);//TODO replace to exists
-
-            if(user == null) {
+            if(!await _userRepository.ExistsAsync(id)) {
                 throw new NotFoundException($"The User with id {id} not exists");
             }
 

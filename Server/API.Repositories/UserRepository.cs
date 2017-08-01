@@ -16,6 +16,14 @@ namespace API.Repositories {
             _queryTemplate = queryTemplate;
         }
 
+        public Task<bool> ExistsAsync(long id) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@id", SqlDbType.BigInt).Value = id;
+
+            return _queryTemplate.QueryForScalarAsync<bool>(USER_EXISTS, parameters);
+        }
+
         public Task<long> AddAsync(User user) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
@@ -157,7 +165,16 @@ namespace API.Repositories {
             return _queryTemplate.CommandAsync(UPDATE_USER, parameters);
         }
 
+        public Task<bool> UsernameExistsAsync(string username) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@username", SqlDbType.VarChar).Value = username;
+
+            return _queryTemplate.QueryForScalarAsync<bool>(USER_EXISTS, parameters);
+        }
+
         //SQL Commands
+        private static readonly string USER_EXISTS = "SELECT CAST(count(id) as BIT) FROM dbo.[User] WHERE id = @id";
         private static readonly string SELECT_ALL = "SELECT id, username, pwdHash, pwdSalt, [name], favorites, penColors " +
                                                     "FROM dbo.[User]" +
                                                     "ORDER BY id " +
@@ -181,6 +198,7 @@ namespace API.Repositories {
                                                         "favorites= @favorites, " +
                                                         "penColors= @penColors " +
                                                     "WHERE id = @id";
+        private static readonly string USERNAME_EXISTS = "SELECT CAST(count(id) as BIT) FROM dbo.[User] WHERE username = @username";
 
         //Extract Data From Data Reader
         private static User GetUser(SqlDataReader dr) {

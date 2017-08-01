@@ -6,5 +6,6 @@ using System.Threading.Tasks;
 
 namespace API.Interfaces.IRepositories {
     public interface IUserRepository : IDefaultSearchableRepository<User> {
+        Task<bool> UsernameExistsAsync(string username);
     }
 }

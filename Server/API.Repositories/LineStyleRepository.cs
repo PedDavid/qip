@@ -16,6 +16,14 @@ namespace API.Repositories {
             _queryTemplate = queryTemplate;
         }
 
+        public Task<bool> ExistsAsync(long id) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@id", SqlDbType.BigInt).Value = id;
+
+            return _queryTemplate.QueryForScalarAsync<bool>(LINE_STYLE_EXISTS, parameters);
+        }
+
         public Task<long> AddAsync(LineStyle lineStyle) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
@@ -81,6 +89,7 @@ namespace API.Repositories {
         }
 
         //SQL Commands
+        private static readonly string LINE_STYLE_EXISTS = "SELECT CAST(count(id) as BIT) FROM dbo.LineStyle WHERE lineStyleId = @id";
         private static readonly string SELECT_ALL = "SELECT lineStyleId, color " +
                                                     "FROM dbo.LineStyle" +
                                                     "ORDER BY lineStyleId " +

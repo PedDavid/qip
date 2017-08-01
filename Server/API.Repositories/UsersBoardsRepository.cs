@@ -15,6 +15,16 @@ namespace API.Repositories {
             _queryTemplate = queryTemplate;
         }
 
+        public Task<bool> ExistsAsync(long boardId, long userId) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
+
+            parameters.Add("@userId", SqlDbType.BigInt).Value = userId;
+
+            return _queryTemplate.QueryForScalarAsync<bool>(USER_BOARD_EXISTS, parameters);
+        }
+
         public Task AddAsync(UserBoard userBoard) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
@@ -150,6 +160,7 @@ namespace API.Repositories {
         }
 
         //SQL Commands
+        private static readonly string USER_BOARD_EXISTS = "SELECT CAST(count(id) as BIT) FROM dbo.User_Board WHERE userId = @userId and boardId = @boardId";
         private static readonly string SELECT_ALL_USERS = "SELECT permission, userId, username, [name] " +
                                                           "FROM dbo.Full_User_Board WHERE boardId=@boardId" +
                                                           "ORDER BY userId " +

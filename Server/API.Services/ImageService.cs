@@ -65,9 +65,7 @@ namespace API.Services {
         }
 
         public async Task DeleteAsync(long id, long boardId) {
-            Image image = await _imageRepository.FindAsync(id, boardId);//TODO replace to exists
-
-            if(image == null) {
+            if(!await _imageRepository.ExistsAsync(id, boardId)) {
                 throw new NotFoundException($"The image with id {id}, belonging to board with id {boardId}, does not exist");
             }
 

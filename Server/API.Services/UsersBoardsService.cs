@@ -15,9 +15,13 @@ using API.Services.Utils;
 namespace API.Services {
     class UsersBoardsService : IUsersBoardsService {
         private readonly IUsersBoardsRepository _usersBoardsRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IBoardRepository _boardRepository;
 
-        public UsersBoardsService(IUsersBoardsRepository usersBoardsRepository) {
+        public UsersBoardsService(IUsersBoardsRepository usersBoardsRepository, IUserRepository userRepository, IBoardRepository boardRepository) {
             _usersBoardsRepository = usersBoardsRepository;
+            _userRepository = userRepository;
+            _boardRepository = boardRepository;
         }
 
         public async Task<OutUserBoard> CreateAsync(long boardId, InUserBoard inputUserBoard) {
@@ -27,13 +31,21 @@ namespace API.Services {
 
             Validator<InUserBoard>.Valid(inputUserBoard, GetValidationConfigurations());
 
+            long userId = inputUserBoard.UserId.Value;
+
             if(inputUserBoard.BoardId != boardId) {
                 throw new InconsistentRequestException(
                     $"The board id present on update is different of the expected. {Environment.NewLine}Expected: {boardId}{Environment.NewLine}Current: {inputUserBoard.BoardId}"
                 );
             }
 
-            //TODO Check if Board and User exists
+            if(!await _userRepository.ExistsAsync(userId)) {
+                throw new NotFoundException($"The User with id {userId} not exists");
+            }
+
+            if(!await _boardRepository.ExistsAsync(boardId)) {
+                throw new NotFoundException($"The Board with id {boardId} not exists");
+            }
 
             UserBoard userBoard = new UserBoard().In(inputUserBoard);
             await _usersBoardsRepository.AddAsync(userBoard);
@@ -42,9 +54,7 @@ namespace API.Services {
         }
 
         public async Task DeleteAsync(long boardId, long userId) {
-            UserBoard userBoard = await _usersBoardsRepository.FindAsync(boardId, userId);//TODO replace to exists
-
-            if(userBoard == null) {
+            if(!await _usersBoardsRepository.ExistsAsync(boardId, userId)) {
                 throw new NotFoundException($"The UserBoard with board id {boardId} and user id {userId} not exists");
             }
 

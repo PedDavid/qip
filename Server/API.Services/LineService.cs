@@ -68,9 +68,7 @@ namespace API.Services {
         }
 
         public async Task DeleteAsync(long id, long boardId) {
-            Line line = await _lineRepository.FindAsync(id, boardId);//TODO replace to exists
-
-            if(line == null) {
+            if(!await _lineRepository.ExistsAsync(id, boardId)) {
                 throw new NotFoundException($"The line with id {id}, belonging to board with id {boardId}, does not exist");
             }
 

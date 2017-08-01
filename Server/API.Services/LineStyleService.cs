@@ -42,9 +42,7 @@ namespace API.Services {
         }
 
         public async Task DeleteAsync(long id) {
-            LineStyle lineStyle = await _lineStyleRepository.FindAsync(id);//TODO replace to exists
-
-            if(lineStyle == null) {
+            if(!await _lineStyleRepository.ExistsAsync(id)) {
                 throw new NotFoundException($"The Line Style with id {id} not exists");
             }
 

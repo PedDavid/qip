@@ -43,9 +43,7 @@ namespace API.Services {
         }
 
         public async Task DeleteAsync(long id) {
-            Board board = await _boardRepository.FindAsync(id);//TODO replace to exists
-
-            if(board == null) {
+            if(!await _boardRepository.ExistsAsync(id)) {
                 throw new NotFoundException($"The Board with id {id} not exists");
             }
 

@@ -22,6 +22,16 @@ namespace API.Repositories {
             _options = options.Value;
         }
 
+        public Task<bool> ExistsAsync(long id, long boardId) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@id", SqlDbType.BigInt).Value = id;
+
+            parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
+
+            return _queryTemplate.QueryForScalarAsync<bool>(LINE_EXISTS, parameters);
+        }
+
         public async Task<long> AddAsync(Line line) {
             long lineId = line.Id;
 
@@ -201,6 +211,7 @@ namespace API.Repositories {
         }
 
         //SQL Functions
+        private static readonly string LINE_EXISTS = "SELECT CAST(count(id) as BIT) FROM dbo.Line WHERE figureId = @id and boardId = @boardId";
         private static readonly string SELECT_ALL_LINES = "SELECT id, boardId, isClosedForm, lineStyleId, lineColor FROM dbo.GetLinesInfo(@boardId) ORDER BY id";
         private static readonly string SELECT_ALL_LINES_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointStyle FROM dbo.GetLinesPoints(@boardId) ORDER BY linePointIdx";
 
