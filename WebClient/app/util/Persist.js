@@ -1,4 +1,6 @@
 import {Figure, FigureStyle} from './../model/Figure'
+import {PointStyle} from './../model/Point'
+import {SimplePoint} from './../model/SimplePoint'
 import fetch from 'isomorphic-fetch'
 import Grid from './../model/Grid'
 import Pen from './../model/tools/Pen'
@@ -64,15 +66,19 @@ export class Persist {
             console.log('updated line with id ' + payload.tempId + ' to id ' + payload.id)
             return
           }
-          const figStyle = new FigureStyle(payload.style.color, 1)
-          const newFigure = new Figure(figStyle, payload.id)
-          newFigure.points = payload.points
+          const figStyle = new FigureStyle(payload.figure.Style.Color, 1)
+          const newFigure = new Figure(figStyle, payload.figure.Id)
+          // todo: this map wouldn't be necessary if server has the same model as client
+          newFigure.points = payload.figure.Points.map(serverPoint => {
+            const simplePointStyle = new PointStyle(serverPoint.Style.Width)
+            return new SimplePoint(serverPoint.X, serverPoint.Y, simplePointStyle, serverPoint.Idx)
+          })
           this.grid.addFigure(newFigure)
           this.grid.draw(this.canvasContext, 1)
-          console.log('received new line with id ' + payload.id)
+          console.log('received new line with id ' + payload.figure.Id)
           break
         case 'DELETE_LINE':
-          const figureToDelete = this.grid.getFigure(payload.id)
+          const figureToDelete = this.grid.getFigure(payload.figure.Id)
           this.grid.removeFigure(figureToDelete, this.canvasContext, 1)
           break
         case 'ALTER_LINE':
