@@ -10,6 +10,7 @@ using IODomain.Extensions;
 using API.Interfaces.IRepositories;
 using System.Linq;
 using API.Services.Exceptions;
+using API.Services.Utils;
 
 namespace API.Services {
     public class UserService : IUserService {
@@ -19,12 +20,12 @@ namespace API.Services {
             _userRepository = userRepository;
         }
 
-        public async Task<OutUser> Create(InUser inputUser) {
+        public async Task<OutUser> CreateAsync(InUser inputUser) {
             if(inputUser == null) {
                 throw new MissingInputException();
             }
 
-            ValidadeFields(inputUser);
+            Validator<InUser>.Valid(inputUser, GetCreateValidationConfigurations());
 
             //TODO Check if username is unique
 
@@ -37,8 +38,16 @@ namespace API.Services {
             return outUser;
         }
 
-        public async Task Delete(long id) {
-            User user = await _userRepository.FindAsync(id);
+        private static ValidatorConfiguration<InUser> GetCreateValidationConfigurations() {
+            return new ValidatorConfiguration<InUser>()
+                .NotNull("Name", i => i.Name)
+                .NotNull("UserName", i => i.UserName)
+                .NotNull("PwdHash", i => i.PwdHash)
+                .NotNull("PwdSalt", i => i.PwdSalt);
+        }
+
+        public async Task DeleteAsync(long id) {
+            User user = await _userRepository.FindAsync(id);//TODO replace to exists
 
             if(user == null) {
                 throw new NotFoundException($"The User with id {id} not exists");
@@ -47,30 +56,43 @@ namespace API.Services {
             await _userRepository.RemoveAsync(id);
         }
 
-        public async Task<IEnumerable<OutUser>> GetAll(string search, long index = 0, long size = 10) {
+        public async Task<IEnumerable<OutUser>> GetAllAsync(string search, long index = 0, long size = 10) {
+            if(search == null)
+                return await GetAllAsync(index, size);
+
             IEnumerable<User> users = await _userRepository.GetAllAsync(search, index, size);
 
             return users.Select(UserExtensions.Out);
         }
 
-        public async Task<OutUser> GetById(long id) {
-            User user = await _userRepository.FindAsync(id);
+        public async Task<IEnumerable<OutUser>> GetAllAsync(long index = 0, long size = 10) {
+            IEnumerable<User> users = await _userRepository.GetAllAsync(index, size);
 
-            return user?.Out();
+            return users.Select(UserExtensions.Out);
         }
 
-        public async Task<OutUser> Update(long id, InUser inputUser) {
+        public async Task<OutUser> GetAsync(long id) {
+            User user = await _userRepository.FindAsync(id);
+
+            if(user == null) {
+                throw new NotFoundException($"The User with id {id} not exists");
+            }
+
+            return user.Out();
+        }
+
+        public async Task<OutUser> UpdateAsync(long id, InUser inputUser) {
+            if(inputUser == null) {
+                throw new MissingInputException();
+            }
+
+            Validator<InUser>.Valid(inputUser, GetUpdateValidationConfigurations());
+
             if(inputUser.Id != id) {
                 throw new InconsistentRequestException(
                     $"The id present on update is different of the expected. {Environment.NewLine}Expected: {id}{Environment.NewLine}Current: {inputUser.Id}"
                 );
             }
-
-            if(inputUser == null) {
-                throw new MissingInputException();
-            }
-
-            ValidadeFields(inputUser);
 
             User user = await _userRepository.FindAsync(id);
             if(user == null) {
@@ -84,38 +106,9 @@ namespace API.Services {
             return user.Out();
         }
 
-        private void ValidadeFields(InUser inUser) {
-            Dictionary<string, object> fieldsToValidate = new Dictionary<string, object>() {
-                {"UserName", inUser.UserName},
-                {"PwdHash", inUser.PwdHash},
-                {"PwdSalt", inUser.PwdSalt},
-                {"Name", inUser.Name}
-            };
-
-            string[] invalidFields = fieldsToValidate
-                                        .Where(pair => pair.Value == null)
-                                        .Select(pair => pair.Key)
-                                        .ToArray();
-
-            if(invalidFields.Length != 0) {
-                string separator = ", ";
-                int sepSize = separator.Length;
-
-                string msg = invalidFields.Aggregate(
-                    new StringBuilder("The following fields are missing: "),
-                    (sb, s) => {
-                        sb.Append(s);
-                        sb.Append(separator);
-                        return sb;
-                    },
-                    sb => {
-                        sb.Remove(sb.Length - sepSize, sepSize);
-                        return sb.ToString();
-                    }
-                );
-
-                throw new InvalidInputException(msg);
-            }
+        private static ValidatorConfiguration<InUser> GetUpdateValidationConfigurations() {
+            return GetCreateValidationConfigurations()
+                .NotNull("Id", i => i.Id);
         }
     }
 }

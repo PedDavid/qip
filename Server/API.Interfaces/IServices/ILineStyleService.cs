@@ -6,6 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace API.Interfaces.IServices {
-    public interface IUserService : IGenericSearchableService<InUser, OutUser> {
+    public interface ILineStyleService : IGenericService<InLineStyle, OutLineStyle> {
     }
 }
