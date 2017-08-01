@@ -5,7 +5,7 @@
 RETURNS TABLE 
 AS 
 	RETURN(
-			select fig.boardId, fig.id, point.x as linePointX, point.y as linePointY, figP.pointIdx as linePointIdx, (SELECT JSON_VALUE(figP.pointStyle, '$.width') as int) as pointWidth
+			select fig.boardId, fig.id, point.x as linePointX, point.y as linePointY, figP.pointIdx as linePointIdx, figP.pointStyle as pointStyle
 			from dbo.Figure as fig 
 				inner join dbo.Line as lin
 					on(lin.figureId = fig.id and lin.boardId = @boardId)
