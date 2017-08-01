@@ -1,5 +1,6 @@
 ﻿using API.Domain;
 using API.Interfaces.IRepositories;
+using API.Interfaces.IServices;
 using API.Services;
 using API.Services.Extensions;
 using IODomain.Extensions;
@@ -14,13 +15,11 @@ using WebSockets.StringWebSockets;
 namespace WebSockets.Operations {
     public class ImageOperations {
         private readonly IImageRepository _imageRepository;
-        private readonly IMemoryCache _memoryCache;
-        private readonly IFigureIdRepository _figureIdRepository;
+        private readonly IFigureIdService _figureIdService;
 
-        public ImageOperations(IImageRepository imageRepository, IMemoryCache memoryCache, IFigureIdRepository figureIdRepository) {
+        public ImageOperations(IImageRepository imageRepository, IFigureIdService figureIdService) {
             _imageRepository = imageRepository;
-            _memoryCache = memoryCache;
-            _figureIdRepository = figureIdRepository;
+            _figureIdService = figureIdService;
         }
 
         public async Task CreateImage(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject payload) {//TODO Rever se não pomos os checks aos ids e outros como nos controlers
@@ -31,7 +30,7 @@ namespace WebSockets.Operations {
 
             long boardId = payload["clientId"].Value<long>();
 
-            FigureIdGenerator idGen = await _memoryCache.GetFigureIdGenerator(_figureIdRepository, boardId);
+            IFigureIdGenerator idGen = await _figureIdService.GetOrCreateFigureIdGeneratorAsync(boardId);
             long id = idGen.NewId();
 
             InImage inImage = payload.ToObject<InImage>();

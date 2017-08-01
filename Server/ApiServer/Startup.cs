@@ -9,6 +9,7 @@ using WebSockets.StringWebSockets;
 using API.Repositories.Extensions.DependencyInjection;
 using API.Services;
 using API.Interfaces.IRepositories;
+using API.Services.Extensions.DependencyInjection;
 
 namespace ApiServer {
     public class Startup {
@@ -53,11 +54,11 @@ namespace ApiServer {
             //Add Db Repositories
             services.AddRepositories();
 
+            //Add Services
+            services.AddServices();
+
             //Add StringWebSockets Session Manager
             services.AddSingleton<StringWebSocketsSessionManager>();
-
-            //Add Generator of Figure Ids
-            services.AddSingleton(provider => FigureIdGenerator.Create(provider.GetService<IFigureIdRepository>()));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

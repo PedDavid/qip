@@ -9,6 +9,7 @@ using API.Domain;
 using Microsoft.Extensions.Caching.Memory;
 using API.Services;
 using API.Services.Extensions;
+using API.Interfaces.IServices;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -17,14 +18,12 @@ namespace API.Controllers {
     public class LinesController : Controller {
         private readonly IBoardRepository _boardRepository;
         private readonly ILineRepository _lineRepository;
-        private readonly IFigureIdRepository _figureIdRepository;
-        private readonly IMemoryCache _memoryCache;
+        private readonly IFigureIdService _figureIdService;
 
-        public LinesController(IBoardRepository boardRepository, ILineRepository lineRepository, IFigureIdRepository figureIdRepository, IMemoryCache memoryCache) {
+        public LinesController(IBoardRepository boardRepository, ILineRepository lineRepository, IFigureIdService figureIdService) {
             _boardRepository = boardRepository;
             _lineRepository = lineRepository;
-            _memoryCache = memoryCache;
-            _figureIdRepository = figureIdRepository;
+            _figureIdService = figureIdService;
         }
 
         [HttpGet]
@@ -53,7 +52,7 @@ namespace API.Controllers {
                 return BadRequest();
             }
 
-            FigureIdGenerator idGen = await _memoryCache.GetFigureIdGenerator(_figureIdRepository, boardId);
+            IFigureIdGenerator idGen = await _figureIdService.GetOrCreateFigureIdGeneratorAsync(boardId);
 
             Line line = new Line(boardId, idGen.NewId()).In(inputLine);
             long id = await _lineRepository.AddAsync(line);
