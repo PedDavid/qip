@@ -22,10 +22,12 @@ import {Image} from './../../model/Image'
 import ToolsConfig from './../../model/ToolsConfig'
 import defaultToolsConfig from './../../public/configFiles/defaultTools'
 import {Persist, PersistType} from './../../util/Persist'
-// import {Figure, FigureStyle} from './../../model/Figure'
+import Auth from './../../auth/Auth'
+import Callback from './../../auth/Callback/SignInCallback.js'
 
 const defaultGrid = new Grid([], 0)
 const defaultPen = new Pen(defaultGrid, 'black', 5)
+const auth = new Auth()
 
 export default class Board extends React.Component {
   // check if these default tools are necessary
@@ -158,7 +160,7 @@ export default class Board extends React.Component {
         <SideBarOverlay grid={this.grid} changeCurrentTool={this.changeCurrentTool.bind(this)} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
           currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite.bind(this)}
           removeFavorite={this.removeFavorite.bind(this)} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}
-          drawImage={this.drawImage}>
+          drawImage={this.drawImage} auth={auth}>
           <Canvas ref={this.refCallback} width={1200} height={800} {...this.listeners}>
             HTML5 Canvas not supported
           </Canvas>
@@ -167,6 +169,9 @@ export default class Board extends React.Component {
         <ShareBoardModal location={this.props.location} history={this.props.history} persist={this.persist} visible={this.state.showShareModal} closeModal={this.toggleShareModal} updateCurrentBoard={this.updateBoardId} />
         <Route path='/signin' component={EnterUserModal} />
         <Loader active={this.state.loading} content='Fetching Data ...' />
+        <Route exact path='/callback' render={props => {
+          return <Callback auth={auth} {...props} />
+        }} />
       </div>
     )
   }

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+// import { Link } from 'react-router-dom'
 import styles from './styles.scss'
 import Tools from './components/Tools'
 import FavoriteTools from './components/FavoriteTools'
@@ -37,15 +37,18 @@ export default class SideBarOverlay extends React.Component {
 
   render () {
     const { visible } = this.state
+    const auth = this.props.auth
+    const userIcon = auth.isAuthenticated() ? 'user outline' : 'sign in'
+    const authLabel = auth.isAuthenticated() ? 'user outline' : 'Login'
 
     return (
       <div>
         <Sidebar.Pushable as={Segment} className={styles.sidebar}>
           <Sidebar ref='sidebar' as={Menu} animation='push' direction='left' width='thin' icon='labeled' visible={visible} vertical style={this.state.extraStyle} inverted className={styles.sidebarMenu}>
-            <Link onClick={this.props.toggleUserModal} to='/signin' className='item'>
-              <Icon name='sign in' />
-              Login
-            </Link>
+            <a onClick={this.props.auth.login} className='item'>
+              <Icon name={userIcon} />
+              {authLabel}
+            </a>
             <a onClick={this.props.toggleShareModal} className='item'>
               <Icon name='share' />
               Share board

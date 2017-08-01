@@ -11,7 +11,7 @@
     "dev": "webpack-dev-server",
     "test": "standard && jest",
     "heroku-postbuild": "webpack -p",
-    "start": "node server.js"
+    "start": "webpack-dev-server"
   },
   "devDependencies": {
     "babel-core": "^6.24.1",
@@ -59,6 +59,7 @@
     }
   },
   "dependencies": {
+    "auth0-js": "^8.8.0",
     "express": "^4.15.3"
   }
 }
