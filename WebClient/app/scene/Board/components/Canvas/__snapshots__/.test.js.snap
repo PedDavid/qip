@@ -1,3 +1,3 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Component: Canvas Renders as expected 1`] = `"<canvas class=\\"debug\\" width=\\"1\\" height=\\"1\\"></canvas>"`;
+exports[`Component: Canvas Renders as expected 1`] = `"<canvas class=\\"debug\\" style=\\"height:-1px;width:-1px;\\" width=\\"1\\" height=\\"1\\"></canvas>"`;

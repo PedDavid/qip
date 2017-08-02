@@ -12,14 +12,38 @@ import {
 } from 'semantic-ui-react'
 
 const halfbtnSize = 20
+const margin = 30
 
 export default class Tools extends React.Component {
   state = {
     visible: false,
     top: 25 - halfbtnSize,
-    left: 1175 - halfbtnSize
+    left: this._scaleBtnPosition(this.props.canvasSize)
+  }
+  onOpenImage = (event) => {
+    var file = event.target.files[0]
+    if (!file) {
+      return
+    }
+    var reader = new FileReader()
+    reader.onload = (event) => {
+      this.props.drawImage(event.target.result)
+    }
+    reader.readAsDataURL(file)
   }
   toggleTools = () => this.setState(prev => { return {visible: !prev.visible} })
+
+  componentWillReceiveProps (nexProps) {
+    // if window size increases, canvas size must be updated
+    if (this._scaleBtnPosition(nexProps.canvasSize) !== this.state.left) {
+      this.setState({
+        left: this._scaleBtnPosition(nexProps.canvasSize)
+      })
+      return true
+    }
+    return false
+  }
+
   render () {
     const {top, left} = this.state
     const visibility = this.state.visible ? 'visible' : 'hidden'
@@ -33,16 +57,12 @@ export default class Tools extends React.Component {
     const btnStyle = !this.state.visible
     ? {
       top: this.state.top,
-      left: this.state.left,
-      padding: '0px',
-      width: '40px'
+      left: this.state.left
     }
     : {
       top: this.state.top,
       left: this.state.left,
       borderRadius: '50px 50px 0px 0px',
-      padding: '0px',
-      width: '40px',
       border: '1px solid #000000'
     }
     return (
@@ -62,11 +82,23 @@ export default class Tools extends React.Component {
           ))}
           <Grid.Row columns={1} className={styles.toolRow} style={{padding: '0px'}}>
             <Grid.Column style={{padding: '0px'}}>
+              <label htmlFor='file-upload'>
+                <GenericTool content='image' />
+              </label>
+              <input accept='image/*' id='file-upload' onChange={this.onOpenImage} style={{zIndex: 1000, visibility: 'hidden'}} type='file' />
+            </Grid.Column>
+          </Grid.Row>
+          <Grid.Row columns={1} className={styles.toolRow} style={{padding: '0px'}}>
+            <Grid.Column style={{padding: '0px'}}>
               <GenericTool content='trash' onClickTool={this.props.cleanCanvas} />
             </Grid.Column>
           </Grid.Row>
         </Grid>
       </div>
     )
+  }
+
+  _scaleBtnPosition (canvasSize) {
+    return canvasSize.width - halfbtnSize - margin
   }
 }
