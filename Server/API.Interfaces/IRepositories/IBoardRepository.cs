@@ -5,6 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace API.Interfaces.IRepositories {
-    public interface IBoardRepository : IDefaultRepository<Board> {
+    public interface IBoardRepository : IDefaultSearchableRepository<Board> {
     }
 }

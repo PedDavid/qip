@@ -6,6 +6,6 @@ create table dbo.Line_Point(
 	pointIdx int not null, --this allows a figure to have a point twice.
 	[pointStyle] VARCHAR(MAX) not null,
 	constraint pk_linePoint primary key (figureId, boardId, pointId, pointIdx),
-	constraint fk_linePoint_figure foreign key (figureId, boardId) references dbo.Figure(id, boardId),
+	constraint fk_linePoint_figure foreign key (figureId, boardId) references dbo.Figure(id, boardId), --TODO: Pq está ligado a Figure??
 	constraint fk_linePoint_point foreign key (pointId) references dbo.Point(id)
 )

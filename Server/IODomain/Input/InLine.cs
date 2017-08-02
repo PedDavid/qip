@@ -8,7 +8,7 @@ namespace IODomain.Input {
         public long? Id { get; set; }
         public long? BoardId { get; set; }
         public IEnumerable<InLinePoint> Points { get; set; }
-        public bool? Closed { get; set; }
+        public bool Closed { get; set; }
         public InLineStyle Style { get; set; }
     }
 }

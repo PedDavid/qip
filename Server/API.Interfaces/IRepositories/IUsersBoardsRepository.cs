@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace API.Interfaces.IRepositories {
     public interface IUsersBoardsRepository {
+        Task<bool> ExistsAsync(long boardId, long userId);
+
         Task AddAsync(UserBoard userBoard);
 
         Task<UserBoard> FindAsync(long boardId, long userId);
@@ -14,9 +16,13 @@ namespace API.Interfaces.IRepositories {
 
         Task<UserBoard_User> FindUserAsync(long boardId, long userId);
 
-        Task<IEnumerable<UserBoard_Board>> GetAllBoardsAsync(long userId);
+        Task<IEnumerable<UserBoard_Board>> GetAllBoardsAsync(long userId, long index, long size);
 
-        Task<IEnumerable<UserBoard_User>> GetAllUsersAsync(long boardId);
+        Task<IEnumerable<UserBoard_Board>> GetAllBoardsAsync(long userId, long index, long size, string search);
+
+        Task<IEnumerable<UserBoard_User>> GetAllUsersAsync(long boardId, long index, long size);
+
+        Task<IEnumerable<UserBoard_User>> GetAllUsersAsync(long boardId, long index, long size, string search);
 
         Task RemoveAsync(long boardId, long userId);
 

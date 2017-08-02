@@ -39,8 +39,37 @@ namespace API.Repositories {
             return _queryTemplate.QueryForObjectAsync(SELECT_BOARD, parameters, GetBoard);
         }
 
-        public Task<IEnumerable<Board>> GetAllAsync() {
-            return _queryTemplate.QueryAsync(SELECT_ALL, GetBoard);
+        public Task<bool> ExistsAsync(long id) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@id", SqlDbType.BigInt).Value = id;
+
+            return _queryTemplate.QueryForScalarAsync<bool>(BOARD_EXISTS, parameters);
+        }
+
+        public Task<IEnumerable<Board>> GetAllAsync(long index, long size) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@take", SqlDbType.BigInt).Value = size;
+
+            parameters.Add("@skip", SqlDbType.BigInt).Value = index * size;
+
+            return _queryTemplate.QueryAsync(SELECT_ALL, parameters, GetBoard);
+        }
+
+        public Task<IEnumerable<Board>> GetAllAsync(long index, long size, string search) {
+            if(search == null)
+                return GetAllAsync(index, size);
+
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@take", SqlDbType.BigInt).Value = size;
+
+            parameters.Add("@skip", SqlDbType.BigInt).Value = index * size;
+
+            parameters.Add("@search", SqlDbType.NVarChar).Value = search;
+
+            return _queryTemplate.QueryAsync(SELECT_SEARCH, parameters, GetBoard);
         }
 
         public Task RemoveAsync(long id) {
@@ -48,7 +77,7 @@ namespace API.Repositories {
 
             parameters.Add("@id", SqlDbType.BigInt).Value = id;
 
-            return _queryTemplate.QueryAsync(DELETE_BOARD, parameters);
+            return _queryTemplate.CommandAsync(DELETE_BOARD, parameters);
         }
 
         public Task UpdateAsync(Board board) {
@@ -66,7 +95,7 @@ namespace API.Repositories {
                 .Add("@maxDistPoints", SqlDbType.TinyInt)
                 .Value = board.MaxDistPoints.Value;
 
-            return _queryTemplate.QueryAsync(UPDATE_BOARD, parameters);
+            return _queryTemplate.CommandAsync(UPDATE_BOARD, parameters);
         }
 
         public Task PartialUpdateAsync(Board board) {
@@ -84,17 +113,26 @@ namespace API.Repositories {
                 .Add("@maxDistPoints", SqlDbType.TinyInt)
                 .Value = board.MaxDistPoints ?? SqlByte.Null;
 
-            return _queryTemplate.QueryAsync(UPDATE_BOARD, parameters);
+            return _queryTemplate.CommandAsync(UPDATE_BOARD, parameters);
         }
 
         //SQL Commands
-        private static readonly string SELECT_ALL = "SELECT id, name, maxDistPoints FROM dbo.Board";
-        private static readonly string SELECT_BOARD = "SELECT id, name, maxDistPoints FROM dbo.Board WHERE id = @id";
-        private static readonly string INSERT_BOARD = "INSERT INTO dbo.Board (name, maxDistPoints) VALUES (@name, @maxDistPoints); " +
+        private static readonly string BOARD_EXISTS = "SELECT CAST(count(id) as BIT) FROM dbo.Board WHERE id = @id";
+        private static readonly string SELECT_ALL = "SELECT id, [name], maxDistPoints " +
+                                                    "FROM dbo.Board " +
+                                                    "ORDER BY id " +
+                                                    "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
+        private static readonly string SELECT_SEARCH = "SELECT id, [name], maxDistPoints " +
+                                                       "FROM dbo.Board " +
+                                                       "WHERE CONTAINS([name], @search)" +
+                                                       "ORDER BY id " +
+                                                       "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
+        private static readonly string SELECT_BOARD = "SELECT id, [name], maxDistPoints FROM dbo.Board WHERE id = @id";
+        private static readonly string INSERT_BOARD = "INSERT INTO dbo.Board ([name], maxDistPoints) VALUES (@name, @maxDistPoints); " +
                                                      "SELECT CAST(SCOPE_IDENTITY() AS BIGINT)";
         private static readonly string DELETE_BOARD = "DELETE FROM dbo.Board WHERE id = @id";
         private static readonly string UPDATE_BOARD = "UPDATE dbo.Board " +
-                                                      "SET name= isnull(@name, name), " +
+                                                      "SET [name]= isnull(@name, [name]), " +
                                                           "maxDistPoints = isnull(@maxDistPoints, maxDistPoints)" +
                                                       "WHERE id = @id";
 

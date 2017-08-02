@@ -38,7 +38,7 @@ namespace API.Repositories {
             return QueryAsync(sql, new List<SqlParameter>(), rowMapper);
         }
 
-        public async Task QueryAsync(string sql, List<SqlParameter> parameters) {
+        public async Task CommandAsync(string sql, List<SqlParameter> parameters) {
             using(SqlConnection con = new SqlConnection(_options.Context)) {
                 using(SqlCommand cmd = con.CreateCommand()) {
                     cmd.CommandText = sql;
@@ -51,8 +51,8 @@ namespace API.Repositories {
             }
         }
 
-        public Task QueryAsync(string sql) {
-            return QueryAsync(sql, new List<SqlParameter>());
+        public Task CommandAsync(string sql) {
+            return CommandAsync(sql, new List<SqlParameter>());
         }
 
         public async Task<T> QueryForScalarAsync<T>(string sql, List<SqlParameter> parameters) {

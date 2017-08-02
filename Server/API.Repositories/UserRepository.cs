@@ -16,6 +16,14 @@ namespace API.Repositories {
             _queryTemplate = queryTemplate;
         }
 
+        public Task<bool> ExistsAsync(long id) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@id", SqlDbType.BigInt).Value = id;
+
+            return _queryTemplate.QueryForScalarAsync<bool>(USER_EXISTS, parameters);
+        }
+
         public Task<long> AddAsync(User user) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
@@ -54,8 +62,29 @@ namespace API.Repositories {
             return _queryTemplate.QueryForObjectAsync(SELECT_USER, parameters, GetUser);
         }
 
-        public Task<IEnumerable<User>> GetAllAsync() {
-            return _queryTemplate.QueryAsync(SELECT_ALL, GetUser);
+        public Task<IEnumerable<User>> GetAllAsync(long index, long size) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@take", SqlDbType.BigInt).Value = size;
+
+            parameters.Add("@skip", SqlDbType.BigInt).Value = index * size;
+
+            return _queryTemplate.QueryAsync(SELECT_ALL, parameters, GetUser);
+        }
+
+        public Task<IEnumerable<User>> GetAllAsync(long index, long size, string search) {
+            if(search == null)
+                return GetAllAsync(index, size);
+
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@take", SqlDbType.BigInt).Value = size;
+
+            parameters.Add("@skip", SqlDbType.BigInt).Value = index * size;
+
+            parameters.Add("@search", SqlDbType.NVarChar).Value = search;
+
+            return _queryTemplate.QueryAsync(SELECT_SEARCH, parameters, GetUser);
         }
 
         public Task RemoveAsync(long id) {
@@ -63,7 +92,7 @@ namespace API.Repositories {
 
             parameters.Add("@id", SqlDbType.BigInt).Value = id;
 
-            return _queryTemplate.QueryAsync(DELETE_USER, parameters);
+            return _queryTemplate.CommandAsync(DELETE_USER, parameters);
         }
 
         public Task UpdateAsync(User user) {
@@ -97,7 +126,7 @@ namespace API.Repositories {
                 .Add("@penColors", SqlDbType.VarChar)
                 .Value = user.PenColors;
 
-            return _queryTemplate.QueryAsync(UPDATE_USER, parameters);
+            return _queryTemplate.CommandAsync(UPDATE_USER, parameters);
         }
 
         //Note: This method can't alter favorites and penColors for null
@@ -133,14 +162,31 @@ namespace API.Repositories {
                 .Add("@penColors", SqlDbType.VarChar)
                 .Value = user.PenColors ?? SqlString.Null;
 
-            return _queryTemplate.QueryAsync(UPDATE_USER, parameters);
+            return _queryTemplate.CommandAsync(UPDATE_USER, parameters);
+        }
+
+        public Task<bool> UsernameExistsAsync(string username) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@username", SqlDbType.VarChar).Value = username;
+
+            return _queryTemplate.QueryForScalarAsync<bool>(USERNAME_EXISTS, parameters);
         }
 
         //SQL Commands
-        private static readonly string SELECT_ALL = "SELECT id, username, pwdHash, pwdSalt, name, favorites, penColors FROM dbo.[User]";
-        private static readonly string SELECT_USER = "SELECT id, username, pwdHash, pwdSalt, name, favorites, penColors FROM dbo.[User] " +
+        private static readonly string USER_EXISTS = "SELECT CAST(count(id) as BIT) FROM dbo.[User] WHERE id = @id";
+        private static readonly string SELECT_ALL = "SELECT id, username, pwdHash, pwdSalt, [name], favorites, penColors " +
+                                                    "FROM dbo.[User]" +
+                                                    "ORDER BY id " +
+                                                    "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
+        private static readonly string SELECT_SEARCH = "SELECT id, username, pwdHash, pwdSalt, [name], favorites, penColors " +
+                                                       "FROM dbo.[User]" +
+                                                       "WHERE CONTAINS((username, [name]), @search) " +
+                                                       "ORDER BY id " +
+                                                       "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
+        private static readonly string SELECT_USER = "SELECT id, username, pwdHash, pwdSalt, [name], favorites, penColors FROM dbo.[User] " +
                                                      "WHERE id = @id";
-        private static readonly string INSERT_USER = "INSERT INTO dbo.[User] (name, pwdHash, pwdSalt, username, favorites, penColors) " +
+        private static readonly string INSERT_USER = "INSERT INTO dbo.[User] ([name], pwdHash, pwdSalt, username, favorites, penColors) " +
                                                                     "VALUES (@name, @pwdHash, @pwdSalt, @username, @favorites, @penColors); " +
                                                      "SELECT CAST(SCOPE_IDENTITY() AS BIGINT)";
         private static readonly string DELETE_USER = "DELETE FROM dbo.[User] WHERE id = @id";
@@ -148,10 +194,11 @@ namespace API.Repositories {
                                                     "SET username = isnull(@username, username), " +
                                                         "pwdHash= isnull(@pwdHash, pwdHash), " +
                                                         "pwdSalt= isnull(@pwdSalt, pwdSalt), " +
-                                                        "name= isnull(@name, name), " +
+                                                        "[name]= isnull(@name, [name]), " +
                                                         "favorites= @favorites, " +
                                                         "penColors= @penColors " +
                                                     "WHERE id = @id";
+        private static readonly string USERNAME_EXISTS = "SELECT CAST(count(id) as BIT) FROM dbo.[User] WHERE username = @username";
 
         //Extract Data From Data Reader
         private static User GetUser(SqlDataReader dr) {

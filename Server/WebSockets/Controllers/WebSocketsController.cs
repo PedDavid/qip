@@ -10,26 +10,29 @@ using WebSockets.Operations;
 using API.Interfaces.IRepositories;
 using API.Services;
 using Microsoft.Extensions.Caching.Memory;
+using API.Interfaces.IServices;
 
 namespace WebSockets.Controllers {
     [Route("ws")]
     public class WebSocketsController : Controller {
-        private StringWebSocketsSessionManager _sessionManager;
+        private readonly IBoardRepository _boardRepository;
+        private readonly StringWebSocketsSessionManager _sessionManager;
         private readonly LineOperations _lineOperations;
         private readonly ImageOperations _imageOperations;
 
         private readonly Dictionary<Models.Action, Operation> _operations;  // TODO(peddavid): Should this be immutable?
 
         public WebSocketsController(
+            IBoardRepository boardRepository,
             StringWebSocketsSessionManager sessionManager, 
-            IFigureIdRepository figureIdRepository, 
+            IFigureIdService figureIdService, 
             IImageRepository imageRepository, 
-            ILineRepository lineRepository, 
-            IMemoryCache memoryCache
+            ILineRepository lineRepository
         ) {
+            _boardRepository = boardRepository;
             _sessionManager = sessionManager;
-            _imageOperations = new ImageOperations(imageRepository, memoryCache, figureIdRepository);
-            _lineOperations = new LineOperations(lineRepository, memoryCache, figureIdRepository);
+            _imageOperations = new ImageOperations(imageRepository, figureIdService);
+            _lineOperations = new LineOperations(lineRepository, figureIdService);
 
             _operations = new Dictionary<Models.Action, Operation>() {
                 { Models.Action.CREATE_IMAGE, _imageOperations.CreateImage },
@@ -43,7 +46,7 @@ namespace WebSockets.Controllers {
 
         [HttpGet("{roomId}")]
         public async Task Index(long roomId) {
-            if(HttpContext.WebSockets.IsWebSocketRequest) {
+            if(HttpContext.WebSockets.IsWebSocketRequest && await _boardRepository.ExistsAsync(roomId)) {
                 StringWebSocket webSocket = await HttpContext.WebSockets.AcceptStringWebSocketAsync();
 
                 var session = _sessionManager.Register(roomId, webSocket);

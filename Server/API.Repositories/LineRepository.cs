@@ -3,6 +3,7 @@ using API.Interfaces.IRepositories;
 using API.Repositories.Model;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -19,6 +20,16 @@ namespace API.Repositories {
         public LineRepository(SqlServerTemplate queryTemplate, IOptionsSnapshot<RepositoriesOptions> options) {
             _queryTemplate = queryTemplate;
             _options = options.Value;
+        }
+
+        public Task<bool> ExistsAsync(long id, long boardId) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@id", SqlDbType.BigInt).Value = id;
+
+            parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
+
+            return _queryTemplate.QueryForScalarAsync<bool>(LINE_EXISTS, parameters);
         }
 
         public async Task<long> AddAsync(Line line) {
@@ -43,6 +54,10 @@ namespace API.Repositories {
             parameters
                 .Add("@points", SqlDbType.Structured)
                 .Value = points;
+
+            parameters
+                .Add("@isClosedForm", SqlDbType.Bit)
+                .Value = line.Closed;
 
             await _queryTemplate.StoredProcedureAsync(INSERT_LINE, parameters);
 
@@ -184,6 +199,10 @@ namespace API.Repositories {
                 .Add("@points", SqlDbType.Structured)
                 .Value = points;
 
+            parameters
+                .Add("@isClosedForm", SqlDbType.Bit)
+                .Value = line.Closed;
+
             return _queryTemplate.StoredProcedureAsync(UPDATE_LINE, parameters);
         }
 
@@ -191,14 +210,13 @@ namespace API.Repositories {
             throw new NotImplementedException();
         }
 
-        // todo (simaovii): alterar a pointWidth para pointStyle, que recebe um json com o estilo. Desta forma, se quisermos alterar o estilo, é só alterar no modelo
-
         //SQL Functions
+        private static readonly string LINE_EXISTS = "SELECT CAST(count(id) as BIT) FROM dbo.Line WHERE figureId = @id and boardId = @boardId";
         private static readonly string SELECT_ALL_LINES = "SELECT id, boardId, isClosedForm, lineStyleId, lineColor FROM dbo.GetLinesInfo(@boardId) ORDER BY id";
-        private static readonly string SELECT_ALL_LINES_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointWidth FROM dbo.GetLinesPoints(@boardId) ORDER BY linePointIdx";
+        private static readonly string SELECT_ALL_LINES_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointStyle FROM dbo.GetLinesPoints(@boardId) ORDER BY linePointIdx";
 
         private static readonly string SELECT_LINES = "SELECT id, boardId, isClosedForm, lineStyleId, lineColor FROM dbo.GetLinesInfo(@boardId) WHERE id=@id";
-        private static readonly string SELECT_LINES_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointWidth FROM dbo.GetLinesPoints(@boardId) WHERE id=@id";
+        private static readonly string SELECT_LINES_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointStyle FROM dbo.GetLinesPoints(@boardId) WHERE id=@id";
 
         //SQL Stored Procedures
         private static readonly string INSERT_LINE = "dbo.InsertNewLine";
@@ -243,9 +261,7 @@ namespace API.Repositories {
                 X = dr.GetInt32(2),
                 Y = dr.GetInt32(3),
                 Idx = dr.GetInt32(4),
-                Style = new PointStyle() {
-                    Width = int.Parse(dr.GetString(5))
-                }
+                Style = JsonConvert.DeserializeObject<PointStyle>(dr.GetString(5))
             };
         }
     }

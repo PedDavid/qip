@@ -14,7 +14,7 @@ namespace API.Domain {
         public long Id { get; }
         public long BoardId { get; }
         public IEnumerable<LinePoint> Points { get; set; }
-        public bool? Closed { get; set; }
+        public bool Closed { get; set; }
         public LineStyle Style { get; set; }
     }
 }

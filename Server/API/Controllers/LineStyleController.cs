@@ -1,79 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using IODomain.Output;
+﻿using API.Filters;
+using API.Interfaces.IServices;
 using IODomain.Input;
-using IODomain.Extensions;
-using API.Interfaces.IRepositories;
-using API.Domain;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using IODomain.Output;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace API.Controllers {
+    [ServicesExceptionFilter]
     [Route("api/[controller]")]
     public class LineStyleController : Controller {
-        private readonly ILineStyleRepository _lineStyleRepository;
+        private readonly ILineStyleService _lineStyleService;
 
-        public LineStyleController(ILineStyleRepository lineStyleRepository) {
-            this._lineStyleRepository = lineStyleRepository;
+        public LineStyleController(ILineStyleService lineStyleService) {
+            _lineStyleService = lineStyleService;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<OutLineStyle>> GetAll() {
-            IEnumerable<LineStyle> lineStyles = await _lineStyleRepository.GetAllAsync();
-
-            return lineStyles.Select(LineStyleExtensions.Out);
+        public Task<IEnumerable<OutLineStyle>> GetAll(long index = 0, long size = 10) {
+            return _lineStyleService.GetAllAsync(index, size);
         }
 
         [HttpGet("{id}", Name = "GetLineStyle")]
-        public async Task<IActionResult> GetById(long id) {
-            LineStyle lineStyle = await _lineStyleRepository.FindAsync(id);
-            if(lineStyle == null) {
-                return NotFound();
-            }
-            return new ObjectResult(lineStyle.Out());
+        public Task<OutLineStyle> GetById(long id) {
+            return _lineStyleService.GetAsync(id);
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] InLineStyle inputLineStyle) {
-            if(inputLineStyle == null) {
-                return BadRequest();
-            }
-
-            LineStyle lineStyle = new LineStyle().In(inputLineStyle);
-            long id = await _lineStyleRepository.AddAsync(lineStyle);
-
-            inputLineStyle.Id = id;
-            return CreatedAtRoute("GetLineStyle", new { id = id }, inputLineStyle);
+            OutLineStyle lineStyle = await _lineStyleService.CreateAsync(inputLineStyle);
+            return CreatedAtRoute("GetLineStyle", new { id = lineStyle.Id }, lineStyle);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(long id, [FromBody] InLineStyle inputLineStyle) {
-            if(inputLineStyle == null || inputLineStyle.Id != id) {
-                return BadRequest();
-            }
-
-            LineStyle lineStyle = await _lineStyleRepository.FindAsync(id);
-            if(lineStyle == null) {
-                return NotFound();
-            }
-
-            lineStyle.In(inputLineStyle);
-
-            await _lineStyleRepository.UpdateAsync(lineStyle);
+            await _lineStyleService.UpdateAsync(id, inputLineStyle);
             return new NoContentResult();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(long id) {
-            LineStyle lineStyle = await _lineStyleRepository.FindAsync(id);
-            if(lineStyle == null) {
-                return NotFound();
-            }
-
-            await _lineStyleRepository.RemoveAsync(id);
+            await _lineStyleService.DeleteAsync(id);
             return new NoContentResult();
         }
     }
