@@ -16,6 +16,9 @@ export default class Auth {
     this.logout = this.logout.bind(this)
     this.handleAuthentication = this.handleAuthentication.bind(this)
     this.isAuthenticated = this.isAuthenticated.bind(this)
+    this.getAccessToken = this.getAccessToken.bind(this)
+    this.getProfile = this.getProfileAsync.bind(this)
+    this.userProfile = null
   }
 
   login () {
@@ -26,7 +29,12 @@ export default class Auth {
     this.auth0.parseHash((err, authResult) => {
       if (authResult && authResult.accessToken && authResult.idToken) {
         this.setSession(authResult)
-        props.history.replace('/')
+        this.getProfileAsync((err, profile) => {
+          if (err) throw new Error(err)
+          console.log(profile)
+          window.localStorage.setItem('profile', JSON.stringify(profile))
+          props.history.replace('/')
+        })
       } else if (err) {
         props.history.replace('/')
         console.log(err)
@@ -45,11 +53,38 @@ export default class Auth {
     // history.replace('/home')
   }
 
+  getAccessToken () {
+    const accessToken = window.localStorage.getItem('access_token')
+    if (!accessToken) {
+      throw new Error('No access token found')
+    }
+    return accessToken
+  }
+
+  getProfileAsync (cb) {
+    let accessToken = this.getAccessToken()
+    this.auth0.client.userInfo(accessToken, (err, profile) => {
+      if (profile) {
+        this.userProfile = profile
+      }
+      cb && cb(err, profile)
+    })
+  }
+
+  tryGetProfile () {
+    // if it was already created and user authentication is valid, return profile
+    if (this.isAuthenticated() && window.localStorage.getItem('profile') != null) {
+      return JSON.parse(window.localStorage.getItem('profile'))
+    }
+  }
+
   logout () {
     // Clear access token and ID token from local storage
     window.localStorage.removeItem('access_token')
     window.localStorage.removeItem('id_token')
     window.localStorage.removeItem('expires_at')
+    window.localStorage.removeItem('profile')
+    this.userProfile = null
     // navigate to the home route
     // history.replace('/home')
   }
