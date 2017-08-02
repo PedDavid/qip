@@ -13,7 +13,7 @@ render(
   <div>
     <Router>
       <Switch> {/* Renders the first path that match */}
-        <Route path='/:board' component={Board} /> 
+        <Route path='/board/:board' component={Board} />
         <Route path='/' component={Board} />
       </Switch>
     </Router>

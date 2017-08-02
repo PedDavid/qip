@@ -35,14 +35,13 @@ export default class ShareBoardModal extends React.Component {
       }
       return response.json()
     }).then(board => {
-      // todo: send current board data to api
       this.props.updateCurrentBoard(board.id)
       this.setState({
         boardUrl: baseUrl + board.id,
         loading: false,
         error: false
       })
-      this.props.history.push('/' + board.id)
+      this.props.history.push('/board/' + board.id)
     }).catch(err => {
       console.log(err)
       this.setState({
