@@ -13,7 +13,7 @@ namespace IODomain.Extensions {
                 Id = image.Id,
                 BoardId = image.BoardId,
                 Src = image.Src,
-                Origin = image.Origin,
+                Origin = image.Origin.Out(),
                 Width = image.Width.Value,
                 Height = image.Height.Value
             };
