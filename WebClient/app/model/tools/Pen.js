@@ -71,7 +71,7 @@ export default class Pen implements Tool {
     this.grid.addFigure(this.currentFigure)
 
     if (persist.connected) {
-      persist.socket.send(this.currentFigure.exportWS(persist.boardId))
+      persist.socket.send(this.currentFigure.exportWS())
     } else {
       // add to localstorage
       const dataFigure = JSON.parse(window.localStorage.getItem('figures'))

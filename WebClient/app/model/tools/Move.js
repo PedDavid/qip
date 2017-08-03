@@ -95,7 +95,6 @@ export default class Move implements Tool {
       if (persist.connected) {
         const offsetPoint = new SimplePoint(this.movingLine.end.x - this.movingLine.start.x, this.movingLine.end.y - this.movingLine.start.y)
         const toSend = this.currentFigure.exportWS(
-          persist.boardId,
           fig => { fig.offsetPoint = offsetPoint }
         )
         persist.socket.send(toSend)

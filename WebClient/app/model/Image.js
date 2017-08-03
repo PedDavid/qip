@@ -126,7 +126,7 @@ export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null) {
     width = width + offsetPoint.x
   }
 
-  this.exportWS = function (boardId, extraFunc) {
+  this.exportWS = function (extraFunc) {
     const imageToExport = this.export()
     imageToExport.tempId = imageToExport.id
     delete imageToExport.id
@@ -135,7 +135,6 @@ export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null) {
 
     const objToSend = {
       type: 'CREATE_IMAGE',
-      owner: parseInt(boardId), // todo: retirar isto daqui
       payload: imageToExport
     }
 
@@ -159,7 +158,7 @@ export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null) {
 
   this.persist = function (persist, grid) {
     if (persist.connected) {
-      persist.socket.send(this.exportWS(persist.boardId))
+      persist.socket.send(this.exportWS())
     } else {
       // add to localstorage
       const dataFigure = JSON.parse(window.localStorage.getItem('figures'))
