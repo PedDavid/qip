@@ -11,7 +11,7 @@ import {
 import SideBarOverlay from './components/SideBarOverlay'
 import Canvas from './components/Canvas'
 import CleanBoardModal from './components/Modals/CleanBoardModal'
-import EnterUserModal from './components/Modals/EnterUserModal'
+import SaveBoardModal from './components/Modals/SaveBoardModal'
 import ShareBoardModal from './components/Modals/ShareBoardModal'
 import styles from './styles.scss'
 
@@ -38,6 +38,7 @@ export default class Board extends React.Component {
     showCleanModal: false,
     showUserModal: false,
     showShareModal: false,
+    showSaveModal: false,
     currTool: defaultPen,
     canvasSize: {width: 0, height: 0},
     favorites: [], // obtain favorites from server
@@ -167,6 +168,10 @@ export default class Board extends React.Component {
     this.setState(prevState => { return { showShareModal: !prevState.showShareModal } })
   }
 
+  toggleSaveModal = () => {
+    this.setState(prevState => { return { showSaveModal: !prevState.showSaveModal } })
+  }
+
   refCallback = (ref) => {
     this.canvasContext = ref.canvas.getContext('2d')
   }
@@ -182,18 +187,20 @@ export default class Board extends React.Component {
         <SideBarOverlay grid={this.grid} changeCurrentTool={this.changeCurrentTool.bind(this)} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
           currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite.bind(this)}
           removeFavorite={this.removeFavorite.bind(this)} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}
-          drawImage={this.drawImage} canvasSize={this.state.canvasSize} auth={auth}>
+          toggleSaveModal={this.toggleSaveModal} drawImage={this.drawImage} canvasSize={this.state.canvasSize} auth={auth}>
           <Canvas ref={this.refCallback} width={this.state.canvasSize.width} height={this.state.canvasSize.height} {...this.listeners}>
             HTML5 Canvas not supported
           </Canvas>
         </SideBarOverlay>
         <CleanBoardModal cleanCanvas={this.cleanCanvas} closeModal={this.toggleCleanModal} visible={this.state.showCleanModal} />
-        <ShareBoardModal location={this.props.location} history={this.props.history} persist={this.persist} visible={this.state.showShareModal} closeModal={this.toggleShareModal} updateCurrentBoard={this.updateBoardId} />
-        <Route path='/signin' component={EnterUserModal} />
+        <ShareBoardModal location={this.props.location} history={this.props.history} persist={this.persist}
+          visible={this.state.showShareModal} closeModal={this.toggleShareModal} updateCurrentBoard={this.updateBoardId} />
         <Loader active={this.state.loading} content='Fetching Data ...' />
         <Route exact path='/callback' render={props => {
           return <Callback auth={auth} {...props} />
         }} />
+        <SaveBoardModal history={this.props.history} persist={this.persist} visible={this.state.showSaveModal} closeModal={this.toggleSaveModal} auth={auth}
+          updateCurrentBoard={this.updateBoardId} />
       </div>
     )
   }

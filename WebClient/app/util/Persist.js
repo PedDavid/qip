@@ -179,8 +179,7 @@ export class Persist {
         fig.tempId = fig.id
         delete fig.id
         const objToSend = {
-          type: 'CREATE_LINE',
-          owner: parseInt(this.boardId), // todo: retirar isto daqui
+          type: fig.type === 'figure' ? 'CREATE_LINE' : 'CREATE_IMAGE',
           payload: fig
         }
         this.socket.send(JSON.stringify(objToSend))
@@ -204,7 +203,6 @@ export class Persist {
       if (this.connected) {
         const objToSend = {
           type: 'DELETE_LINE',
-          owner: parseInt(this.boardId), // todo: retirar isto
           payload: {'id': fig.id}
         }
         this.socket.send(JSON.stringify(objToSend))

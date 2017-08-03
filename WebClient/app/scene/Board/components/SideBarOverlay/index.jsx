@@ -91,10 +91,6 @@ export default class SideBarOverlay extends React.Component {
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
-            <a className='item'>
-              <Icon name='share' />
-              New Board
-            </a>
             {/* Only Appears if current scretch is not associated with a board */}
             <a onClick={this.props.toggleSaveModal} className='item'>
               <Icon name='save' />
