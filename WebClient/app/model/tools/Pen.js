@@ -5,6 +5,7 @@ import Tool from './Tool'
 
 export default class Pen implements Tool {
   constructor (grid, color, width) {
+    this.type = 'pen'
     this.color = color
     this.width = width
 

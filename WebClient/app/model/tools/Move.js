@@ -8,6 +8,7 @@ import Tool from './Tool'
 
 export default class Move implements Tool {
   constructor (grid) {
+    this.type = 'move'
     this.grid = grid
     this.movingLine = null
     this.currentFigureMoving = null

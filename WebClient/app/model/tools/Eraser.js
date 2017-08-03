@@ -6,6 +6,7 @@ import Tool from './Tool'
 
 export default class Eraser implements Tool {
   constructor (grid, width) {
+    this.type = 'eraser'
     this.width = width
     this.grid = grid
     this.eraseLine = null
