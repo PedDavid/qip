@@ -5,6 +5,7 @@ import fetch from 'isomorphic-fetch'
 import Grid from './../model/Grid'
 import Pen from './../model/tools/Pen'
 import Eraser from './../model/tools/Eraser'
+import Move from './../model/tools/Move'
 
 export class Persist {
   // todo: check if it's necessary all parameters
@@ -148,28 +149,53 @@ export class Persist {
     console.info('getting board data from local storage')
     return new Promise((resolve, reject) => {
       // if it's not authenticated or not sharing board, get data from localstorage
-      if (window.localStorage.getItem('figures') === null && window.localStorage.getItem('pen') === null && window.localStorage.getItem('eraser') === null) {
+      if (window.localStorage.getItem('figures') === null && window.localStorage.getItem('defaultPen') === null && window.localStorage.getItem('defaultEraser') === null) {
         this._resetLocalStorage()
       }
 
       const figures = JSON.parse(window.localStorage.getItem('figures'))
       const nextFigureId = JSON.parse(window.localStorage.getItem('currFigureId'))
       const grid = new Grid(figures, nextFigureId)
-      // const tempPen = JSON.parse(window.localStorage.getItem('pen'))
-      // const pen = new Pen(grid, tempPen.color, tempPen.width)
-      // const tempEraser = JSON.parse(window.localStorage.getItem('eraser'))
-      // const eraser = new Eraser(grid, tempEraser.width)
+      const tempPen = JSON.parse(window.localStorage.getItem('defaultPen'))
+      const tempEraser = JSON.parse(window.localStorage.getItem('defaultEraser'))
+      const tempCurrTool = JSON.parse(window.localStorage.getItem('currTool'))
+      const currTool = this._getToolFromLS(grid, tempCurrTool)
+      const favorites = JSON.parse(window.localStorage.getItem('favorites'))
+        .map(fav => this._getToolFromLS(grid, fav))
 
-      resolve(grid)
+      const initBoard = {
+        grid,
+        defaultPen: new Pen(grid, tempPen.color, tempPen.width),
+        defaultEraser: new Eraser(grid, tempEraser.width),
+        currTool,
+        favorites
+      }
+
+      resolve(initBoard)
     })
+  }
+
+  _getToolFromLS = function (grid, rawTool) {
+    switch (rawTool.type){
+      case ('pen') : 
+        return new Pen(grid, rawTool.color, rawTool.width)
+        break
+      case ('eraser') :
+        return new Eraser (grid, rawTool.width)
+        break
+      case ('move'):
+        return new Move(grid)
+    }
   }
 
   _resetLocalStorage = function () {
     const tempGrid = new Grid([], -1)
     window.localStorage.setItem('figures', JSON.stringify(tempGrid.getFiguresArray()))
     window.localStorage.setItem('currFigureId', JSON.stringify(tempGrid.getCurrentFigureId()))
-    window.localStorage.setItem('pen', JSON.stringify(new Pen(tempGrid, 'black', 5)))
-    window.localStorage.setItem('eraser', JSON.stringify(new Eraser(tempGrid, 20)))
+    window.localStorage.setItem('defaultPen', JSON.stringify(new Pen(tempGrid, 'black', 5)))
+    window.localStorage.setItem('defaultEraser', JSON.stringify(new Eraser(tempGrid, 20)))
+    window.localStorage.setItem('favorites', '[]')
+    window.localStorage.setItem('currTool', JSON.stringify(new Pen(tempGrid, 'black', 5)))
   }
 
   _persistBoardByWS = function () {

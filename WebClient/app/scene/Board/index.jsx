@@ -96,8 +96,8 @@ export default class Board extends React.Component {
 
     // get initial board from server or from local storage
     this.persist.getInitialBoardAsync(boardId)
-      .then(grid => {
-        this.grid = grid
+      .then(initBoard => {
+        this.grid = initBoard.grid
         this.persist.grid = this.grid
 
         if (this.persist.persistType === PersistType().WebSockets) {
@@ -113,12 +113,13 @@ export default class Board extends React.Component {
         const defaultEraser = new Eraser(this.grid, 5)
 
         // necessary procedure to avoid bug
-        this.toolsConfig.updatePrevTool(defaultPen)
-        this.toolsConfig.updatePrevTool(defaultEraser)
+        this.toolsConfig.updatePrevTool(initBoard.defaultPen)
+        this.toolsConfig.updatePrevTool(initBoard.defaultEraser)
 
         this.setState({
           loading: false,
-          currTool: defaultPen
+          currTool: initBoard.currTool,
+          favorites: initBoard.favorites
         })
       }).catch(err => {
         console.error(err)
@@ -134,7 +135,10 @@ export default class Board extends React.Component {
   }
 
   addFavorite (tool) {
-    this.setState(() => this.state.favorites.push(tool)) // not needed to change prevState
+    this.setState(() => {
+      this.state.favorites.push(tool)
+      window.localStorage.setItem('favorites', JSON.stringify(this.state.favorites))
+    }) // not needed to change prevState
   }
   removeFavorite = (tool) => {
     this.setState((prevState) => {
@@ -142,6 +146,7 @@ export default class Board extends React.Component {
       if (index > -1) {
         prevState.favorites.splice(index, 1)
       }
+      window.localStorage.setItem('favorites', JSON.stringify(prevState.favorites))
     })
   }
   drawImage = (imageSrc) => {
@@ -153,6 +158,7 @@ export default class Board extends React.Component {
   }
   changeCurrentTool = (tool) => {
     this.toolsConfig.updatePrevTool(this.state.currTool)
+    window.localStorage.setItem('currTool', JSON.stringify(tool))
     this.setState({currTool: tool})
   }
   cleanCanvas = () => {
