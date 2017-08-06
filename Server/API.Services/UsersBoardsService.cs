@@ -53,8 +53,14 @@ namespace API.Services {
         }
 
         public async Task DeleteAsync(long boardId, long userId) {
-            if(!await _usersBoardsRepository.ExistsAsync(boardId, userId)) {
+            UserBoard_User user = await _usersBoardsRepository.FindUserAsync(boardId, userId);
+
+            if(user != null) {
                 throw new NotFoundException($"The UserBoard with board id {boardId} and user id {userId} not exists");
+            }
+
+            if(user.Permission == BoardPermission.Owner) {
+                throw new InvalidChangeException($"It is not possible for the owner to withdraw his own permissions");
             }
 
             await _usersBoardsRepository.RemoveAsync(boardId, userId);
@@ -114,6 +120,14 @@ namespace API.Services {
             UserBoard user = await _usersBoardsRepository.FindAsync(boardId, userId);
             if(user == null) {
                 throw new NotFoundException($"The UserBoard with board id {boardId} and user id {userId} not exists");
+            }
+
+            if(user.Permission != BoardPermission.Owner && inputUserBoard.Permission == InBoardPermission.Owner) {
+                throw new InvalidChangeException("It is not possible change the permissions for owner.");
+            }
+
+            if(user.Permission == BoardPermission.Owner && inputUserBoard.Permission != InBoardPermission.Owner) {
+                throw new InvalidChangeException("It is not possible change the permissions owner.");
             }
 
             user.In(inputUserBoard);
