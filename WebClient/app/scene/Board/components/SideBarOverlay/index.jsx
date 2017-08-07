@@ -10,7 +10,8 @@ import {
   Menu,
   Icon,
   Dropdown,
-  Button
+  Button,
+  Popup
 } from 'semantic-ui-react'
 
 export default class SideBarOverlay extends React.Component {
@@ -37,7 +38,7 @@ export default class SideBarOverlay extends React.Component {
   getAuthView () {
     const auth = this.props.auth
     const authUserIcon = auth.isAuthenticated() ? 'user outline' : 'sign in'
-    const authLabel = auth.isAuthenticated() ? /* auth.tryGetProfile().sub */ 'Alexandre' : 'Login'
+    const authLabel = auth.isAuthenticated() ? auth.tryGetProfile().given_name : 'Login'
     const authOnClick = auth.isAuthenticated() ? () => this.extendMenu(220) : () => this.props.auth.login()
 
     const trigger = (
@@ -50,7 +51,7 @@ export default class SideBarOverlay extends React.Component {
     )
 
     const options = [
-      { key: 'user', text: 'Account', icon: 'user', onClick: () => window.alert(2) },
+      { key: 'user', text: 'Account', icon: 'user', onClick: () => this.props.openUserAccount() },
       { key: 'settings', text: 'Settings', icon: 'settings', onClick: () => window.alert(2) },
       { key: 'sign-out', text: 'Sign Out', icon: 'sign out', onClick: () => auth.logout() }
     ]
@@ -74,28 +75,34 @@ export default class SideBarOverlay extends React.Component {
             </a>
             <Dropdown ref='menux' onClose={this.closeBoards} onClick={() => this.extendMenu(300)} item text='My Boards'>
               <Dropdown.Menu className={styles.myBoards} >
-                <Dropdown.Header>School</Dropdown.Header>
-                <Dropdown.Item>Semester 1 xpto class</Dropdown.Item>
-                <Dropdown.Item>Semester 2</Dropdown.Item>
-                <Dropdown.Item>Semester 3</Dropdown.Item>
-
-                <Dropdown.Header>Personal</Dropdown.Header>
-                <Dropdown.Item >Diary</Dropdown.Item>
-                <Dropdown.Item >Ideas</Dropdown.Item>
-                <Dropdown.Item >House</Dropdown.Item>
-
+                <Dropdown.Header>Current Board</Dropdown.Header>
+                <Dropdown.Item >{this.props.currentBoard.name}</Dropdown.Item>
+                <Dropdown.Header>Your Boards</Dropdown.Header>
+                {this.props.userBoards.map(board => {
+                  return <Dropdown.Item >{board.name}</Dropdown.Item>
+                })}
                 <Dropdown.Item className={styles.addBoard}>
-                  <Button className={styles.btnPlus}>
+                  <Button onClick={this.props.addBoard} className={styles.btnPlus}>
                     <Icon name='plus' className={styles.iconPlus} />
                   </Button>
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
-            {/* Only Appears if current scretch is not associated with a board */}
-            <a onClick={this.props.toggleSaveModal} className='item'>
-              <Icon name='save' />
-              Save Board
-            </a>
+            {/* Only Appears if current scretch is not associated with a board that is saved remotely */}
+            {this.props.persist.connected
+            ? null
+            : (
+              <Popup
+                trigger={
+                  <a onClick={this.props.toggleSaveModal} className='item'>
+                    <Icon name='save' />
+                    Send to Cloud
+                  </a>
+                }
+                content='Save Your Current Board To Cloud'
+                basic
+              />
+            )}
           </Sidebar>
           <Sidebar.Pusher>
             <Segment basic>
