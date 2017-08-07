@@ -10,7 +10,7 @@ import {
 } from 'semantic-ui-react'
 
 export default class ToolsSideMenu extends React.Component {
-  changeCurrentTool (toolInstance) {
+  changeCurrentTool = (toolInstance) => {
     this.props.toggleSideMenu() // must be here to avoid a small user experience bug
     const toolInst = toolInstance[0]
     const toolsConfig = this.props.toolsConfig
@@ -37,7 +37,7 @@ export default class ToolsSideMenu extends React.Component {
     return (
       <div onMouseLeave={this.props.toggleSideMenu} className={styles.toolMenu} style={{width: 40 * toolContentSize, visibility}}>
         {content.map((toolInstance, idx) => (
-          <div key={'toolInstance' + idx} className={styles.block} onClick={this.changeCurrentTool.bind(this, [toolInstance])}>
+          <div key={'toolInstance' + idx} className={styles.block} onClick={() => this.changeCurrentTool([toolInstance])}>
             <span>
               {/* it could be color:red instead of style:{color:'red'}} but the first one does not support rgba */}
               <Icon name={icon} size={toolInstance.size} style={{paddingTop: '5px', color: toolInstance.color}} />
