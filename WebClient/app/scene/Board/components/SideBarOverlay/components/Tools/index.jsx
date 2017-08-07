@@ -12,11 +12,15 @@ import {
 const halfbtnSize = 20
 const margin = 30
 
+function scaleBtnPosition (canvasSize) {
+  return canvasSize.width - halfbtnSize - margin
+}
+
 export default class Tools extends React.Component {
   state = {
     visible: false,
     top: 25 - halfbtnSize,
-    left: this._scaleBtnPosition(this.props.canvasSize)
+    left: scaleBtnPosition(this.props.canvasSize)
   }
   onOpenImage = (event) => {
     var file = event.target.files[0]
@@ -33,9 +37,9 @@ export default class Tools extends React.Component {
 
   componentWillReceiveProps (nexProps) {
     // if window size increases, canvas size must be updated
-    if (this._scaleBtnPosition(nexProps.canvasSize) !== this.state.left) {
+    if (scaleBtnPosition(nexProps.canvasSize) !== this.state.left) {
       this.setState({
-        left: this._scaleBtnPosition(nexProps.canvasSize)
+        left: scaleBtnPosition(nexProps.canvasSize)
       })
       return true
     }
@@ -94,9 +98,5 @@ export default class Tools extends React.Component {
         </Grid>
       </div>
     )
-  }
-
-  _scaleBtnPosition (canvasSize) {
-    return canvasSize.width - halfbtnSize - margin
   }
 }
