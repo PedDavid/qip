@@ -10,11 +10,13 @@ export default class Tool extends React.Component {
   state = {sideMenuOpened: false}
 
   toggleSideMenu = () => {
+    // TODO(peddavid): This is because Move Tool doesn't have "subtools",
+    //  That said, this logic should not be here at all, or at least generified
     if (this.props.tool.type === 'move') {
       const tool = new Move(this.props.grid)
       this.props.changeCurrentTool(tool)
     } else {
-      this.setState(lastState => { return {sideMenuOpened: !lastState.sideMenuOpened} })
+      this.setState(lastState => ({sideMenuOpened: !lastState.sideMenuOpened}))
     }
   }
 
