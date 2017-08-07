@@ -130,16 +130,12 @@ export default class Board extends React.Component {
       })
   }
 
+  // TODO(peddavid): Favorites are not used anywhere here, why is it Board concern? (change to another file?)
   addFavorite = (tool) => {
-    this.setState(() => this.state.favorites.push(tool)) // not needed to change prevState
+    this.setState(prevState => ({favorites: [...prevState.favorites, tool]}))
   }
   removeFavorite = (tool) => {
-    this.setState((prevState) => {
-      const index = prevState.favorites.indexOf(tool)
-      if (index > -1) {
-        prevState.favorites.splice(index, 1)
-      }
-    })
+    this.setState(prevState => ({favorites: prevState.favorites.filter(favorite => favorite !== tool)}))
   }
   drawImage = (imageSrc) => {
     const newImage = new Image({x: 80, y: 80}, imageSrc)
@@ -158,11 +154,11 @@ export default class Board extends React.Component {
     this.toggleCleanModal()
   }
   toggleCleanModal = () => {
-    this.setState(prevState => { return { showCleanModal: !prevState.showCleanModal } })
+    this.setState(prevState => ({showCleanModal: !prevState.showCleanModal}))
   }
 
   toggleShareModal = () => {
-    this.setState(prevState => { return { showShareModal: !prevState.showShareModal } })
+    this.setState(prevState => ({showShareModal: !prevState.showShareModal}))
   }
 
   refCallback = (ref) => {
