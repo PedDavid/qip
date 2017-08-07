@@ -35,7 +35,7 @@ export default class ShareBoardModal extends React.Component {
       }
       return response.json()
     }).then(board => {
-      this.props.updateCurrentBoard(board.id)
+      // this.props.updateCurrentBoard(board.id) // todo (simaovii): verificar se isto é necessário
       this.setState({
         boardUrl: baseUrl + board.id,
         loading: false,

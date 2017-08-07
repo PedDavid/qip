@@ -8,7 +8,7 @@ export default class Auth {
     redirectUri: AUTH_CONFIG.callbackUrl,
     audience: `https://${AUTH_CONFIG.domain}/userinfo`,
     responseType: 'token id_token',
-    scope: 'openid'
+    scope: 'openid profile'
   })
 
   constructor () {
@@ -71,6 +71,7 @@ export default class Auth {
     })
   }
 
+  // todo: this might be called when there is no profile yet. correct this and change all calls to this method
   tryGetProfile () {
     // if it was already created and user authentication is valid, return profile
     if (this.isAuthenticated() && window.localStorage.getItem('profile') != null) {

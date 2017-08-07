@@ -58,7 +58,7 @@ export default class SaveBoardModal extends React.Component {
 
     savePromise
       .then(board => {
-        const addBoardToUserFetch = fetch(`${baseUrl}${boardsPath}${board.id}/userboards`, {
+        const addBoardToUserFetch = fetch(`${baseUrl}${boardsPath}${board.id}/usersboards`, {
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
