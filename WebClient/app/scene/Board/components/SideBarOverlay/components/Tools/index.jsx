@@ -1,5 +1,3 @@
-// @flow
-
 import React from 'react'
 import styles from './styles.scss'
 import Tool from './components/Tool'
@@ -83,14 +81,14 @@ export default class Tools extends React.Component {
           <Grid.Row columns={1} className={styles.toolRow} style={{padding: '0px'}}>
             <Grid.Column style={{padding: '0px'}}>
               <label htmlFor='file-upload'>
-                <GenericTool content='image' />
+                <GenericTool name='image' />
               </label>
               <input accept='image/*' id='file-upload' onChange={this.onOpenImage} style={{zIndex: 1000, visibility: 'hidden'}} type='file' />
             </Grid.Column>
           </Grid.Row>
           <Grid.Row columns={1} className={styles.toolRow} style={{padding: '0px'}}>
             <Grid.Column style={{padding: '0px'}}>
-              <GenericTool content='trash' onClickTool={this.props.cleanCanvas} />
+              <GenericTool name='trash' onClick={this.props.cleanCanvas} />
             </Grid.Column>
           </Grid.Row>
         </Grid>

@@ -1,5 +1,3 @@
-// @flow
-
 import React from 'react'
 import SignInModal from './components/SignInModal'
 import SignUpModal from './components/SignUpModal'

@@ -1,5 +1,3 @@
-// @flow
-
 import React from 'react'
 import { Modal, Icon, Form, Checkbox, Label, Button, Divider } from 'semantic-ui-react'
 import styles from './../../styles.scss'
