@@ -4,5 +4,5 @@ import { Icon } from 'semantic-ui-react'
 
 export default function GenericTool (props) {
   const style = {paddingTop: '5px', width: '38px', height: '38px'}
-  return <Icon onClick={props.onClickTool} name={props.content} size='large' style={style} />
+  return <Icon onClick={props.onClick} name={props.name} size='large' style={style} />
 }
