@@ -130,7 +130,7 @@ export default class Board extends React.Component {
       })
   }
 
-  addFavorite (tool) {
+  addFavorite = (tool) => {
     this.setState(() => this.state.favorites.push(tool)) // not needed to change prevState
   }
   removeFavorite = (tool) => {
@@ -177,9 +177,9 @@ export default class Board extends React.Component {
   render () {
     return (
       <div onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.xpto}>
-        <SideBarOverlay grid={this.grid} changeCurrentTool={this.changeCurrentTool.bind(this)} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
-          currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite.bind(this)}
-          removeFavorite={this.removeFavorite.bind(this)} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}
+        <SideBarOverlay grid={this.grid} changeCurrentTool={this.changeCurrentTool} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
+          currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite}
+          removeFavorite={this.removeFavorite} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}
           drawImage={this.drawImage} canvasSize={this.state.canvasSize}>
           <Canvas ref={this.refCallback} width={this.state.canvasSize.width} height={this.state.canvasSize.height} {...this.listeners}>
             HTML5 Canvas not supported
