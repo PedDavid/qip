@@ -12,6 +12,7 @@
   <ItemGroup>
     <ProjectReference Include="..\API.Interfaces\API.Interfaces.csproj" />
     <ProjectReference Include="..\API.Services\API.Services.csproj" />
+    <ProjectReference Include="..\Authorization\Authorization.csproj" />
     <ProjectReference Include="..\IODomain\IODomain.csproj" />
   </ItemGroup>
 

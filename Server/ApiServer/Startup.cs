@@ -1,6 +1,10 @@
-﻿using API.Repositories;
+﻿using Authorization;
+using Authorization.Requirements;
+using Authorization.Extensions.DependencyInjection;
+using API.Repositories;
 using API.Repositories.Extensions.DependencyInjection;
 using API.Services.Extensions.DependencyInjection;
+using IODomain.Output;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -39,7 +43,18 @@ namespace ApiServer {
                 );
             });
 
+            //Add Authorization Policies
+            string domain = $"https://{Configuration["Auth0:Domain"]}/";//TODO Config on the appsettings
+            services.AddAuthorization(options => {
+                options.AddPolicy("Administrator", policy => policy.Requirements.Add(new AdminRequirement()));
+                options.AddPolicy(Policies.UserIsOwnPolicy, policy => policy.Requirements.Add(new UserIsOwnRequirement()));
+                options.AddPolicy(Policies.BoardIsOwnPolicy, policy => policy.Requirements.Add(new BoardPermissionRequirement(OutBoardPermission.Owner)));
+                options.AddPolicy(Policies.ReadBoardPolicy, policy => policy.Requirements.Add(new BoardPermissionRequirement(OutBoardPermission.View)));
+                options.AddPolicy(Policies.WriteBoadPolicy, policy => policy.Requirements.Add(new BoardPermissionRequirement(OutBoardPermission.Edit)));
+            });
 
+            //Add Api Authorization Handlers
+            services.AddApiAuthorization();
 
             // Adds services required for using options.
             services.AddOptions();

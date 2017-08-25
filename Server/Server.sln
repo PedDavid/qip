@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+VisualStudioVersion = 15.0.26730.10
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Database", "Database\Database.sqlproj", "{C114D5A5-B8D7-47C2-B21F-F750222F578D}"
 EndProject
@@ -20,6 +20,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API.Services", "API.Services\API.Services.csproj", "{0025D419-A092-4F44-ABFB-6DCFB9E2394B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IODomain", "IODomain\IODomain.csproj", "{30F23DB8-28A3-4A4D-8486-78D59C0E499A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Authorization", "Authorization\Authorization.csproj", "{7278C253-D4A0-4C55-8B53-5C2C7F64129D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -65,8 +67,15 @@ Global
 		{30F23DB8-28A3-4A4D-8486-78D59C0E499A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{30F23DB8-28A3-4A4D-8486-78D59C0E499A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{30F23DB8-28A3-4A4D-8486-78D59C0E499A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7278C253-D4A0-4C55-8B53-5C2C7F64129D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7278C253-D4A0-4C55-8B53-5C2C7F64129D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7278C253-D4A0-4C55-8B53-5C2C7F64129D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7278C253-D4A0-4C55-8B53-5C2C7F64129D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {89477982-94F0-42F4-A8AB-5DFF9B55D71F}
 	EndGlobalSection
 EndGlobal
