@@ -1,15 +1,15 @@
-﻿using System;
+﻿using API.Repositories;
+using API.Repositories.Extensions.DependencyInjection;
+using API.Services.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using API.Repositories;
+using System;
 using WebSockets.StringWebSockets;
-using API.Repositories.Extensions.DependencyInjection;
-using API.Services;
-using API.Interfaces.IRepositories;
-using API.Services.Extensions.DependencyInjection;
 
 namespace ApiServer {
     public class Startup {
@@ -39,6 +39,8 @@ namespace ApiServer {
                 );
             });
 
+
+
             // Adds services required for using options.
             services.AddOptions();
 
@@ -49,7 +51,13 @@ namespace ApiServer {
             services.AddMemoryCache();
 
             // Add framework services.
-            services.AddMvc();
+            services.AddMvc(config => {
+                // Define that by default authentication is required
+                var policy = new AuthorizationPolicyBuilder() 
+                                 .RequireAuthenticatedUser()
+                                 .Build();
+                config.Filters.Add(new AuthorizeFilter(policy));
+            });
 
             //Add Db Repositories
             services.AddRepositories();
@@ -59,6 +67,7 @@ namespace ApiServer {
 
             //Add StringWebSockets Session Manager
             services.AddSingleton<StringWebSocketsSessionManager>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -68,6 +77,12 @@ namespace ApiServer {
 
             // Shows UseCors with named policy.
             app.UseCors("AllowSpecificOrigin");
+
+            var options = new JwtBearerOptions {
+                Audience = Configuration["Auth0:ApiIdentifier"],
+                Authority = $"https://{Configuration["Auth0:Domain"]}/"
+            };
+            app.UseJwtBearerAuthentication(options);
 
             var webSocketOptions = new WebSocketOptions() {
                 KeepAliveInterval = TimeSpan.FromSeconds(120),
