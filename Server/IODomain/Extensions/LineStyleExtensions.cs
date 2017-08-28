@@ -15,6 +15,13 @@ namespace IODomain.Extensions {
             };
         }
 
+        public static OutLineStyle Out(this LineStyle lineStyle, long id) {
+            return new OutLineStyle() {
+                Id = lineStyle.Id ?? id,
+                Color = lineStyle.Color
+            };
+        }
+
         public static LineStyle In(this LineStyle lineStyle, InLineStyle inLineStyle) {
             lineStyle.Color = inLineStyle.Color;
 

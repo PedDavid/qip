@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace IODomain.Output {
     public class OutUserBoard_User {
-        public OutPartialUser User { get; set; }
+        public OutUser User { get; set; }
         public OutBoardPermission Permission { get; set; }
     }
 }
