@@ -33,18 +33,14 @@ export default class FavoriteTools extends React.Component {
     const moveY = event.clientY
     // check if move is enough to change favorite position
     if (moveY > parentOffsetBottom) {
-      console.log('moving DOWN')
       // it's not possible to use "this.props.currTool" because if the second favorite is selected and
       // the user is trying to move the first one, it will throw an error
       // therefore, favorite must be received by parameter
       this.props.moveFavorite(this.favorite, false)
-      this.favorite = null
-      this.div = null
+      this.onMouseUp()
     } else if (moveY < parentOffsetTop) {
-      console.log('moving UP')
       this.props.moveFavorite(this.favorite, true)
-      this.favorite = null
-      this.div = null
+      this.onMouseUp()
     }
   }
   onMouseUp = (event) => {
@@ -56,7 +52,7 @@ export default class FavoriteTools extends React.Component {
     return (
       <div className={styles.quickBtnsContainer}>
         <Grid divided textAlign='center'>
-          <Grid.Row columns='1' className={styles.rows} style={{padding: '4px'}}> {/* todo: (simaovii) I don't understand why padding in className is not working... */}
+          <Grid.Row columns='1' className={styles.rows} >
             <Grid.Column>
               <Button circular className={styles.btn} icon='list layout' onClick={this.props.toggleSideBar} />
             </Grid.Column>
