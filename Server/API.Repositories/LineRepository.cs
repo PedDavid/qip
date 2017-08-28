@@ -15,9 +15,9 @@ using System.Threading.Tasks;
 namespace API.Repositories {
     public class LineRepository : ILineRepository {
         private readonly SqlServerTemplate _queryTemplate;
-        private readonly RepositoriesOptions _options;
+        private readonly DatabaseOptions _options;
 
-        public LineRepository(SqlServerTemplate queryTemplate, IOptionsSnapshot<RepositoriesOptions> options) {
+        public LineRepository(SqlServerTemplate queryTemplate, IOptionsSnapshot<DatabaseOptions> options) {
             _queryTemplate = queryTemplate;
             _options = options.Value;
         }

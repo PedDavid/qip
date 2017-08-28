@@ -60,7 +60,8 @@ namespace ApiServer {
             services.AddOptions();
 
             // Configure using a sub-section of the appsettings.json file.
-            services.Configure<RepositoriesOptions>(Configuration.GetSection("ConnectionStrings"));
+            services.Configure<DatabaseOptions>(Configuration.GetSection("ConnectionStrings"));
+            services.Configure<Auth0Options>(Configuration.GetSection("Auth0"));
 
             //Add Memory Cache
             services.AddMemoryCache();

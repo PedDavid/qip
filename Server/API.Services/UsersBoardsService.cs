@@ -2,25 +2,30 @@
 using API.Interfaces.IRepositories;
 using API.Interfaces.IServices;
 using API.Interfaces.ServicesExceptions;
+using API.Services.Exntensions;
 using API.Services.Utils;
 using IODomain.Extensions;
 using IODomain.Input;
 using IODomain.Output;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace API.Services {
     class UsersBoardsService : IUsersBoardsService {
         private readonly IUsersBoardsRepository _usersBoardsRepository;
-        private readonly IUserRepository _userRepository;
+        private readonly IAuth0ManagementRepository _auth0ManagementRepository;
         private readonly IBoardRepository _boardRepository;
+        private readonly IMemoryCache _memoryCache;
 
-        public UsersBoardsService(IUsersBoardsRepository usersBoardsRepository, IUserRepository userRepository, IBoardRepository boardRepository) {
+        public UsersBoardsService(IUsersBoardsRepository usersBoardsRepository, IAuth0ManagementRepository auth0ManagementRepository, IBoardRepository boardRepository, IMemoryCache memoryCache) {
             _usersBoardsRepository = usersBoardsRepository;
-            _userRepository = userRepository;
+            _auth0ManagementRepository = auth0ManagementRepository;
             _boardRepository = boardRepository;
+            _memoryCache = memoryCache;
         }
 
         public async Task<OutUserBoard> CreateAsync(long boardId, InUserBoard inputUserBoard) {
@@ -30,7 +35,7 @@ namespace API.Services {
 
             Validator<InUserBoard>.Valid(inputUserBoard, GetValidationConfigurations());
 
-            long userId = inputUserBoard.UserId.Value;
+            string userId = inputUserBoard.UserId;
 
             if(inputUserBoard.BoardId != boardId) {
                 throw new InconsistentRequestException(
@@ -38,7 +43,9 @@ namespace API.Services {
                 );
             }
 
-            if(!await _userRepository.ExistsAsync(userId)) {
+            AccessToken token = await _memoryCache.GetAccessToken(_auth0ManagementRepository);
+
+            if(!await _auth0ManagementRepository.UserExistsAsync(userId, token.Access_token)) {
                 throw new NotFoundException($"The User with id {userId} not exists");
             }
 
@@ -52,7 +59,7 @@ namespace API.Services {
             return userBoard.Out();
         }
 
-        public async Task DeleteAsync(long boardId, long userId) {
+        public async Task DeleteAsync(long boardId, string userId) {
             UserBoard_User user = await _usersBoardsRepository.FindUserAsync(boardId, userId);
 
             if(user != null) {
@@ -66,7 +73,7 @@ namespace API.Services {
             await _usersBoardsRepository.RemoveAsync(boardId, userId);
         }
 
-        public async Task<IEnumerable<OutUserBoard_Board>> GetAllBoardsAsync(long userId, long index, long size, string search) {
+        public async Task<IEnumerable<OutUserBoard_Board>> GetAllBoardsAsync(string userId, long index, long size, string search) {
             IEnumerable<UserBoard_Board> userBoards = await _usersBoardsRepository.GetAllBoardsAsync(userId, index, size, search);
 
             return userBoards.Select(UserBoard_BoardExtensions.Out);
@@ -75,10 +82,32 @@ namespace API.Services {
         public async Task<IEnumerable<OutUserBoard_User>> GetAllUsersAsync(long boardId, long index, long size, string search) {
             IEnumerable<UserBoard_User> userBoards = await _usersBoardsRepository.GetAllUsersAsync(boardId, index, size, search);
 
+            string userIds = String.Join(" OR ", userBoards.Select(ub => ub.User.User_id).ToArray());
+
+            var sch = $"user_id:({userIds})";
+
+            if(search != null) {
+                sch = $"{sch} AND {search}";
+            }
+
+            AccessToken token = await _memoryCache.GetAccessToken(_auth0ManagementRepository);
+
+            IEnumerable<User> users = await _auth0ManagementRepository.GetUsersAsync(token.Access_token, index, size, sch);
+
+            userBoards = userBoards.Join(
+                users, 
+                ub => ub.User.User_id, 
+                u => u.User_id, 
+                (ub, u) => {
+                    ub.User = u;
+                    return ub;
+                }
+            );
+
             return userBoards.Select(UserBoard_UserExtensions.Out);
         }
 
-        public async Task<OutUserBoard_Board> GetBoardAsync(long userId, long boardId) {
+        public async Task<OutUserBoard_Board> GetBoardAsync(string userId, long boardId) {
             UserBoard_Board board = await _usersBoardsRepository.FindBoardAsync(userId, boardId);
 
             if(board == null) {
@@ -88,7 +117,7 @@ namespace API.Services {
             return board.Out();
         }
 
-        public async Task<OutUserBoard_User> GetUserAsync(long boardId, long userId) {
+        public async Task<OutUserBoard_User> GetUserAsync(long boardId, string userId) {
             UserBoard_User user = await _usersBoardsRepository.FindUserAsync(boardId, userId);
 
             if(user == null) {
@@ -98,7 +127,7 @@ namespace API.Services {
             return user.Out();
         }
 
-        public async Task<OutUserBoard> UpdateAsync(long boardId, long userId, InUserBoard inputUserBoard) {
+        public async Task<OutUserBoard> UpdateAsync(long boardId, string userId, InUserBoard inputUserBoard) {
             if(inputUserBoard == null) {
                 throw new MissingInputException();
             }

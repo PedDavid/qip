@@ -9,6 +9,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using API.Interfaces.ServicesExceptions;
 
 namespace Authorization.Handlers {
     public class BoardPermissionHandler : AuthorizationHandler<BoardPermissionRequirement, BoardRequest> {
@@ -24,13 +25,15 @@ namespace Authorization.Handlers {
             }
 
             Claim nameIdentifierClaim = context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-            string stringUserId = nameIdentifierClaim?.Value;
+            string userId = nameIdentifierClaim?.Value;
 
-            if(!long.TryParse(stringUserId, out long userId)) {//TODO Corrigir a incoerencia entre o identifier ser string ou long
+            OutUserBoard_User user;
+            try {//TODO Tirar
+                user = await _usersBoardsService.GetUserAsync(resource.BoardId, userId);
+            }
+            catch(NotFoundException) {
                 return;
             }
-
-            OutUserBoard_User user = await _usersBoardsService.GetUserAsync(resource.BoardId, userId);
 
             if(user.Permission >= requirement.Permission) {
                 context.Succeed(requirement);

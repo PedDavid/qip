@@ -32,7 +32,7 @@ namespace API.Controllers {
         }
 
         [HttpGet("{userId}", Name = "GetUserBoard")]
-        public async Task<IActionResult> GetById(long boardId, long userId) {
+        public async Task<IActionResult> GetById(long boardId, string userId) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.BoardIsOwnPolicy))
                 return new ChallengeResult();
 
@@ -52,7 +52,7 @@ namespace API.Controllers {
         }
 
         [HttpPut("{userId}")]
-        public async Task<IActionResult> Update(long boardId, long userId, [FromBody] InUserBoard inputUserBoard) {
+        public async Task<IActionResult> Update(long boardId, string userId, [FromBody] InUserBoard inputUserBoard) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.BoardIsOwnPolicy))
                 return new ChallengeResult();
 
@@ -62,7 +62,7 @@ namespace API.Controllers {
         }
 
         [HttpDelete("{userId}")]
-        public async Task<IActionResult> Delete(long boardId, long userId) {
+        public async Task<IActionResult> Delete(long boardId, string userId) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.BoardIsOwnPolicy))
                 return new ChallengeResult();
 

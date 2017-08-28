@@ -11,6 +11,7 @@ namespace API.Services.Extensions.DependencyInjection {
             services.AddScoped<ILineStyleService, LineStyleService>();
             services.AddScoped<IUsersBoardsService, UsersBoardsService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IPreferencesService, PreferencesService>();
 
             return services;
         }
