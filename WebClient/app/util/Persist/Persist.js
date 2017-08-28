@@ -74,8 +74,8 @@ export class Persist {
 
   updateCurrTool (newCurrTool) {
     return this.callWSLSFunc(
-      () => PersistWS._updateFavoritesWS(newCurrTool),
-      () => PersistLS._updateFavoritesLS(newCurrTool)
+      () => PersistWS._updateCurrToolWS(newCurrTool),
+      () => PersistLS._updateCurrToolLS(newCurrTool)
     )
   }
 

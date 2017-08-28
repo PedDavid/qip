@@ -18,6 +18,40 @@ export default class FavoriteTools extends React.Component {
     }
   }
 
+  onMouseDownFav = (args) => {
+    const favIdx = args[0]
+    this.div = this.refs['div' + favIdx]
+    this.favorite = args[1]
+  }
+  onMoveFav = (event) => {
+    // if event was trigger by hovering, ignore move
+    if (event.buttons <= 0 || this.favorite == null) {
+      return
+    }
+    const parentOffsetTop = this.div.offsetTop
+    const parentOffsetBottom = parentOffsetTop + this.div.offsetHeight
+    const moveY = event.clientY
+    // check if move is enough to change favorite position
+    if (moveY > parentOffsetBottom) {
+      console.log('moving DOWN')
+      // it's not possible to use "this.props.currTool" because if the second favorite is selected and
+      // the user is trying to move the first one, it will throw an error
+      // therefore, favorite must be received by parameter
+      this.props.moveFavorite(this.favorite, false)
+      this.favorite = null
+      this.div = null
+    } else if (moveY < parentOffsetTop) {
+      console.log('moving UP')
+      this.props.moveFavorite(this.favorite, true)
+      this.favorite = null
+      this.div = null
+    }
+  }
+  onMouseUp = (event) => {
+    this.favorite = null
+    this.div = null
+  }
+
   render () {
     return (
       <div className={styles.quickBtnsContainer}>
@@ -28,11 +62,16 @@ export default class FavoriteTools extends React.Component {
             </Grid.Column>
           </Grid.Row>
           {this.props.favorites.map((favorite, idx) => (
-            <Grid.Row key={'favorite' + idx} columns='1' className={styles.rows} style={{padding: '4px'}}>
-              <Grid.Column>
-                <Favorite ref={'favorite' + idx} toolsConfig={this.props.toolsConfig} currTool={this.props.currTool} changeCurrentTool={this.props.changeCurrentTool} removeFavorite={this.props.removeFavorite} fav={favorite} />
-              </Grid.Column>
-            </Grid.Row>
+            <div ref={'div' + idx} key={'div' + idx}> {/* this div allows onMove function to know offset positions of element */}
+              <Grid.Row key={'div' + idx} columns='1' className={styles.rows} style={{padding: '4px'}}
+                onMouseUp={this.onMouseUp} onMouseMove={this.onMoveFav} onMouseDown={this.onMouseDownFav.bind(this, [idx, favorite])}>
+                <Grid.Column>
+                  <Favorite ref={'favorite' + idx} toolsConfig={this.props.toolsConfig} currTool={this.props.currTool}
+                    changeCurrentTool={this.props.changeCurrentTool} removeFavorite={this.props.removeFavorite} fav={favorite}
+                    moveFavorite={this.props.moveFavorite} />
+                </Grid.Column>
+              </Grid.Row>
+            </div>
           ))}
           {/* Add Favorite Button */}
           <Grid.Row columns='1' className={styles.rows} style={{padding: '4px'}}>

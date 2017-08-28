@@ -165,6 +165,30 @@ export default class Board extends React.Component {
       this.persist.updateFavorites(prevState.favorites)
     })
   }
+  moveFavorite = (tool, movingUp) => {
+    this.setState((prevState) => {
+      let index = -1
+      prevState.favorites
+        .find((mtool, idx) => { // array.findIndex was not working, possible because tool.grid was not equal
+          if (mtool.equals(tool)) {
+            index = idx
+          }
+        })
+
+      if (index === -1 || tool == null) {
+        return
+      } else if (movingUp && index - 1 >= 0) {
+        const auxTool = prevState.favorites[index - 1]
+        prevState.favorites[index - 1] = tool
+        prevState.favorites[index] = auxTool
+      } else if (!movingUp && index + 1 <= prevState.favorites.length) {
+        const auxTool = prevState.favorites[index + 1]
+        prevState.favorites[index + 1] = tool
+        prevState.favorites[index] = auxTool
+      }
+      this.persist.updateFavorites(prevState.favorites)
+    })
+  }
   drawImage = (imageSrc) => {
     const newImage = new Image({x: 80, y: 80}, imageSrc)
     // do not change this order. image must be added to grid first to set the new id
@@ -228,7 +252,7 @@ export default class Board extends React.Component {
           removeFavorite={this.removeFavorite} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}
           toggleSaveModal={this.toggleSaveModal} drawImage={this.drawImage} canvasSize={this.state.canvasSize} auth={auth}
           addBoard={this.toggleAddModal} currentBoard={this.state.currentBoard} userBoards={this.state.userBoards} persist={this.persist}
-          openUserAccount={this.toggleUserAccountModal}>
+          openUserAccount={this.toggleUserAccountModal} moveFavorite={this.moveFavorite}>
           <Canvas ref={this.refCallback} width={this.state.canvasSize.width} height={this.state.canvasSize.height} {...this.listeners}>
             HTML5 Canvas not supported
           </Canvas>
