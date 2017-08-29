@@ -48,7 +48,9 @@ export default class PersistLS {
     console.info('getting user info from local storage')
     return new Promise((resolve, reject) => {
       // if it's not authenticated or not sharing board, get data from localstorage
-      if (window.localStorage.getItem('defaultPen') === null || window.localStorage.getItem('defaultEraser') === null || window.localStorage.getItem('currTool') === null || window.localStorage.getItem('favorites') === null) {
+      if (window.localStorage.getItem('defaultPen') === null || window.localStorage.getItem('defaultEraser') === null ||
+        window.localStorage.getItem('currTool') === null || window.localStorage.getItem('favorites') === null ||
+        window.localStorage.getItem('settings') === null) {
         this._resetLocalStorage()
       }
 
@@ -57,12 +59,13 @@ export default class PersistLS {
       const tempCurrTool = JSON.parse(window.localStorage.getItem('currTool'))
       const favorites = JSON.parse(window.localStorage.getItem('favorites'))
         .map(fav => this._getToolFromLS(grid, fav))
-
+      const settings = JSON.parse(window.localStorage.getItem('settings'))
       const userInfo = {
         defaultPen: new Pen(grid, tempPen.color, tempPen.width),
         defaultEraser: new Eraser(grid, tempEraser.width),
         currTool: this._getToolFromLS(grid, tempCurrTool),
-        favorites
+        favorites,
+        settings
       }
 
       resolve(userInfo)
@@ -99,5 +102,6 @@ export default class PersistLS {
     window.localStorage.setItem('favorites', '[]')
     window.localStorage.setItem('currTool', JSON.stringify(new Pen(tempGrid, 'black', 5)))
     window.localStorage.setItem('canvasSize', JSON.stringify({width: 0, height: 0}))
+    window.localStorage.setItem('settings', JSON.stringify([false, false]))
   }
 }

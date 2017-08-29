@@ -2,6 +2,7 @@ import { Figure, FigureStyle } from './../Figure'
 import {SimplePoint} from './../SimplePoint'
 import {PointStyle} from './../Point'
 import Tool from './Tool'
+import SettingsConfig from './../../util/SettingsConfig.js'
 
 export default class Pen implements Tool {
   constructor (grid, color, width) {
@@ -14,8 +15,8 @@ export default class Pen implements Tool {
   }
 
   // passar para aqui as funções getMousePos
-  onPress (event, scale, updateCanvasSizeFunc) {
-    if (event.pointerType === 'touch') {
+  onPress (event, scale, updateCanvasSizeFunc, settings) {
+    if (settings[SettingsConfig.fingerMoveSettingIdx] && event.pointerType === 'touch') {
       return
     }
     const x = event.offsetX
@@ -41,8 +42,8 @@ export default class Pen implements Tool {
     updateCanvasSizeFunc(x, y)
   }
 
-  onSwipe (event, scale, updateCanvasSizeFunc) {
-    if (event.buttons > 0 && event.pointerType !== 'touch') {
+  onSwipe (event, scale, updateCanvasSizeFunc, settings) {
+    if (event.buttons > 0 && !(settings[SettingsConfig.fingerMoveSettingIdx] && event.pointerType === 'touch')) {
       const x = event.offsetX
       const y = event.offsetY
 

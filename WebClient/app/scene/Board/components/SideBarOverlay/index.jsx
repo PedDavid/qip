@@ -52,7 +52,7 @@ export default class SideBarOverlay extends React.Component {
 
     const options = [
       { key: 'user', text: 'Account', icon: 'user', onClick: () => this.props.openUserAccount() },
-      { key: 'settings', text: 'Settings', icon: 'settings', onClick: () => window.alert(2) },
+      { key: 'settings', text: 'Settings', icon: 'settings', onClick: () => this.props.openSettings() },
       { key: 'sign-out', text: 'Sign Out', icon: 'sign out', onClick: () => auth.logout() }
     ]
 

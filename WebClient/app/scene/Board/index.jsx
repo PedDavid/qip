@@ -14,9 +14,9 @@ import CleanBoardModal from './components/Modals/CleanBoardModal'
 import SaveBoardModal from './components/Modals/SaveBoardModal'
 import AddBoardModal from './components/Modals/AddBoardModal'
 import ShareBoardModal from './components/Modals/ShareBoardModal'
+import SettingsModal from './components/Modals/SettingsModal'
 import UserAccountModal from './components/Modals/UserAccountModal'
 import styles from './styles.scss'
-
 import Pen from './../../model/tools/Pen'
 import Eraser from './../../model/tools/Eraser'
 import Grid from './../../model/Grid'
@@ -27,6 +27,7 @@ import defaultToolsConfig from './../../public/configFiles/defaultTools'
 import {Persist, PersistType} from './../../util/Persist/Persist'
 import Auth from './../../auth/Auth'
 import Callback from './../../auth/Callback/SignInCallback.js'
+import SettingsConfig from './../../util/SettingsConfig.js'
 
 const defaultGrid = new Grid([], 0)
 const defaultPen = new Pen(defaultGrid, 'black', 5)
@@ -45,20 +46,22 @@ export default class Board extends React.Component {
     showSaveModal: false,
     showAddModal: false,
     showUserAccountModal: false,
+    showSettingsModal: false,
     currTool: defaultPen,
     canvasSize: {width: 0, height: 0},
     favorites: [],
     loading: true,
     currentBoard: new BoardData(), // this is necessary because currentBoard is only fetched after first render
-    userBoards: []
+    userBoards: [],
+    settings: [false, false]
   }
   toolsConfig = new ToolsConfig(defaultToolsConfig)
 
   listeners = {
     // currently, this.perists is not defined but it will on componentDidMount
-    onDown: event => this.state.currTool.onPress(event, 1, (x, y) => this.updateCanvasSize(x, y)),
+    onDown: event => this.state.currTool.onPress(event, 1, (x, y) => this.updateCanvasSize(x, y), this.state.settings),
     onUp: event => this.state.currTool.onPressUp(event, this.persist),
-    onMove: event => this.state.currTool.onSwipe(event, 1, (x, y) => this.updateCanvasSize(x, y)), // change the way canvas size is updated
+    onMove: event => this.state.currTool.onSwipe(event, 1, (x, y) => this.updateCanvasSize(x, y), this.state.settings), // change the way canvas size is updated
     onOut: event => this.state.currTool.onOut(event, this.persist)
   }
 
@@ -90,10 +93,9 @@ export default class Board extends React.Component {
     })
 
     canvasHammer.on('pan', ev => {
-      console.log(ev.deltaY)
-      console.log(window.scrollY)
-      console.log()
-      window.scrollTo(window.scrollX - ev.deltaX / 2, window.scrollY - ev.deltaY / 2)
+      if (this.state.settings[SettingsConfig.fingerMoveSettingIdx]){
+        window.scrollTo(window.scrollX - ev.deltaX / 2, window.scrollY - ev.deltaY / 2)
+      }
     })
   }
 
@@ -151,7 +153,8 @@ export default class Board extends React.Component {
           loading: false,
           currTool: userinfo.currTool != null ? userinfo.currTool : defaultPen,
           favorites: userinfo.favorites != null ? userinfo.favorites : [],
-          userBoards: userinfo.userBoards != null ? userinfo.userBoards : []
+          userBoards: userinfo.userBoards != null ? userinfo.userBoards : [],
+          settings: userinfo.settings != null ? userinfo.settings : [false, false]
         })
       }).catch(err => {
         console.error(err)
@@ -234,6 +237,10 @@ export default class Board extends React.Component {
     })
   }
   updateCanvasSize = (x, y) => {
+    // check if dynamic page setting is checked
+    if (!this.state.settings[SettingsConfig.dynamicPageSettingIdx]) {
+      return
+    }
     let updated = false
     this.setState(prevState => {
       let prevCanvasSize = prevState.canvasSize
@@ -272,6 +279,10 @@ export default class Board extends React.Component {
     this.setState(prevState => { return { showUserAccountModal: !prevState.showUserAccountModal } })
   }
 
+  toggleSettingsModal = () => {
+    this.setState(prevState => { return { showSettingsModal: !prevState.showSettingsModal } })
+  }
+
   refCallback = (ref) => {
     this.canvas = ref.canvas
     this.canvasContext = ref.canvas.getContext('2d')
@@ -291,6 +302,13 @@ export default class Board extends React.Component {
     })
   }
 
+  updateSettings = (setting, idx) => {
+    this.setState(prevState => {
+      prevState.settings[idx] = setting
+    })
+    // todo: persist settings
+  }
+
   render () {
     return (
       <div ref='maindiv' onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.boardStyle} style={{width: this.state.canvasSize.width, height: this.state.canvasSize.height}}>
@@ -299,7 +317,7 @@ export default class Board extends React.Component {
           removeFavorite={this.removeFavorite} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}
           toggleSaveModal={this.toggleSaveModal} drawImage={this.drawImage} canvasSize={this.state.canvasSize} auth={auth}
           addBoard={this.toggleAddModal} currentBoard={this.state.currentBoard} userBoards={this.state.userBoards} persist={this.persist}
-          openUserAccount={this.toggleUserAccountModal} moveFavorite={this.moveFavorite}>
+          openUserAccount={this.toggleUserAccountModal} moveFavorite={this.moveFavorite} openSettings={this.toggleSettingsModal}>
           <Canvas ref={this.refCallback} width={this.state.canvasSize.width} height={this.state.canvasSize.height} {...this.listeners}>
             HTML5 Canvas not supported
           </Canvas>
@@ -317,6 +335,7 @@ export default class Board extends React.Component {
         <AddBoardModal history={this.props.history} persist={this.persist} visible={this.state.showAddModal} closeModal={this.toggleAddModal} auth={auth}
           addBoard={this.addBoard} />
         <UserAccountModal auth={auth} visible={this.state.showUserAccountModal} closeModal={this.toggleUserAccountModal} />
+        <SettingsModal settings={this.state.settings} updateSettings={this.updateSettings} visible={this.state.showSettingsModal} closeModal={this.toggleSettingsModal} />
       </div>
     )
   }

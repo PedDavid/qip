@@ -160,7 +160,8 @@ export default class PersistLS {
         defaultEraser: null,
         currTool: null,
         favorites: null,
-        userBoards: null
+        userBoards: null,
+        settings: null
       }
       return userInfo
     })
