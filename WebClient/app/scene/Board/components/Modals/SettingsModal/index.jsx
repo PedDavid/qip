@@ -17,7 +17,7 @@ export default class SettingsModal extends React.Component {
     console.log(data.checked)
     if (data.checked === false) {
       this.props.updateSettings(false, SettingsConfig.fingerMoveSettingIdx)
-    } 
+    }
     this.setState({
       fingerMoveSettingDisabled: !data.checked
     })

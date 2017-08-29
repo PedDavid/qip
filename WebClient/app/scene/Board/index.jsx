@@ -93,7 +93,7 @@ export default class Board extends React.Component {
     })
 
     canvasHammer.on('pan', ev => {
-      if (this.state.settings[SettingsConfig.fingerMoveSettingIdx]){
+      if (this.state.settings[SettingsConfig.fingerMoveSettingIdx]) {
         window.scrollTo(window.scrollX - ev.deltaX / 2, window.scrollY - ev.deltaY / 2)
       }
     })
