@@ -68,11 +68,13 @@ export default class Board extends React.Component {
     this.getInitialBoard(boardId)
 
     window.addEventListener('resize', event => {
-      this.setState({
-        canvasSize: {
+      this.setState(prevState => {
+        const newCanvasSize = {
           width: window.innerWidth,
           height: window.innerHeight
         }
+        this.persist.updateCanvasSize(newCanvasSize)
+        return {canvasSize: newCanvasSize}
       })
       this.grid.draw(this.canvasContext, 1)
     })
@@ -219,6 +221,17 @@ export default class Board extends React.Component {
     this.persist.cleanCanvas()
     this.grid.clean(this.canvasContext)
     this.toggleCleanModal()
+    this.resetCanvasSize()
+  }
+  resetCanvasSize = () => {
+    this.setState(prevState => {
+      const resetedCanvasSize = {
+        width: window.innerWidth,
+        height: window.innerHeight
+      }
+      this.persist.updateCanvasSize(resetedCanvasSize)
+      return {canvasSize: resetedCanvasSize}
+    })
   }
   updateCanvasSize = (x, y) => {
     let updated = false

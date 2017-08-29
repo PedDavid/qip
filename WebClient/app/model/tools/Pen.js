@@ -21,8 +21,6 @@ export default class Pen implements Tool {
     const x = event.offsetX
     const y = event.offsetY
 
-    updateCanvasSizeFunc(x, y)
-
     const figStyle = new FigureStyle(this.color, scale)
     // Create a new Figure
     this.currentFigure = new Figure(figStyle)
@@ -39,14 +37,14 @@ export default class Pen implements Tool {
     canvasContext.lineWidth = press / 2
     canvasContext.strokeStyle = this.color
     canvasContext.stroke()
+
+    updateCanvasSizeFunc(x, y)
   }
 
   onSwipe (event, scale, updateCanvasSizeFunc) {
     if (event.buttons > 0 && event.pointerType !== 'touch') {
       const x = event.offsetX
       const y = event.offsetY
-
-      updateCanvasSizeFunc(x, y)
 
       if (this.currentFigure === null) {
         return
@@ -71,6 +69,8 @@ export default class Pen implements Tool {
       canvasContext.lineWidth = press
       canvasContext.lineJoin = canvasContext.lineCap = 'round'
       canvasContext.stroke()
+
+      updateCanvasSizeFunc(x, y)
     }
   }
 
