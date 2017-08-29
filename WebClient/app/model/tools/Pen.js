@@ -14,9 +14,14 @@ export default class Pen implements Tool {
   }
 
   // passar para aqui as funções getMousePos
-  onPress (event, scale) {
+  onPress (event, scale, updateCanvasSizeFunc) {
+    if (event.pointerType === 'touch') {
+      return
+    }
     const x = event.offsetX
     const y = event.offsetY
+
+    updateCanvasSizeFunc(x, y)
 
     const figStyle = new FigureStyle(this.color, scale)
     // Create a new Figure
@@ -36,10 +41,12 @@ export default class Pen implements Tool {
     canvasContext.stroke()
   }
 
-  onSwipe (event, scale) {
-    if (event.buttons > 0) {
+  onSwipe (event, scale, updateCanvasSizeFunc) {
+    if (event.buttons > 0 && event.pointerType !== 'touch') {
       const x = event.offsetX
       const y = event.offsetY
+
+      updateCanvasSizeFunc(x, y)
 
       if (this.currentFigure === null) {
         return
@@ -68,6 +75,9 @@ export default class Pen implements Tool {
   }
 
   onPressUp (event, persist) {
+    if (this.currentFigure === null) { // it is necessary to avoid some minor bugs
+      return
+    }
     // todo: passar persistencia para o onOut
     this.grid.addFigure(this.currentFigure)
 

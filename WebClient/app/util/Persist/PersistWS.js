@@ -135,6 +135,8 @@ export default class PersistLS {
 
   static _updateCurrToolWS = function (newCurrTool) {}
 
+  static _updateCanvasSizeWS = function (canvasSize) {}
+
   // get user info from server by web sockets
   static _getUserInfoAsyncWS = function (grid, profile) {
     console.info('getting user info from server by web sockets')

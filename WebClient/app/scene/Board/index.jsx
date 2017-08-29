@@ -1,5 +1,5 @@
 import React from 'react'
-
+import Hammer from './../../util/Hammer.js'
 import {
   Route
 } from 'react-router-dom'
@@ -31,6 +31,7 @@ import Callback from './../../auth/Callback/SignInCallback.js'
 const defaultGrid = new Grid([], 0)
 const defaultPen = new Pen(defaultGrid, 'black', 5)
 const auth = new Auth()
+const maxCanvasSize = 3000
 
 export default class Board extends React.Component {
   // check if these default tools are necessary
@@ -55,21 +56,10 @@ export default class Board extends React.Component {
 
   listeners = {
     // currently, this.perists is not defined but it will on componentDidMount
-    onDown: event => this.state.currTool.onPress(event, 1),
+    onDown: event => this.state.currTool.onPress(event, 1, (x, y) => this.updateCanvasSize(x, y)),
     onUp: event => this.state.currTool.onPressUp(event, this.persist),
-    onMove: event => this.state.currTool.onSwipe(event, 1),
+    onMove: event => this.state.currTool.onSwipe(event, 1, (x, y) => this.updateCanvasSize(x, y)), // change the way canvas size is updated
     onOut: event => this.state.currTool.onOut(event, this.persist)
-  }
-
-  componentWillMount () {
-    console.log(window.innerWidth)
-    console.log(window.innerHeight)
-    this.setState({
-      canvasSize: {
-        width: window.innerWidth,
-        height: window.innerHeight
-      }
-    })
   }
 
   componentDidMount () {
@@ -85,6 +75,23 @@ export default class Board extends React.Component {
         }
       })
       this.grid.draw(this.canvasContext, 1)
+    })
+
+    // var canvasHammer = new Hammer(this.canvas)
+
+    var canvasHammer = new Hammer.Manager(this.canvas, {
+      inputClass: Hammer.TouchInput, // only touch triggers hammer js
+      recognizers: [
+        // RecognizerClass, [options], [recognizeWith, ...], [requireFailure, ...]
+        [Hammer.Pan, { direction: Hammer.DIRECTION_ALL }]
+      ]
+    })
+
+    canvasHammer.on('pan', ev => {
+      console.log(ev.deltaY)
+      console.log(window.scrollY)
+      console.log()
+      window.scrollTo(window.scrollX - ev.deltaX / 2, window.scrollY - ev.deltaY / 2)
     })
   }
 
@@ -112,6 +119,13 @@ export default class Board extends React.Component {
       .then(initBoard => {
         this.grid = initBoard.grid
         this.persist.grid = this.grid
+        const canvasSize = initBoard.canvasSize
+        this.setState({
+          canvasSize: {
+            width: canvasSize.width === 0 ? window.innerWidth : canvasSize.width,
+            height: canvasSize.height === 0 ? window.innerHeight : canvasSize.height
+          }
+        })
 
         if (this.persist.persistType === PersistType().WebSockets) {
           this.updateBoardId(this.state.currentBoard)
@@ -124,7 +138,7 @@ export default class Board extends React.Component {
       })
       .then(userinfo => {
         // if there is no pen and eraser
-        const defaultPen = new Pen(this.grid, 'black', 5)
+        const defaultPen = new Pen(defaultGrid, 'black', 5)
         const defaultEraser = new Eraser(this.grid, 5)
 
         // necessary procedure to avoid bug
@@ -206,6 +220,25 @@ export default class Board extends React.Component {
     this.grid.clean(this.canvasContext)
     this.toggleCleanModal()
   }
+  updateCanvasSize = (x, y) => {
+    let updated = false
+    this.setState(prevState => {
+      let prevCanvasSize = prevState.canvasSize
+      // check if event occurred in trigger zone and if canvas size can be augmented
+      if (x > prevState.canvasSize.width - 100 && prevCanvasSize.width + 300 < maxCanvasSize) {
+        prevCanvasSize.width += 300
+        updated = true
+      } if (y > prevState.canvasSize.height - 100 && prevCanvasSize.height + 300 < maxCanvasSize) {
+        prevCanvasSize.height += 300
+        updated = true
+      }
+      return {canvasSize: prevCanvasSize}
+    })
+    if (updated) {
+      this.grid.draw(this.canvasContext, 1)
+      this.persist.updateCanvasSize(this.state.canvasSize)
+    }
+  }
   toggleCleanModal = () => {
     this.setState(prevState => { return { showCleanModal: !prevState.showCleanModal } })
   }
@@ -227,6 +260,7 @@ export default class Board extends React.Component {
   }
 
   refCallback = (ref) => {
+    this.canvas = ref.canvas
     this.canvasContext = ref.canvas.getContext('2d')
   }
 
@@ -246,7 +280,7 @@ export default class Board extends React.Component {
 
   render () {
     return (
-      <div onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.xpto}>
+      <div ref='maindiv' onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.boardStyle} style={{width: this.state.canvasSize.width, height: this.state.canvasSize.height}}>
         <SideBarOverlay grid={this.grid} changeCurrentTool={this.changeCurrentTool} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
           currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite}
           removeFavorite={this.removeFavorite} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}

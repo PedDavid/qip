@@ -65,7 +65,7 @@ export default class SideBarOverlay extends React.Component {
     const { visible } = this.state
 
     return (
-      <div>
+      <div className={styles.divsidebar}>
         <Sidebar.Pushable as={Segment} className={styles.sidebar}>
           <Sidebar ref='sidebar' as={Menu} animation='push' direction='left' width='thin' icon='labeled' visible={visible} vertical style={this.state.extraStyle} inverted className={styles.sidebarMenu}>
             {this.getAuthView()}

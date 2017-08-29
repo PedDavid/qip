@@ -79,6 +79,13 @@ export class Persist {
     )
   }
 
+  updateCanvasSize (canvasSize) {
+    return this.callWSLSFunc(
+      () => PersistWS._updateCanvasSizeWS(canvasSize),
+      () => PersistLS._updateCanvasSizeLS(canvasSize)
+    )
+  }
+
   addUserBoard () {
 
   }

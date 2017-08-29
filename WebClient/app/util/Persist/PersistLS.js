@@ -10,16 +10,17 @@ export default class PersistLS {
     console.info('getting board data from local storage')
     return new Promise((resolve, reject) => {
       // if it's not authenticated or not sharing board, get data from localstorage
-      if (window.localStorage.getItem('figures') === null) {
+      if (window.localStorage.getItem('figures') === null || window.localStorage.getItem('canvasSize') === null) {
         this._resetLocalStorage()
       }
 
       const figures = JSON.parse(window.localStorage.getItem('figures'))
       const nextFigureId = JSON.parse(window.localStorage.getItem('currFigureId'))
       const grid = new Grid(figures, nextFigureId)
-
+      const canvasSize = JSON.parse(window.localStorage.getItem('canvasSize'))
       const initBoard = {
-        grid
+        grid,
+        canvasSize
       }
 
       resolve(initBoard)
@@ -36,6 +37,10 @@ export default class PersistLS {
 
   static _updateCurrToolLS = function (newCurrTool) {
     window.localStorage.setItem('currTool', JSON.stringify(newCurrTool))
+  }
+
+  static _updateCanvasSizeLS = function (canvasSize) {
+    window.localStorage.setItem('canvasSize', JSON.stringify(canvasSize))
   }
 
   // get user info from local storage
@@ -93,5 +98,6 @@ export default class PersistLS {
     window.localStorage.setItem('defaultEraser', JSON.stringify(new Eraser(tempGrid, 20)))
     window.localStorage.setItem('favorites', '[]')
     window.localStorage.setItem('currTool', JSON.stringify(new Pen(tempGrid, 'black', 5)))
+    window.localStorage.setItem('canvasSize', JSON.stringify({width: 0, height: 0}))
   }
 }

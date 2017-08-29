@@ -1,13 +1,17 @@
 .sidebar {
-    height: 100vh;
+    height: 100% !important;
     width: auto !important;
     touch-action: none;
     user-select: none;
 }
 
+.divsidebar {
+    height: 100% !important;
+}
+
 .sidebarMenu {
     transition: 1s;
-    overflow-x: hidden !important;
+    // overflow-x: hidden !important;
 }
 
 // must have tag important to override any css that comes after this, by semantic ui
