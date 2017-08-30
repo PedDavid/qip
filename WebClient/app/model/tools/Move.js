@@ -33,13 +33,13 @@ export default class Move implements Tool {
       if (this.currentFigureMoving != null) {
         const canvasContext = event.target.getContext('2d')
         this.selection = new Selection(this.currentFigureMoving.getTopLeftPoint(), this.currentFigureMoving.getBottomRightPoint(), canvasContext)
-        this.selection.select()
+        this.selection.select(event.pointerType === 'touch')
       }
     }
 
     // check if user tap in the scaling circles
     if (this.currentFigureMoving != null) {
-      this.scaling = this.selection.isScaling(new SimplePoint(x, y))
+      this.scaling = this.selection.isScaling(new SimplePoint(x, y), event.pointerType === 'touch')
     }
 
     if (this.selection != null && this.selection.containsPoint(new SimplePoint(x, y))) {
@@ -83,7 +83,7 @@ export default class Move implements Tool {
 
     if (this.currentFigureMoving != null) {
       this.selection.move(this.currentFigureMoving.getTopLeftPoint(), this.currentFigureMoving.getBottomRightPoint())
-      this.selection.select()
+      this.selection.select(event.pointerType === 'touch')
     }
   }
 
