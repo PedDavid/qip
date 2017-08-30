@@ -260,11 +260,11 @@ export default class Board extends React.Component {
     }
   }
   toggleCleanModal = () => {
-    this.setState(prevState => { return { showCleanModal: !prevState.showCleanModal } })
+    this.setState(prevState => ({showCleanModal: !prevState.showCleanModal}))
   }
 
   toggleShareModal = () => {
-    this.setState(prevState => { return { showShareModal: !prevState.showShareModal } })
+    this.setState(prevState => ({showShareModal: !prevState.showShareModal}))
   }
 
   toggleSaveModal = () => {

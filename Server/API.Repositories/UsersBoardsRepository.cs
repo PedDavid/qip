@@ -15,6 +15,16 @@ namespace API.Repositories {
             _queryTemplate = queryTemplate;
         }
 
+        public Task<bool> ExistsAsync(long boardId, long userId) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
+
+            parameters.Add("@userId", SqlDbType.BigInt).Value = userId;
+
+            return _queryTemplate.QueryForScalarAsync<bool>(USER_BOARD_EXISTS, parameters);
+        }
+
         public Task AddAsync(UserBoard userBoard) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
@@ -30,7 +40,7 @@ namespace API.Repositories {
                 .Add("@permission", SqlDbType.TinyInt)
                 .Value = (byte)userBoard.Permission;
 
-            return _queryTemplate.QueryAsync(INSERT_USER_BOARD, parameters);
+            return _queryTemplate.CommandAsync(INSERT_USER_BOARD, parameters);
         }
 
         public Task<UserBoard> FindAsync(long boardId, long userId) {
@@ -63,20 +73,62 @@ namespace API.Repositories {
                 return _queryTemplate.QueryForObjectAsync(SELECT_USER, parameters, GetUser);
         }
 
-        public Task<IEnumerable<UserBoard_Board>> GetAllBoardsAsync(long userId) {
+        public Task<IEnumerable<UserBoard_Board>> GetAllBoardsAsync(long userId, long index, long size) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters.Add("@userId", SqlDbType.BigInt).Value = userId;
 
+            parameters.Add("@take", SqlDbType.BigInt).Value = size;
+
+            parameters.Add("@skip", SqlDbType.BigInt).Value = index * size;
+
             return _queryTemplate.QueryAsync(SELECT_ALL_BOARDS, parameters, GetBoard);
         }
 
-        public Task<IEnumerable<UserBoard_User>> GetAllUsersAsync(long boardId) {
+        public Task<IEnumerable<UserBoard_Board>> GetAllBoardsAsync(long userId, long index, long size, string search) {
+            if(search == null)
+                return GetAllBoardsAsync(userId, index, size);
+
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@userId", SqlDbType.BigInt).Value = userId;
+
+            parameters.Add("@take", SqlDbType.BigInt).Value = size;
+
+            parameters.Add("@skip", SqlDbType.BigInt).Value = index * size;
+
+            parameters.Add("@search", SqlDbType.NVarChar).Value = search;
+
+            return _queryTemplate.QueryAsync(SELECT_SEARCH_BOARDS, parameters, GetBoard);
+        }
+
+        public Task<IEnumerable<UserBoard_User>> GetAllUsersAsync(long boardId, long index, long size) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
 
+            parameters.Add("@take", SqlDbType.BigInt).Value = size;
+
+            parameters.Add("@skip", SqlDbType.BigInt).Value = index * size;
+
             return _queryTemplate.QueryAsync(SELECT_ALL_USERS, parameters, GetUser);
+        }
+
+        public Task<IEnumerable<UserBoard_User>> GetAllUsersAsync(long boardId, long index, long size, string search) {
+            if(search == null)
+                return GetAllUsersAsync(boardId, index, size);
+
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
+
+            parameters.Add("@take", SqlDbType.BigInt).Value = size;
+
+            parameters.Add("@skip", SqlDbType.BigInt).Value = index * size;
+
+            parameters.Add("@search", SqlDbType.NVarChar).Value = search;
+
+            return _queryTemplate.QueryAsync(SELECT_SEARCH_USERS, parameters, GetUser);
         }
 
         public Task RemoveAsync(long boardId, long userId) {
@@ -86,7 +138,7 @@ namespace API.Repositories {
 
             parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
 
-            return _queryTemplate.QueryAsync(DELETE_USER_BOARD, parameters);
+            return _queryTemplate.CommandAsync(DELETE_USER_BOARD, parameters);
         }
 
         public Task UpdateAsync(UserBoard userBoard) {
@@ -104,12 +156,29 @@ namespace API.Repositories {
                     .Add("@permission", SqlDbType.TinyInt)
                 .Value = (byte)userBoard.Permission;
 
-            return _queryTemplate.QueryAsync(UPDATE_USER_BOARD, parameters);
+            return _queryTemplate.CommandAsync(UPDATE_USER_BOARD, parameters);
         }
 
         //SQL Commands
-        private static readonly string SELECT_ALL_USERS = "SELECT permission, userId, username, [name] FROM dbo.Full_User_Board WHERE boardId=@boardId";
-        private static readonly string SELECT_ALL_BOARDS = "SELECT permission, boardId, boardName, maxDistPoints FROM dbo.Full_User_Board WHERE userId=@userId";
+        private static readonly string USER_BOARD_EXISTS = "SELECT CAST(count(id) as BIT) FROM dbo.User_Board WHERE userId = @userId and boardId = @boardId";
+        private static readonly string SELECT_ALL_USERS = "SELECT permission, userId, username, [name] " +
+                                                          "FROM dbo.Full_User_Board WHERE boardId=@boardId" +
+                                                          "ORDER BY userId " +
+                                                          "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
+        private static readonly string SELECT_SEARCH_USERS = "SELECT permission, userId, username, [name] " +
+                                                             "FROM dbo.Full_User_Board WHERE boardId=@boardId " +
+                                                             "WHERE CONTAINS((username, [name]), @search) " +
+                                                             "ORDER BY userId " +
+                                                             "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
+        private static readonly string SELECT_ALL_BOARDS = "SELECT permission, boardId, boardName, maxDistPoints " +
+                                                           "FROM dbo.Full_User_Board WHERE userId=@userId" +
+                                                           "ORDER BY boardId " +
+                                                           "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
+        private static readonly string SELECT_SEARCH_BOARDS = "SELECT permission, boardId, boardName, maxDistPoints " +
+                                                              "FROM dbo.Full_User_Board WHERE userId=@userId " +
+                                                              "WHERE CONTAINS(boardName, @search) " +
+                                                              "ORDER BY boardId " +
+                                                              "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
         private static readonly string SELECT_USER_BOARD = "SELECT permission, boardId, userId FROM dbo.User_Board WHERE boardId=@boardId and userId=@userId";
         private static readonly string SELECT_USER = "SELECT permission, userId, username, [name] FROM dbo.Full_User_Board WHERE boardId=@boardId and userId=@userId";
         private static readonly string SELECT_BOARD = "SELECT permission, boardId, boardName, maxDistPoints FROM dbo.Full_User_Board WHERE userId=@userId and boardId=@boardId";
@@ -147,6 +216,5 @@ namespace API.Repositories {
                 UserId = dr.GetInt64(2)
             };
         }
-
     }
 }

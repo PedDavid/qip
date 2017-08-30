@@ -8,10 +8,5 @@ namespace API.Domain {
         public PointStyle() { }
 
         public int? Width { get; set; }
-
-        // todo: use automatic way to convert to json (Try JavaScriptSerializable)
-        public string ToJson() {
-            return $"{{\"width\": {Width}}}";
-        }
     }
 }

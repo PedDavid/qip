@@ -16,6 +16,16 @@ namespace API.Repositories {
             _queryTemplate = queryTemplate;
         }
 
+        public Task<bool> ExistsAsync(long id, long boardId) {
+            List<SqlParameter> parameters = new List<SqlParameter>();
+
+            parameters.Add("@id", SqlDbType.BigInt).Value = id;
+
+            parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
+
+            return _queryTemplate.QueryForScalarAsync<bool>(IMAGE_EXISTS, parameters);
+        }
+
         public async Task<long> AddAsync(Image image) {
             long imageId = image.Id;
 
@@ -155,6 +165,7 @@ namespace API.Repositories {
         }
 
         //SQL Functions
+        private static readonly string IMAGE_EXISTS = "SELECT CAST(count(id) as BIT) FROM dbo.[Image] WHERE figureId = @id and boardId = @boardId";
         private static readonly string SELECT_ALL = "SELECT id, boardId, pointX, pointY, src, imageWidth, imageHeight FROM dbo.GetImages(@boardId)";
         private static readonly string SELECT_IMAGE = "SELECT id, boardId, pointX, pointY, src, imageWidth, imageHeight FROM dbo.GetImages(@boardId) WHERE id=@id";
 

@@ -1,5 +1,6 @@
 ﻿using API.Domain;
 using Microsoft.SqlServer.Server;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -59,7 +60,7 @@ namespace API.Repositories.Model {
             row.SetInt32(0, point.X.Value);
             row.SetInt32(1, point.Y.Value);
             row.SetInt32(2, point.Idx.Value);
-            row.SetString(3, point.Style.ToJson());
+            row.SetString(3, JsonConvert.SerializeObject(point.Style));
 
             rows.Add(row);
         }

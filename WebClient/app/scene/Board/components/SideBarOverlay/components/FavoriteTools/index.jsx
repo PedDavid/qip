@@ -4,15 +4,16 @@ import styles from './styles.scss'
 
 import { Grid, Button } from 'semantic-ui-react'
 
-// TODO(peddavid): This could probably be a functional Component
+const favNodes = []
+// note: (simao) due to lack of time, i didn't search for a better algorithm without the use of ref. therefore, it mustn't be a statless function
 export default class FavoriteTools extends React.Component {
+  // TODO(peddavid): Avoid ref usage and auxiliar array, maybe there is an alternative with props
   addFavorite = () => {
-    // TODO(peddavid): Is this really needed? Prop by prop comparison should be enough.
     const currTool = this.props.currTool
     const favorites = this.props.favorites
     let idx = -1
     if ((idx = favorites.findIndex(fav => fav.equals(currTool))) > -1) {
-      this.refs['favorite' + idx].animate()
+      favNodes[idx].animate()
     } else {
       this.props.addFavorite(this.props.currTool)
     }
@@ -62,7 +63,7 @@ export default class FavoriteTools extends React.Component {
               <Grid.Row key={'div' + idx} columns='1' className={styles.rows} style={{padding: '4px'}}
                 onMouseUp={this.onMouseUp} onMouseMove={this.onMoveFav} onMouseDown={this.onMouseDownFav.bind(this, [idx, favorite])}>
                 <Grid.Column>
-                  <Favorite ref={'favorite' + idx} toolsConfig={this.props.toolsConfig} currTool={this.props.currTool}
+                  <Favorite ref={favNode => { favNodes[idx] = favNode }} toolsConfig={this.props.toolsConfig} currTool={this.props.currTool}
                     changeCurrentTool={this.props.changeCurrentTool} removeFavorite={this.props.removeFavorite} fav={favorite}
                     moveFavorite={this.props.moveFavorite} />
                 </Grid.Column>

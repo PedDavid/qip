@@ -12,18 +12,14 @@ export default class Favorite extends React.Component {
     this.refs.btnDiv.addEventListener('webkitAnimationEnd', this.endAnimate)
   }
   animate = () => {
-    this.setState({
-      animateClass: styles.animateFav
-    })
+    this.setState({animateClass: styles.animateFav})
   }
   endAnimate = () => {
-    this.setState({
-      animateClass: ''
-    })
+    this.setState({animateClass: ''})
   }
   toggleFavMenu = (evt) => {
     evt.preventDefault()
-    this.setState({openFavMenu: !this.state.openFavMenu})
+    this.setState(prevState => ({openFavMenu: !prevState.openFavMenu}))
   }
   render () {
     const favMenuWidth = this.state.openFavMenu ? 'visible' : 'hidden'

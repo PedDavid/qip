@@ -1,4 +1,5 @@
 ﻿using API.Interfaces.IRepositories;
+using API.Interfaces.IServices;
 using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
@@ -13,21 +14,6 @@ namespace API.Services.Extensions {
 
         private static string CreateKeyWithRegion(string key, string region) {//TODO ALTERAR
             return "region:" + (region ?? "null_region") + ";key=" + key;
-        }
-
-        public static Task<FigureIdGenerator> GetFigureIdGenerator(this IMemoryCache memoryCache, IFigureIdRepository figureIdRepository, long clientId) {
-            return memoryCache.GetOrCreateAsync(
-                clientId.ToString(),
-                CacheRegions.FIGURE_ID_GENERATOR,
-                async cacheEntry => {
-                    FigureIdGenerator idGen = await FigureIdGenerator.Create(figureIdRepository);
-
-                    cacheEntry.Priority = CacheItemPriority.High;
-                    cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(90);//TODO REVER, FALAR COM O GAMBOA
-
-                    return idGen;
-                }
-            );
         }
     }
 }
