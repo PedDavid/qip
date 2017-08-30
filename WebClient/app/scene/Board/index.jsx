@@ -73,8 +73,8 @@ export default class Board extends React.Component {
     window.addEventListener('resize', event => {
       this.setState(prevState => {
         const newCanvasSize = {
-          width: window.innerWidth,
-          height: window.innerHeight
+          width: window.innerWidth > this.state.canvasSize.width ? window.innerWidth - 20 : this.state.canvasSize.width,
+          height: window.innerHeight > this.state.canvasSize.height ? window.innerHeight - 20 : this.state.canvasSize.height
         }
         this.persist.updateCanvasSize(newCanvasSize)
         return {canvasSize: newCanvasSize}
@@ -126,8 +126,8 @@ export default class Board extends React.Component {
         const canvasSize = initBoard.canvasSize
         this.setState({
           canvasSize: {
-            width: canvasSize.width === 0 ? window.innerWidth : canvasSize.width,
-            height: canvasSize.height === 0 ? window.innerHeight : canvasSize.height
+            width: canvasSize.width === 0 ? window.innerWidth - 20 : canvasSize.width,
+            height: canvasSize.height === 0 ? window.innerHeight - 20 : canvasSize.height
           }
         })
 
@@ -229,8 +229,8 @@ export default class Board extends React.Component {
   resetCanvasSize = () => {
     this.setState(prevState => {
       const resetedCanvasSize = {
-        width: window.innerWidth,
-        height: window.innerHeight
+        width: window.innerWidth - 20,
+        height: window.innerHeight - 20
       }
       this.persist.updateCanvasSize(resetedCanvasSize)
       return {canvasSize: resetedCanvasSize}
