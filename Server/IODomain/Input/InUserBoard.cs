@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace IODomain.Input {
     public class InUserBoard {
-        public long? UserId { get; set; }
+        public string UserId { get; set; }
         public long? BoardId { get; set; }
         public InBoardPermission Permission { get; set; }
     }

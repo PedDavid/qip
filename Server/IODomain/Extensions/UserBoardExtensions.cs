@@ -10,7 +10,7 @@ namespace IODomain.Extensions {
     public static class UserBoardExtensions {
         public static OutUserBoard Out(this UserBoard userBoard) {
             return new OutUserBoard() {
-                UserId = userBoard.UserId.Value,
+                UserId = userBoard.UserId,
                 BoardId = userBoard.BoardId.Value,
                 Permission = BoardPermissionConverter.ConvertToOut(userBoard.Permission)
             };

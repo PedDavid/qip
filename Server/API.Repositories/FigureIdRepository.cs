@@ -19,12 +19,12 @@ namespace API.Repositories
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
-                    .Add("@id", SqlDbType.BigInt)
+                    .Add("@boardId", SqlDbType.BigInt)
                     .Value = boardId;
 
-            return _queryTemplate.QueryForScalarAsync<long>(SELECT_MAX_ID);
+            return _queryTemplate.QueryForScalarAsync<long>(SELECT_MAX_ID, parameters);
         }
 
-        private static readonly string SELECT_MAX_ID = "SELECT isnull(max(id), -1) as maxId FROM dbo.Figure WHERE id=@id";
+        private static readonly string SELECT_MAX_ID = "SELECT isnull(max(id), -1) as maxId FROM dbo.Figure WHERE boardId = @boardId";
     }
 }

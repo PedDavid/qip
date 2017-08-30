@@ -10,7 +10,14 @@ namespace IODomain.Extensions {
     public static class LineStyleExtensions {
         public static OutLineStyle Out(this LineStyle lineStyle) {
             return new OutLineStyle() {
-                Id = lineStyle.Id.Value,
+                Id = lineStyle.Id??-1,//TODO CHANGE
+                Color = lineStyle.Color
+            };
+        }
+
+        public static OutLineStyle Out(this LineStyle lineStyle, long id) {
+            return new OutLineStyle() {
+                Id = lineStyle.Id ?? id,
                 Color = lineStyle.Color
             };
         }

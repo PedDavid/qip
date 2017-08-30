@@ -29,10 +29,7 @@ namespace API.Services {
             LineStyle lineStyle = new LineStyle().In(inLineStyle);
             long id = await _lineStyleRepository.AddAsync(lineStyle);
 
-            OutLineStyle outLineStyle = lineStyle.Out();
-            outLineStyle.Id = id;
-
-            return outLineStyle;
+            return lineStyle.Out(id);
         }
 
         private static ValidatorConfiguration<InLineStyle> GetCreateValidationConfigurations() {
@@ -51,7 +48,7 @@ namespace API.Services {
         public async Task<IEnumerable<OutLineStyle>> GetAllAsync(long index, long size) {
             IEnumerable<LineStyle> lineStyles = await _lineStyleRepository.GetAllAsync(index, size);
 
-            return lineStyles.Select(LineStyleExtensions.Out);
+            return lineStyles.Select((Func<LineStyle,OutLineStyle>)LineStyleExtensions.Out);
         }
 
         public async Task<OutLineStyle> GetAsync(long id) {

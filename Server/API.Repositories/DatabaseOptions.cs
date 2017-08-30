@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace API.Repositories {
-    public class RepositoriesOptions {
+    public class DatabaseOptions {
         public string Context { get; set; }
     }
 }

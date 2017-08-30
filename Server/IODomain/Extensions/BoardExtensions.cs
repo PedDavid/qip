@@ -16,6 +16,14 @@ namespace IODomain.Extensions {
             };
         }
 
+        public static OutBoard Out(this Board board, long id) {
+            return new OutBoard() {
+                Id = board.Id??id,
+                Name = board.Name,
+                MaxDistPoints = board.MaxDistPoints.Value
+            };
+        }
+
         public static Board In(this Board board, InBoard inBoard) {
             board.Name = inBoard.Name;
             board.MaxDistPoints = inBoard.MaxDistPoints;

@@ -9,9 +9,9 @@ using Microsoft.Extensions.Options;
 
 namespace API.Repositories {
     public class SqlServerTemplate {
-        private readonly RepositoriesOptions _options;
+        private readonly DatabaseOptions _options;
 
-        public SqlServerTemplate(IOptionsSnapshot<RepositoriesOptions> options) {
+        public SqlServerTemplate(IOptionsSnapshot<DatabaseOptions> options) {
             _options = options.Value;
         }
 
