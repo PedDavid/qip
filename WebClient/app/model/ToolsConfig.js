@@ -1,4 +1,3 @@
-// @Flow
 import Tool from './tools/Tool'
 import Pen from './tools/Pen'
 import Eraser from './tools/Eraser'

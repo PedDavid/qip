@@ -130,16 +130,12 @@ export default class Board extends React.Component {
       })
   }
 
-  addFavorite (tool) {
-    this.setState(() => this.state.favorites.push(tool)) // not needed to change prevState
+  // TODO(peddavid): Favorites are not used anywhere here, why is it Board concern? (change to another file?)
+  addFavorite = (tool) => {
+    this.setState(prevState => ({favorites: [...prevState.favorites, tool]}))
   }
   removeFavorite = (tool) => {
-    this.setState((prevState) => {
-      const index = prevState.favorites.indexOf(tool)
-      if (index > -1) {
-        prevState.favorites.splice(index, 1)
-      }
-    })
+    this.setState(prevState => ({favorites: prevState.favorites.filter(favorite => favorite !== tool)}))
   }
   drawImage = (imageSrc) => {
     const newImage = new Image({x: 80, y: 80}, imageSrc)
@@ -158,11 +154,11 @@ export default class Board extends React.Component {
     this.toggleCleanModal()
   }
   toggleCleanModal = () => {
-    this.setState(prevState => { return { showCleanModal: !prevState.showCleanModal } })
+    this.setState(prevState => ({showCleanModal: !prevState.showCleanModal}))
   }
 
   toggleShareModal = () => {
-    this.setState(prevState => { return { showShareModal: !prevState.showShareModal } })
+    this.setState(prevState => ({showShareModal: !prevState.showShareModal}))
   }
 
   refCallback = (ref) => {
@@ -177,9 +173,9 @@ export default class Board extends React.Component {
   render () {
     return (
       <div onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.xpto}>
-        <SideBarOverlay grid={this.grid} changeCurrentTool={this.changeCurrentTool.bind(this)} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
-          currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite.bind(this)}
-          removeFavorite={this.removeFavorite.bind(this)} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}
+        <SideBarOverlay grid={this.grid} changeCurrentTool={this.changeCurrentTool} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
+          currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite}
+          removeFavorite={this.removeFavorite} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}
           drawImage={this.drawImage} canvasSize={this.state.canvasSize}>
           <Canvas ref={this.refCallback} width={this.state.canvasSize.width} height={this.state.canvasSize.height} {...this.listeners}>
             HTML5 Canvas not supported
