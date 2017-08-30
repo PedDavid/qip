@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.1.1" />
     <PackageReference Include="Microsoft.AspNetCore" Version="1.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="1.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Cors" Version="1.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.1.3" />
     <PackageReference Include="Microsoft.AspNetCore.WebSockets" Version="1.0.2" />
@@ -25,6 +26,7 @@
     <ProjectReference Include="..\API.Repositories\API.Repositories.csproj" />
     <ProjectReference Include="..\API.Services\API.Services.csproj" />
     <ProjectReference Include="..\API\API.csproj" />
+    <ProjectReference Include="..\Authorization\Authorization.csproj" />
     <ProjectReference Include="..\WebSockets\WebSockets.csproj" />
   </ItemGroup>
 

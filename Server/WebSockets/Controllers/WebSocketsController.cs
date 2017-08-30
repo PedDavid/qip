@@ -45,7 +45,7 @@ namespace WebSockets.Controllers {
         }
 
         [HttpGet("{roomId}")]
-        public async Task Index(long roomId) {
+        public async Task Index(long roomId) {//Add Security to WebSockets
             if(HttpContext.WebSockets.IsWebSocketRequest && await _boardRepository.ExistsAsync(roomId)) {
                 StringWebSocket webSocket = await HttpContext.WebSockets.AcceptStringWebSocketAsync();
 

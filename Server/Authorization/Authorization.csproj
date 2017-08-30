@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="1.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\API.Interfaces\API.Interfaces.csproj" />
+    <ProjectReference Include="..\IODomain\IODomain.csproj" />
+  </ItemGroup>
+
+</Project>

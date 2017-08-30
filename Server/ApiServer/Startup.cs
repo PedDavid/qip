@@ -1,15 +1,19 @@
-﻿using System;
+﻿using Authorization;
+using Authorization.Requirements;
+using Authorization.Extensions.DependencyInjection;
+using API.Repositories;
+using API.Repositories.Extensions.DependencyInjection;
+using API.Services.Extensions.DependencyInjection;
+using IODomain.Output;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using API.Repositories;
+using System;
 using WebSockets.StringWebSockets;
-using API.Repositories.Extensions.DependencyInjection;
-using API.Services;
-using API.Interfaces.IRepositories;
-using API.Services.Extensions.DependencyInjection;
 
 namespace ApiServer {
     public class Startup {
@@ -39,17 +43,37 @@ namespace ApiServer {
                 );
             });
 
+            //Add Authorization Policies
+            string domain = $"https://{Configuration["Auth0:Domain"]}/";//TODO Config on the appsettings
+            services.AddAuthorization(options => {
+                options.AddPolicy("Administrator", policy => policy.Requirements.Add(new AdminRequirement()));
+                options.AddPolicy(Policies.UserIsOwnPolicy, policy => policy.Requirements.Add(new UserIsOwnRequirement()));
+                options.AddPolicy(Policies.BoardIsOwnPolicy, policy => policy.Requirements.Add(new BoardPermissionRequirement(OutBoardPermission.Owner)));
+                options.AddPolicy(Policies.ReadBoardPolicy, policy => policy.Requirements.Add(new BoardPermissionRequirement(OutBoardPermission.View)));
+                options.AddPolicy(Policies.WriteBoadPolicy, policy => policy.Requirements.Add(new BoardPermissionRequirement(OutBoardPermission.Edit)));
+            });
+
+            //Add Api Authorization Handlers
+            services.AddApiAuthorization();
+
             // Adds services required for using options.
             services.AddOptions();
 
             // Configure using a sub-section of the appsettings.json file.
-            services.Configure<RepositoriesOptions>(Configuration.GetSection("ConnectionStrings"));
+            services.Configure<DatabaseOptions>(Configuration.GetSection("ConnectionStrings"));
+            services.Configure<Auth0Options>(Configuration.GetSection("Auth0"));
 
             //Add Memory Cache
             services.AddMemoryCache();
 
             // Add framework services.
-            services.AddMvc();
+            services.AddMvc(config => {
+                // Define that by default authentication is required
+                var policy = new AuthorizationPolicyBuilder() 
+                                 .RequireAuthenticatedUser()
+                                 .Build();
+                config.Filters.Add(new AuthorizeFilter(policy));
+            });
 
             //Add Db Repositories
             services.AddRepositories();
@@ -59,6 +83,7 @@ namespace ApiServer {
 
             //Add StringWebSockets Session Manager
             services.AddSingleton<StringWebSocketsSessionManager>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -68,6 +93,12 @@ namespace ApiServer {
 
             // Shows UseCors with named policy.
             app.UseCors("AllowSpecificOrigin");
+
+            var options = new JwtBearerOptions {
+                Audience = Configuration["Auth0:ApiIdentifier"],
+                Authority = $"https://{Configuration["Auth0:Domain"]}/"
+            };
+            app.UseJwtBearerAuthentication(options);
 
             var webSocketOptions = new WebSocketOptions() {
                 KeepAliveInterval = TimeSpan.FromSeconds(120),

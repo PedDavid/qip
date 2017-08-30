@@ -10,31 +10,12 @@ namespace IODomain.Extensions {
     public static class UserExtensions {
         public static OutUser Out(this User user) {
             return new OutUser() {
-                Id = user.Id.Value,
+                Id = user.User_id,
                 Name = user.Name,
                 UserName = user.UserName,
-                Favorites = user.Favorites,
-                PenColors = user.PenColors
+                Nickname = user.Nickname,
+                Picture = user.Picture
             };
-        }
-
-        public static OutPartialUser OutPartial(this User user) {
-            return new OutPartialUser() {
-                Id = user.Id.Value,
-                Name = user.Name,
-                UserName = user.UserName
-            };
-        }
-
-        public static User In(this User user, InUser inUser) {
-            user.Name = inUser.Name;
-            user.PwdHash = inUser.PwdHash;
-            user.PwdSalt = inUser.PwdSalt;
-            user.UserName = inUser.UserName;
-            user.Favorites = inUser.Favorites;
-            user.PenColors = inUser.PenColors;
-
-            return user;
         }
     }
 }
