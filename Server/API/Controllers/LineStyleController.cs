@@ -36,6 +36,7 @@ namespace API.Controllers {
         }
 
         [HttpPut("{id}")]
+        [Authorize("Administrator")]
         public async Task<IActionResult> Update(long id, [FromBody] InLineStyle inputLineStyle) {
             await _lineStyleService.UpdateAsync(id, inputLineStyle);
             return new NoContentResult();

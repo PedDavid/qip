@@ -171,7 +171,7 @@ namespace API.Repositories {
                                                              "ORDER BY userId " +
                                                              "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
         private static readonly string SELECT_ALL_BOARDS = "SELECT permission, boardId, boardName, maxDistPoints " +
-                                                           "FROM dbo.Full_User_Board WHERE userId=@userId" +
+                                                           "FROM dbo.Full_User_Board WHERE userId=@userId " +
                                                            "ORDER BY boardId " +
                                                            "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
         private static readonly string SELECT_SEARCH_BOARDS = "SELECT permission, boardId, boardName, maxDistPoints " +

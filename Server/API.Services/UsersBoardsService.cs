@@ -62,7 +62,7 @@ namespace API.Services {
         public async Task DeleteAsync(long boardId, string userId) {
             UserBoard_User user = await _usersBoardsRepository.FindUserAsync(boardId, userId);
 
-            if(user != null) {
+            if(user == null) {
                 throw new NotFoundException($"The UserBoard with board id {boardId} and user id {userId} not exists");
             }
 
@@ -83,6 +83,9 @@ namespace API.Services {
             IEnumerable<UserBoard_User> userBoards = await _usersBoardsRepository.GetAllUsersAsync(boardId, index, size, search);
 
             string userIds = String.Join(" OR ", userBoards.Select(ub => ub.User.User_id).ToArray());
+
+            if(string.IsNullOrWhiteSpace(userIds))
+                return userBoards.Select(UserBoard_UserExtensions.Out);
 
             var sch = $"user_id:({userIds})";
 

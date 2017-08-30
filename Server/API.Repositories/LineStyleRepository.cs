@@ -89,9 +89,9 @@ namespace API.Repositories {
         }
 
         //SQL Commands
-        private static readonly string LINE_STYLE_EXISTS = "SELECT CAST(count(id) as BIT) FROM dbo.LineStyle WHERE lineStyleId = @id";
+        private static readonly string LINE_STYLE_EXISTS = "SELECT CAST(count(lineStyleId) as BIT) FROM dbo.LineStyle WHERE lineStyleId = @id";
         private static readonly string SELECT_ALL = "SELECT lineStyleId, color " +
-                                                    "FROM dbo.LineStyle" +
+                                                    "FROM dbo.LineStyle " +
                                                     "ORDER BY lineStyleId " +
                                                     "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
         private static readonly string SELECT_LINE_STYLE = "SELECT lineStyleId, color FROM dbo.LineStyle WHERE lineStyleId = @id";

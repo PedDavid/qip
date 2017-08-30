@@ -45,10 +45,7 @@ namespace API.Services {
             Line line = new Line(boardId, idGen.NewId()).In(inLine);
             long id = await _lineRepository.AddAsync(line);
 
-            OutLine outLine = line.Out();
-            outLine.Id = id;
-
-            return outLine;
+            return line.Out();
         }
 
         private static ValidatorConfiguration<InLine> GetCreateValidationConfigurations() {

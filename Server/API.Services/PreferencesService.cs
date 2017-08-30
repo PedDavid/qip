@@ -28,7 +28,7 @@ namespace API.Services {
 
         public async Task<OutPreferences> GetAsync(string userId) {
             Preferences preferences = await _preferencesRepository.FindAsync(userId);
-            return preferences.Out();
+            return preferences?.Out();//REVER utilização de ?
         }
     }
 }

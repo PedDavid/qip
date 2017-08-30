@@ -45,10 +45,7 @@ namespace API.Services {
             Image image = new Image(boardId, idGen.NewId()).In(inImage);
             long id = await _imageRepository.AddAsync(image);
 
-            OutImage outImage = image.Out();
-            outImage.Id = id;
-
-            return outImage;
+            return image.Out();
         }
 
         private static ValidatorConfiguration<InImage> GetCreateValidationConfigurations() {
