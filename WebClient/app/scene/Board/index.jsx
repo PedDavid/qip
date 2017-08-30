@@ -52,8 +52,6 @@ export default class Board extends React.Component {
   }
 
   componentWillMount () {
-    console.log(window.innerWidth)
-    console.log(window.innerHeight)
     this.setState({
       canvasSize: {
         width: window.innerWidth,
@@ -74,6 +72,7 @@ export default class Board extends React.Component {
           height: window.innerHeight
         }
       })
+      // TODO(peddavid): This is probably required to be done after state is changed, setState callback or Update
       this.grid.draw(this.canvasContext, 1)
     })
   }
@@ -84,9 +83,9 @@ export default class Board extends React.Component {
     // if there isn't a specific board, or if the user is not authenticated, get persisted data from local storage
     // todo: implement isAuthenticated()
     if (boardId == null) {
-      persistType = PersistType().LocalStorage
+      persistType = PersistType.LocalStorage
     } else if (boardId != null) {
-      persistType = PersistType().WebSockets
+      persistType = PersistType.WebSockets
     }
 
     this.persist = new Persist(persistType, this.canvasContext, this.grid)
@@ -97,7 +96,7 @@ export default class Board extends React.Component {
         this.grid = grid
         this.persist.grid = this.grid
 
-        if (this.persist.persistType === PersistType().WebSockets) {
+        if (this.persist.persistType === PersistType.WebSockets) {
           // todo update board id and start web socket connection
           this.updateBoardId(boardId)
         }
