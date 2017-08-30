@@ -18,12 +18,13 @@ namespace API.Filters {
                 { typeof(NotFoundException), NotFoundExceptionHandler },
                 { typeof(InconsistentRequestException), InconsistentRequestExceptionHandler },
                 { typeof(InvalidFieldsException), InvalidFieldsExceptionHandler },
-                { typeof(MissingInputException), MissingInputExceptionHandler }
+                { typeof(MissingInputException), MissingInputExceptionHandler },
+                { typeof(InvalidChangeException), InvalidChangeExceptionHandler }
             };
         }
 
         public override void OnException(ExceptionContext context) {
-            if(_exceptionHandlers.TryGetValue(context.Exception.GetType(), out Func<Exception,IActionResult> exceptionHandler)) {
+            if(_exceptionHandlers.TryGetValue(context.Exception.GetType(), out Func<Exception, IActionResult> exceptionHandler)) {
                 context.Result = exceptionHandler(context.Exception);
             }
         }
@@ -36,7 +37,7 @@ namespace API.Filters {
                 Title = "Resource Not Found",
                 Details = notFound.Message
             };
-            
+
             var result = new NotFoundObjectResult(JsonConvert.SerializeObject(problem));
             result.ContentTypes.Add(MEDIA_TYPE);
             return result;
@@ -76,6 +77,19 @@ namespace API.Filters {
             var problem = new ProblemPlusJson() {
                 Status = 400,
                 Title = "The body of the request is necessary",
+            };
+
+            var result = new BadRequestObjectResult(JsonConvert.SerializeObject(problem));
+            result.ContentTypes.Add(MEDIA_TYPE);
+            return result;
+        }
+        private static IActionResult InvalidChangeExceptionHandler(Exception exception) {
+            InvalidChangeException invalidChange = exception as InvalidChangeException;
+
+            var problem = new ProblemPlusJson() {
+                Status = 400,
+                Title = "The change required is not valid",
+                Details = invalidChange.Message
             };
 
             var result = new BadRequestObjectResult(JsonConvert.SerializeObject(problem));

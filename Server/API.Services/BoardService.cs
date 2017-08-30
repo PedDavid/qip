@@ -29,10 +29,7 @@ namespace API.Services {
             Board board = new Board().In(inputBoard);
             long id = await _boardRepository.AddAsync(board);
 
-            OutBoard outBoard = board.Out();
-            outBoard.Id = id;
-
-            return outBoard;
+            return board.Out(id);
         }
 
         private static ValidatorConfiguration<InBoard> GetCreateValidationConfigurations() {
@@ -55,13 +52,13 @@ namespace API.Services {
 
             IEnumerable<Board> boards = await _boardRepository.GetAllAsync(index, size, search);
 
-            return boards.Select(BoardExtensions.Out);
+            return boards.Select((Func<Board, OutBoard>)BoardExtensions.Out);
         }
 
         public async Task<IEnumerable<OutBoard>> GetAllAsync(long index, long size) {
             IEnumerable<Board> boards = await _boardRepository.GetAllAsync(index, size);
 
-            return boards.Select(BoardExtensions.Out);
+            return boards.Select((Func<Board, OutBoard>)BoardExtensions.Out);
         }
 
         public async Task<OutBoard> GetAsync(long id) {

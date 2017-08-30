@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace API.Domain {
     public class UserBoard {
-        public long? UserId { get; set; }
+        public string UserId { get; set; }
         public long? BoardId { get; set; }
         public BoardPermission Permission { get; set; }
     }

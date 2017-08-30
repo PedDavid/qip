@@ -9,12 +9,13 @@ namespace API.Repositories.Extensions.DependencyInjection {
             services.AddScoped<SqlServerTemplate>();
 
             services.AddScoped<IFigureIdRepository, FigureIdRepository>();
-            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IPreferencesRepository, PreferencesRepository>();
             services.AddScoped<IBoardRepository, BoardRepository>();
             services.AddScoped<IImageRepository, ImageRepository>();
             services.AddScoped<ILineRepository, LineRepository>();
             services.AddScoped<ILineStyleRepository, LineStyleRepository>();
             services.AddScoped<IUsersBoardsRepository, UsersBoardsRepository>();
+            services.AddScoped<IAuth0ManagementRepository, Auth0ManagementRepository>();
 
             return services;
         }

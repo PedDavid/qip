@@ -165,7 +165,7 @@ namespace API.Repositories {
         }
 
         //SQL Functions
-        private static readonly string IMAGE_EXISTS = "SELECT CAST(count(id) as BIT) FROM dbo.[Image] WHERE figureId = @id and boardId = @boardId";
+        private static readonly string IMAGE_EXISTS = "SELECT CAST(count(figureId) as BIT) FROM dbo.[Image] WHERE figureId = @id and boardId = @boardId";
         private static readonly string SELECT_ALL = "SELECT id, boardId, pointX, pointY, src, imageWidth, imageHeight FROM dbo.GetImages(@boardId)";
         private static readonly string SELECT_IMAGE = "SELECT id, boardId, pointX, pointY, src, imageWidth, imageHeight FROM dbo.GetImages(@boardId) WHERE id=@id";
 
