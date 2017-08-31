@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Security.Claims;
+using System.Linq;
+using Authorization.Extensions;
 
 namespace API.Controllers {
     [Route("api/[controller]")]
@@ -35,7 +38,7 @@ namespace API.Controllers {
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] InBoard inputBoard) {
-            OutBoard board = await _boardService.CreateAsync(inputBoard);
+            OutBoard board = await _boardService.CreateAsync(inputBoard, User.GetNameIdentifier());
             return CreatedAtRoute("GetBoard", new { id = board.Id }, board);
         }
 

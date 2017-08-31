@@ -65,6 +65,19 @@ namespace API.Repositories {
             return GetUsersAsync(access_token, index, size, null);
         }
 
+        public async Task<User> GetUserAsync(string userId, string access_token) {
+            _client.DefaultRequestHeaders.Clear();
+            _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {access_token}");
+
+            userId = Uri.EscapeDataString(userId);
+
+            var fieldsRequired = Uri.EscapeDataString("username,user_id,picture,name,nickname");
+
+            string json = await _client.GetStringAsync($"{USERS_ENDPOINT}/{userId}?fields={fieldsRequired}");
+
+            return JsonConvert.DeserializeObject<User>(json);
+        }
+
         public async Task<bool> UserExistsAsync(string userId, string access_token) {
             _client.DefaultRequestHeaders.Clear();
             _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {access_token}");
