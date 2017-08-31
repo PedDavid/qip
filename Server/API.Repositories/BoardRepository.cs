@@ -17,7 +17,7 @@ namespace API.Repositories {
             _queryTemplate = queryTemplate;
         }
 
-        public Task<long> AddAsync(Board board) {
+        public async Task<long> AddAsync(Board board, string userId) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
@@ -28,7 +28,16 @@ namespace API.Repositories {
                     .Add("@maxDistPoints", SqlDbType.TinyInt)
                     .Value = board.MaxDistPoints.Value;
 
-            return _queryTemplate.QueryForScalarAsync<long>(INSERT_BOARD, parameters);
+            parameters
+                    .Add("@userId", SqlDbType.VarChar)
+                    .Value = userId;
+
+            SqlParameter boardId = parameters.Add("@boardId", SqlDbType.BigInt);
+            boardId.Direction = ParameterDirection.Output;
+
+            await _queryTemplate.StoredProcedureAsync(INSERT_BOARD, parameters);
+
+            return (long)boardId.Value;
         }
 
         public Task<Board> FindAsync(long id) {
@@ -128,13 +137,15 @@ namespace API.Repositories {
                                                        "ORDER BY id " +
                                                        "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
         private static readonly string SELECT_BOARD = "SELECT id, [name], maxDistPoints FROM dbo.Board WHERE id = @id";
-        private static readonly string INSERT_BOARD = "INSERT INTO dbo.Board ([name], maxDistPoints) VALUES (@name, @maxDistPoints); " +
-                                                     "SELECT CAST(SCOPE_IDENTITY() AS BIGINT)";
         private static readonly string DELETE_BOARD = "DELETE FROM dbo.Board WHERE id = @id";
         private static readonly string UPDATE_BOARD = "UPDATE dbo.Board " +
                                                       "SET [name]= isnull(@name, [name]), " +
                                                           "maxDistPoints = isnull(@maxDistPoints, maxDistPoints)" +
                                                       "WHERE id = @id";
+
+        //SQL Stored Procedures
+        private static readonly string INSERT_BOARD = "[dbo].[InsertBoard]";
+
 
         //Extract Data From Data Reader
         private static Board GetBoard(SqlDataReader dr) {

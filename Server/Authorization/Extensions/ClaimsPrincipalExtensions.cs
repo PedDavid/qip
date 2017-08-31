@@ -14,5 +14,11 @@ namespace Authorization.Extensions {
             // Succeed if the scope array contains the required scope
             return scopes.Any(s => s == scope);
         }
+
+        public static string GetNameIdentifier(this ClaimsPrincipal principal) {
+            Claim nameIdentifierClaim = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+
+            return nameIdentifierClaim?.Value;
+        }
     }
 }
