@@ -1,4 +1,5 @@
-﻿using Authorization.Requirements;
+﻿using Authorization.Extensions;
+using Authorization.Requirements;
 using Authorization.Resources;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq;
@@ -12,8 +13,7 @@ namespace Authorization.Handlers {
                 return Task.CompletedTask;
             }
 
-            Claim nameIdentifierClaim = context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-            string userId = nameIdentifierClaim?.Value; 
+            string userId = context.User.GetNameIdentifier();
 
             if(resource.UserId == userId) {
                 context.Succeed(requirement);

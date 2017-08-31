@@ -19,7 +19,7 @@ namespace API.Services {
             _boardRepository = boardRepository;
         }
 
-        public async Task<OutBoard> CreateAsync(InBoard inputBoard) {
+        public async Task<OutBoard> CreateAsync(InBoard inputBoard, string userId) {
             if(inputBoard == null) {
                 throw new MissingInputException();
             }
@@ -27,7 +27,7 @@ namespace API.Services {
             Validator<InBoard>.Valid(inputBoard, GetCreateValidationConfigurations());
 
             Board board = new Board().In(inputBoard);
-            long id = await _boardRepository.AddAsync(board);
+            long id = await _boardRepository.AddAsync(board, userId);
 
             return board.Out(id);
         }
