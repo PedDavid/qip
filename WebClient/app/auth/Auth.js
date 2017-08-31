@@ -6,7 +6,7 @@ export default class Auth {
     domain: AUTH_CONFIG.domain,
     clientID: AUTH_CONFIG.clientId,
     redirectUri: AUTH_CONFIG.callbackUrl,
-    audience: `https://${AUTH_CONFIG.domain}/userinfo`,
+    audience: `https://qip_api`,
     responseType: 'token id_token',
     scope: 'openid profile'
   })

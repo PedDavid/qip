@@ -1,5 +1,5 @@
 export const AUTH_CONFIG = {
-  domain: 'simons.eu.auth0.com',
-  clientId: '6boWXsXW5jeRFB4nzM4h0DSJT4XYNTUy',
+  domain: 'qip.eu.auth0.com',
+  clientId: 'sVFFSX3uzsjp6750JdBpkHtN6J6pbJue',
   callbackUrl: 'http://localhost:8080/callback'
 }
