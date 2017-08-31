@@ -28,7 +28,7 @@ export class Persist {
       this._configureWSProtocol()
       this.connected = true
       this.boardId = boardId
-      this.persistType = PersistType().WebSockets
+      this.persistType = PersistType.WebSockets
       this._persistBoardByWS()
     }
 
@@ -90,9 +90,9 @@ export class Persist {
   }
 
   getInitialBoardAsync = function (boardId) {
-    if (this.persistType === PersistType().WebSockets) {
+    if (this.persistType === PersistType.WebSockets) {
       return this._getInitialBoardWS(boardId)
-    } else if (this.persistType === PersistType().LocalStorage) {
+    } else if (this.persistType === PersistType.LocalStorage) {
       return this._getInitialBoardLS()
     }
   }
@@ -101,6 +101,7 @@ export class Persist {
   _getInitialBoardWS = function (boardId) {
     // todo: fazer também um fetch ao board específico e obter o maxFigureId em vez de estar a verificar qual o maior atrvés das figuras recebidas
     console.info('getting board data from server by web sockets')
+    // TODO (peddavid): Why API call instead of using existing websocket connection? Also, does it need 2 different calls?
     // fetch data of current board
     return Promise.all([
       fetch(`http://localhost:57059/api/boards/${boardId}/figures/lines`, {
@@ -118,6 +119,7 @@ export class Persist {
         method: 'GET'
       })
     ]).then(responses => {
+      // TODO(peddavid): Handle this better, specially the return
       if (responses.some(res => res.status >= 400)) {
         throw new Error('Bad response from server. Check if Board Id is correct')
       }
@@ -185,9 +187,9 @@ export class Persist {
   }
 
   cleanCanvas = function () {
-    if (this.persistType === PersistType().WebSockets) {
+    if (this.persistType === PersistType.WebSockets) {
       return this._cleanCanvasWS()
-    } else if (this.persistType === PersistType().LocalStorage) {
+    } else if (this.persistType === PersistType.LocalStorage) {
       return this._resetLocalStorage()
     }
   }
@@ -207,9 +209,7 @@ export class Persist {
   }
 }
 
-export function PersistType () {
-  return {
-    WebSockets: 0,
-    LocalStorage: 1
-  }
+export const PersistType = {
+  WebSockets: 0,
+  LocalStorage: 1
 }
