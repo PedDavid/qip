@@ -50,6 +50,7 @@ export default class SideBarOverlay extends React.Component {
               <Icon name='share' />
               Share board
             </a>
+            { /* TODO(peddavid -> simaovii): ref menux needed? */ }
             <Dropdown ref='menux' onClose={this.closeBoards} onClick={this.openBoards} item text='My Boards'>
               <Dropdown.Menu className={styles.myBoards} >
                 <Dropdown.Header>School</Dropdown.Header>
