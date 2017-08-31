@@ -19,6 +19,7 @@ export default class ShareBoardModal extends React.Component {
       return
     }
 
+    // TODO: POST is not idempotent, "sharing" a board multiple times should not be able to produce side effects
     fetch('http://localhost:57059/api/boards', {
       headers: {
         'Accept': 'application/json',

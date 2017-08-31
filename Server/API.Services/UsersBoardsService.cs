@@ -127,6 +127,10 @@ namespace API.Services {
                 throw new NotFoundException($"The UserBoard with board id {boardId} and user id {userId} not exists");
             }
 
+            AccessToken token = await _memoryCache.GetAccessToken(_auth0ManagementRepository);
+
+            user.User = await _auth0ManagementRepository.GetUserAsync(userId, token.Access_token);
+
             return user.Out();
         }
 
@@ -145,7 +149,7 @@ namespace API.Services {
 
             if(inputUserBoard.UserId != userId) {
                 throw new InconsistentRequestException(
-                    $"The user id present on update is different of the expected. {Environment.NewLine}Expected: {boardId}{Environment.NewLine}Current: {inputUserBoard.BoardId}"
+                    $"The user id present on update is different of the expected. {Environment.NewLine}Expected: {userId}{Environment.NewLine}Current: {inputUserBoard.UserId}"
                 );
             }
 

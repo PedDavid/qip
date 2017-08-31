@@ -5,17 +5,17 @@ as
 		begin tran
 			
 			-- verificar se o estilo dos pontos é um json válido
-			declare @pointStyle varchar(max)
-			select @pointStyle=pointStyle from @points
-			if(ISJSON(@pointStyle) < 1)
-				throw 51000, 'Point Style is not a valid JSON', 1;  
+			declare @invalidJson int
+			SELECT @invalidJson = COUNT(*) FROM @points WHERE ISJSON(pointStyle) <> 1
+			if(@invalidJson <> 0)
+				throw 51000, 'Point Style is not a valid JSON', 1; 
 
 			--verificar se já existe um objeto lineStyle com width dada. se já existir, é possível reutilizar
 			declare @styleId bigint
 			select @styleId=lineStyleId from dbo.LineStyle where color = @color
 			if @styleId is null
 			begin
-				insert into dbo.LineStyle values(@color)
+				insert into dbo.LineStyle(color) values(@color)
 				set @styleId = SCOPE_IDENTITY() --último id introduzido no scope atual
 			end
 

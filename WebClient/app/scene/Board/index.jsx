@@ -79,6 +79,7 @@ export default class Board extends React.Component {
         this.persist.updateCanvasSize(newCanvasSize)
         return {canvasSize: newCanvasSize}
       })
+      // TODO(peddavid): This is probably required to be done after state is changed, setState callback or Update
       this.grid.draw(this.canvasContext, 1)
     })
 
@@ -105,9 +106,9 @@ export default class Board extends React.Component {
     // if there isn't a specific board, or if the user is not authenticated, get persisted data from local storage
     // todo: implement isAuthenticated()
     if (boardId == null) {
-      persistType = PersistType().LocalStorage
+      persistType = PersistType.LocalStorage
     } else if (boardId != null) {
-      persistType = PersistType().WebSockets
+      persistType = PersistType.WebSockets
     }
 
     this.persist = new Persist(persistType, this.canvasContext, this.grid)
@@ -131,8 +132,9 @@ export default class Board extends React.Component {
           }
         })
 
-        if (this.persist.persistType === PersistType().WebSockets) {
-          this.updateBoardId(this.state.currentBoard)
+        if (this.persist.persistType === PersistType.WebSockets) {
+          // todo update board id and start web socket connection
+          this.updateBoardId(boardId)
         }
 
         // draw initial grid

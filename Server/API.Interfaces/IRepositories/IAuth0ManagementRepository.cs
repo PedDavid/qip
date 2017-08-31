@@ -7,6 +7,7 @@ namespace API.Interfaces.IRepositories {
         Task<AccessToken> GetAccessToken();
         Task<List<User>> GetUsersAsync(string access_token, long index, long size, string search);
         Task<List<User>> GetUsersAsync(string access_token, long index, long size);
+        Task<User> GetUserAsync(string userId, string access_token);
         Task<bool> UserExistsAsync(string userId, string access_token);
     }
 }
