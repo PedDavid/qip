@@ -13,7 +13,6 @@ as
 			if exists(select * from @points)begin
 
 				-- verificar se o estilo dos pontos é um json válido
-				
 				declare @invalidJson int
 				SELECT @invalidJson = COUNT(*) FROM @points WHERE ISJSON(pointStyle) <> 1
 				if(@invalidJson <> 0)
@@ -46,7 +45,7 @@ as
 			select @styleId=lineStyleId from dbo.LineStyle where color = @color
 			if @styleId is null
 			begin
-				insert into dbo.LineStyle values(@color)
+				insert into dbo.LineStyle(color) values(@color)
 				set @styleId = SCOPE_IDENTITY() --último id introduzido no scope atual
 			end
 
