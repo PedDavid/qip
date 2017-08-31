@@ -86,7 +86,7 @@ namespace API.Repositories {
 
             parameters.Add("@id", SqlDbType.BigInt).Value = id;
 
-            return _queryTemplate.CommandAsync(DELETE_BOARD, parameters);
+            return _queryTemplate.StoredProcedureAsync(DELETE_BOARD, parameters);
         }
 
         public Task UpdateAsync(Board board) {
@@ -137,7 +137,6 @@ namespace API.Repositories {
                                                        "ORDER BY id " +
                                                        "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
         private static readonly string SELECT_BOARD = "SELECT id, [name], maxDistPoints FROM dbo.Board WHERE id = @id";
-        private static readonly string DELETE_BOARD = "DELETE FROM dbo.Board WHERE id = @id";
         private static readonly string UPDATE_BOARD = "UPDATE dbo.Board " +
                                                       "SET [name]= isnull(@name, [name]), " +
                                                           "maxDistPoints = isnull(@maxDistPoints, maxDistPoints)" +
@@ -145,6 +144,7 @@ namespace API.Repositories {
 
         //SQL Stored Procedures
         private static readonly string INSERT_BOARD = "[dbo].[InsertBoard]";
+        private static readonly string DELETE_BOARD = "[dbo].[DeleteBoard]";
 
 
         //Extract Data From Data Reader

@@ -149,7 +149,7 @@ namespace API.Services {
 
             if(inputUserBoard.UserId != userId) {
                 throw new InconsistentRequestException(
-                    $"The user id present on update is different of the expected. {Environment.NewLine}Expected: {boardId}{Environment.NewLine}Current: {inputUserBoard.BoardId}"
+                    $"The user id present on update is different of the expected. {Environment.NewLine}Expected: {userId}{Environment.NewLine}Current: {inputUserBoard.UserId}"
                 );
             }
 
