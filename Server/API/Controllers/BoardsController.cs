@@ -31,7 +31,7 @@ namespace API.Controllers {
         }
 
         [HttpGet("{id}", Name = "GetBoard")]
-        [Authorize("Administrator")]
+        [AllowAnonymous]
         public Task<OutBoard> GetByIdAsync(long id) {
             return _boardService.GetAsync(id);
         }

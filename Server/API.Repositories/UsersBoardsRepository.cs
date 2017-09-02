@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -76,11 +77,11 @@ namespace API.Repositories {
         public async Task<BoardPermission> FindPermissionAsync(string userId, long boardId) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
+            parameters.Add("@userId", SqlDbType.VarChar).Value = userId??SqlString.Null;
+
             parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
 
-            parameters.Add("@userId", SqlDbType.VarChar).Value = userId;
-
-            return (BoardPermission) await _queryTemplate.QueryForScalarAsync<byte>(SELECT_PERMISSION, parameters, defaultToLackValue: true);
+            return (BoardPermission) await _queryTemplate.QueryForScalarAsync<byte>(SELECT_PERMISSION, parameters);
         }
 
         public Task<IEnumerable<UserBoard_Board>> GetAllBoardsAsync(string userId, long index, long size) {
@@ -192,7 +193,7 @@ namespace API.Repositories {
         private static readonly string SELECT_USER_BOARD = "SELECT permission, boardId, userId FROM dbo.User_Board WHERE boardId=@boardId and userId=@userId";
         private static readonly string SELECT_USER = "SELECT permission, userId FROM dbo.Full_User_Board WHERE boardId=@boardId and userId=@userId";
         private static readonly string SELECT_BOARD = "SELECT permission, boardId, boardName, maxDistPoints FROM dbo.Full_User_Board WHERE userId=@userId and boardId=@boardId";
-        private static readonly string SELECT_PERMISSION = "SELECT CAST(permission AS TINYINT) FROM dbo.User_Board WHERE userId=@userId and boardId=@boardId";
+        private static readonly string SELECT_PERMISSION = "SELECT [dbo].[GetPermission](@userId, @boardId)";
         private static readonly string INSERT_USER_BOARD = "INSERT INTO dbo.User_Board (userId, boardId, permission) VALUES (@userId, @boardId, @permission)";
         private static readonly string DELETE_USER_BOARD = "DELETE FROM dbo.User_Board WHERE userId = @userId and boardId = @boardId";
         private static readonly string UPDATE_USER_BOARD = "UPDATE dbo.User_Board " +

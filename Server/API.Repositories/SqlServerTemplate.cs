@@ -55,7 +55,7 @@ namespace API.Repositories {
             return CommandAsync(sql, new List<SqlParameter>());
         }
 
-        public async Task<T> QueryForScalarAsync<T>(string sql, List<SqlParameter> parameters, bool defaultToLackValue = false) {
+        public async Task<T> QueryForScalarAsync<T>(string sql, List<SqlParameter> parameters) {
             using(SqlConnection con = new SqlConnection(_options.Context)) {
                 using(SqlCommand cmd = con.CreateCommand()) {
                     cmd.CommandText = sql;
@@ -64,12 +64,7 @@ namespace API.Repositories {
 
                     await con.OpenAsync();
 
-                    object scalar = await cmd.ExecuteScalarAsync();
-
-                    if(defaultToLackValue && scalar == null)
-                        return default(T);
-
-                    return (T) scalar;
+                    return (T) await cmd.ExecuteScalarAsync();
                 }
             }
         }
