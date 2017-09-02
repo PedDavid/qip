@@ -10,7 +10,7 @@ begin try
 
 		SET @boardId = SCOPE_IDENTITY()
 
-		INSERT INTO dbo.User_Board(userId, boardId, permission) VALUES(@userId, @boardId, 2)
+		INSERT INTO dbo.User_Board(userId, boardId, permission) VALUES(@userId, @boardId, 3)
 	COMMIT
 	RETURN 0
 end try
