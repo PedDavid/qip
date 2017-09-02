@@ -33,19 +33,19 @@ namespace API.Repositories {
 
             parameters
                 .Add("@defaultPen", SqlDbType.VarChar)
-                .Value = preferences.PenColors;
+                .Value = preferences.DefaultPen;
 
             parameters
                 .Add("@defaultEraser", SqlDbType.VarChar)
-                .Value = preferences.PenColors;
+                .Value = preferences.DefaultEraser;
 
             parameters
                 .Add("@currTool", SqlDbType.VarChar)
-                .Value = preferences.PenColors;
+                .Value = preferences.CurrTool;
 
             parameters
                 .Add("@settings", SqlDbType.VarChar)
-                .Value = preferences.PenColors;
+                .Value = preferences.Settings;
 
             SqlParameter outParam = parameters.Add("@created", SqlDbType.Bit);
             outParam.Direction = ParameterDirection.Output;
