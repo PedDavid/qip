@@ -67,24 +67,20 @@ export default class SideBarOverlay extends React.Component {
     return (
       <div className={styles.divsidebar}>
         <Sidebar.Pushable as={Segment} className={styles.sidebar}>
-          <Sidebar ref='sidebar' as={Menu} animation='push' direction='left' width='thin' icon='labeled' visible={visible} vertical style={this.state.extraStyle} inverted className={styles.sidebarMenu}>
+          <Sidebar as={Menu} animation='push' direction='left' width='thin' icon='labeled' visible={visible} vertical style={this.state.extraStyle} inverted className={styles.sidebarMenu}>
             {this.getAuthView()}
             <a onClick={this.props.toggleShareModal} className='item'>
               <Icon name='share' />
               Share board
             </a>
-<<<<<<< HEAD
-            <Dropdown ref='menux' onClose={this.closeBoards} onClick={() => this.extendMenu(300)} item text='My Boards'>
-=======
-            { /* TODO(peddavid -> simaovii): ref menux needed? */ }
-            <Dropdown ref='menux' onClose={this.closeBoards} onClick={this.openBoards} item text='My Boards'>
->>>>>>> @{-1}
+            <Dropdown onClose={this.closeBoards} onClick={() => this.extendMenu(300)} item text='My Boards'>
               <Dropdown.Menu className={styles.myBoards} >
                 <Dropdown.Header>Current Board</Dropdown.Header>
                 <Dropdown.Item >{this.props.currentBoard.name}</Dropdown.Item>
+                <Dropdown.Divider />
                 <Dropdown.Header>Your Boards</Dropdown.Header>
                 {this.props.userBoards.map(board => {
-                  return <Dropdown.Item >{board.name}</Dropdown.Item>
+                  return <Dropdown.Item key={board.id}>{board.name}</Dropdown.Item>
                 })}
                 <Dropdown.Item className={styles.addBoard}>
                   <Button onClick={this.props.addBoard} className={styles.btnPlus}>

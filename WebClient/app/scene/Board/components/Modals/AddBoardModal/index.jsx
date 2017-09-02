@@ -1,9 +1,5 @@
 import React from 'react'
 import { Modal, Button, Icon, Input, Message } from 'semantic-ui-react'
-import fetch from 'isomorphic-fetch'
-
-const baseUrl = 'http://localhost:57059/'
-const boardsPath = 'api/boards/'
 
 export default class AddBoardModal extends React.Component {
   state = {
@@ -27,55 +23,17 @@ export default class AddBoardModal extends React.Component {
       })
       return
     }
-    const saveBoardPromise = new Promise((resolve, reject) => {
-      if (this.props.persist.connected) {
-        resolve(this.props.persist.boardId)
-      } else {
-        fetch(`${baseUrl}${boardsPath}`, {
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          method: 'POST',
-          body: JSON.stringify({
-            'name': this.boardName,
-            'maxDistPoints': 0
-          })
-        }).then(response => {
-          if (response.status >= 400) {
-            throw new Error('Bad response from server')
-          }
-          return response.json()
-        }).then(board => {
-          this.props.addBoard(board)
-          resolve(board)
-        }).catch(err => {
-          reject(err)
-        })
-      }
-    })
-    // add created board to logged user
-    saveBoardPromise
-      .then(board => {
-        const addBoardToUserFetch = fetch(`${baseUrl}${boardsPath}${board.id}/usersboards`, {
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          method: 'POST',
-          body: JSON.stringify({
-            'userId': this.props.auth.tryGetProfile().sub,
-            'boardId': board.id,
-            'permission': 0
-          })
-        })
 
+    this.setState({
+      loading: true
+    })
+
+    this.props.addBoardAsync(this.boardName)
+      .then(board => {
         this.setState({
           loading: false,
           error: false
         })
-
-        return addBoardToUserFetch
       }).catch(err => {
         console.log(err)
         this.setState({
@@ -83,10 +41,6 @@ export default class AddBoardModal extends React.Component {
           error: true
         })
       })
-
-    this.setState({
-      loading: true
-    })
   }
 
   render () {

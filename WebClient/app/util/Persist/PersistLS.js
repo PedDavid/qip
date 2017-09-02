@@ -65,7 +65,9 @@ export default class PersistLS {
         defaultEraser: new Eraser(grid, tempEraser.width),
         currTool: this._getToolFromLS(grid, tempCurrTool),
         favorites,
-        settings
+        settings,
+        userBoards: [],
+        currentBoard: new BoardData(-1, 'My Board')
       }
 
       resolve(userInfo)

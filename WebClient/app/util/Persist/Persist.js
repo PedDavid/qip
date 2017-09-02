@@ -17,6 +17,7 @@ export class Persist {
     const scheme = document.location.protocol === 'https:' ? 'wss' : 'ws'
     const port = document.location.port ? (57059) : ''
     const connectionUrl = `${scheme}://localhost:${port}/ws/${boardId}`
+    this.boardId = boardId // this should be here because even if ws connection goes wrong, there is a url to share
     console.log('making web socket connection to: ' + connectionUrl)
     this.socket = new WebSocket(connectionUrl)
 
@@ -24,7 +25,6 @@ export class Persist {
       console.info('web socket connection to: ' + connectionUrl + ' is now open')
       PersistWS._configureWSProtocol(this.socket, this.grid, this.canvasContext)
       this.connected = true
-      this.boardId = boardId
       this.persistType = PersistType().WebSockets
       PersistWS._persistBoardByWS(this.socket)
       PersistLS._resetLocalStorage()
@@ -33,20 +33,19 @@ export class Persist {
     this.socket.onerror = (event) => {
       console.error('an error occurred on web socket connection to: ' + connectionUrl)
       this.connected = false
-      this.boardId = null
     }
   }
 
-  getInitialBoardAsync (boardId) {
+  getInitialBoardAsync (boardId, accessToken) {
     return this.callWSLSFunc(
-      () => PersistWS._getInitialBoardWS(boardId),
+      () => PersistWS._getInitialBoardWS(boardId, accessToken),
       () => PersistLS._getInitialBoardLS()
     )
   }
 
-  getUserInfoAsync (grid, userProfile) {
+  getUserInfoAsync (grid, userProfile, accessToken) {
     return this.callWSLSFunc(
-      () => PersistWS._getUserInfoAsyncWS(grid, userProfile),
+      () => PersistWS._getUserInfoAsyncWS(grid, userProfile, accessToken),
       () => PersistLS._getUserInfoAsyncLS(grid)
     )
   }
@@ -86,8 +85,11 @@ export class Persist {
     )
   }
 
-  addUserBoard () {
-
+  addUserBoard (boardName, user, accessToken) {
+    return this.callWSLSFunc(
+      () => PersistWS._addUserBoardWS(boardName, user, accessToken),
+      () => {} // do nothing in localstorage
+    )
   }
 
   callWSLSFunc (WSFunc, LSFunc) {

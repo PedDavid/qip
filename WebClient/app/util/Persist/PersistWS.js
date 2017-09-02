@@ -75,7 +75,7 @@ export default class PersistLS {
   }
 
   // get initial board from server by web sockets
-  static _getInitialBoardWS = function (boardId) {
+  static _getInitialBoardWS = function (boardId, accessToken) {
     // todo: fazer também um fetch ao board específico e obter o maxFigureId em vez de estar a verificar qual o maior atrvés das figuras recebidas
     console.info('getting board data from server by web sockets')
     // fetch data of current board
@@ -83,7 +83,9 @@ export default class PersistLS {
       fetch(`http://localhost:57059/api/boards/${boardId}/figures/lines`, {
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+          'Access-Control-Allow-Origin': 'http://localhost:8080'
         },
         method: 'GET'
       }).then(figRes => {
@@ -95,7 +97,9 @@ export default class PersistLS {
       fetch(`http://localhost:57059/api/boards/${boardId}/figures/images`, {
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+          'Access-Control-Allow-Origin': 'http://localhost:8080'
         },
         method: 'GET'
       }).then(imgRes => {
@@ -107,13 +111,17 @@ export default class PersistLS {
     ]).then(allFigs => {
       const figures = allFigs[0].concat(allFigs[1])
       let maxId = -1
-      console.log('lines fetched from initial board:')
+      console.log('figures fetched from initial board:')
       console.log(figures)
       // todo: make possible to get images too
       const grid = new Grid(figures, maxId)
 
       const initBoard = {
-        grid
+        grid,
+        canvasSize: { // todo: get from server
+          width: 0,
+          height: 0
+        }
       }
 
       return initBoard
@@ -137,30 +145,71 @@ export default class PersistLS {
 
   static _updateCanvasSizeWS = function (canvasSize) {}
 
+  static _addUserBoardWS = function (boardName, user, accessToken) {
+    console.info('adding new board: ' + boardName)
+    // this fetch will create a board and associate it to current user. Current user will be admin
+    return fetch(`http://localhost:57059/api/boards/`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+        'Access-Control-Allow-Origin': 'http://localhost:8080'
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        name: boardName,
+        maxDistPoints: 0
+      })
+    }).then(addedBoardRes => {
+      if (addedBoardRes.status >= 400) {
+        throw new Error('Bad response from server. Check if Board Id is correct')
+      }
+      return addedBoardRes.json()
+    }).then(addedBoard => {
+      return addedBoard
+    })
+  }
+
   // get user info from server by web sockets
-  static _getUserInfoAsyncWS = function (grid, profile) {
+  static _getUserInfoAsyncWS = function (grid, profile, accessToken) {
     console.info('getting user info from server by web sockets')
     // fetch data of current board
     return Promise.all([
-      fetch(`http://localhost:57059/api/users/0`, { // todo: alterar id do user
+      fetch(`http://localhost:57059/api/users/${profile.sub}/preferences`, {
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
         },
         method: 'GET'
+      }).then(preferencesRes => {
+        if (preferencesRes.status >= 400) {
+          throw new Error('Bad response from server. Check if User Sub is correct')
+        }
+        const aux = preferencesRes.text()
+        return aux
+      }),
+      fetch(`http://localhost:57059/api/users/${profile.sub}/boards`, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        method: 'GET'
+      }).then(userBoardsRes => {
+        if (userBoardsRes.status >= 400) {
+          throw new Error('Bad response from server. Check if User Sub is correct')
+        }
+        const aux = userBoardsRes.json()
+        return aux
       })
-    ]).then(responses => {
-      if (responses.some(res => res.status >= 400)) {
-        throw new Error('Bad response from server. Check if Board Id is correct')
-      }
-      return responses[0].json()
-    }).then(figures => {
+    ]).then(allRes => {
       const userInfo = {
         defaultPen: null,
         defaultEraser: null,
         currTool: null,
         favorites: null,
-        userBoards: null,
+        userBoards: allRes[1],
         settings: null
       }
       return userInfo
@@ -171,21 +220,19 @@ export default class PersistLS {
   static _getBoardInfoWS = function (boardId) {
     console.info('getting board info from server by web sockets')
     // fetch data of board
-    return Promise.all([
-      fetch(`http://localhost:57059/api/boards/${boardId}`, {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        method: 'GET'
-      })
-    ]).then(responses => {
-      if (responses.some(res => res.status >= 400)) {
+    return fetch(`http://localhost:57059/api/boards/${boardId}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      method: 'GET'
+    }).then(boardInfoRes => {
+      if (boardInfoRes.status >= 400) {
         throw new Error('Bad response from server. Check if Board Id is correct')
       }
-      return responses[0].json()
-    }).then(board => {
-      return new BoardData(board.id, board.name)
+      return boardInfoRes.json()
+    }).then(boardInfo => {
+      return new BoardData(boardInfo.id, boardInfo.name)
     })
   }
 }

@@ -101,74 +101,95 @@ export default class Board extends React.Component {
   }
 
   getInitialBoard (boardId) {
+    /*
+      There is the following possibilities for this initial procedure:
+      * User is not authenticated and there is no specific board requested -> persistType is LocalStorage.
+      * User is not authenticated but requests a specific board (/board/boardid) -> persistType is WebSockets but profile can't be asked to server.
+      * User is authenticated and there is no specific board request -> persistType is WebStorage. Profile is requested to server and currentBoard is obtained from user preferences.
+      * User is authenticated but requests a specific board -> persistType is WebSockets. Profile is requested to server but user current board is ignored. It is used requested board instead.
+    */
     let persistType = null
 
     // if there isn't a specific board, or if the user is not authenticated, get persisted data from local storage
-    // todo: implement isAuthenticated()
-    if (boardId == null) {
-      persistType = PersistType.LocalStorage
-    } else if (boardId != null) {
-      persistType = PersistType.WebSockets
+    if (boardId != null || auth.isAuthenticated()) {
+      persistType = PersistType().WebSockets
+    } else if (boardId == null) {
+      persistType = PersistType().LocalStorage
     }
 
     this.persist = new Persist(persistType, this.canvasContext, this.grid)
 
-    // get initial board from server or from local storage
-    this.persist.getBoardInfo(boardId)
-      .then(currBoard => {
-        this.setState({
-          currentBoard: currBoard
-        })
-        return this.persist.getInitialBoardAsync(boardId)
-      })
-      .then(initBoard => {
-        this.grid = initBoard.grid
-        this.persist.grid = this.grid
-        const canvasSize = initBoard.canvasSize
-        this.setState({
-          canvasSize: {
-            width: canvasSize.width === 0 ? window.innerWidth - 20 : canvasSize.width,
-            height: canvasSize.height === 0 ? window.innerHeight - 20 : canvasSize.height
-          }
-        })
+    const userProfile = auth.isAuthenticated() ? auth.tryGetProfile() : null
+    const userAccessToken = auth.isAuthenticated() ? auth.getAccessToken() : null
 
-        if (this.persist.persistType === PersistType.WebSockets) {
-          // todo update board id and start web socket connection
-          this.updateBoardId(boardId)
+    // this must be done to process requests when User is not authenticated but requests a specific board
+    let getUserInfoPromise = null
+    if (persistType === PersistType().WebSockets && !auth.isAuthenticated()) {
+      this.persist.persistType = PersistType().LocalStorage
+      getUserInfoPromise = this.persist.getUserInfoAsync(this.grid, userProfile, userAccessToken)
+      this.persist.persistType = PersistType().WebSockets
+    } else {
+      getUserInfoPromise = this.persist.getUserInfoAsync(this.grid, userProfile, userAccessToken)
+    }
+
+    getUserInfoPromise.then(userinfo => {
+      // if there is no pen, eraser or currentBoard
+      const defaultPen = new Pen(defaultGrid, 'black', 5)
+      const defaultEraser = new Eraser(this.grid, 5)
+
+      // necessary procedure to avoid bug
+      this.toolsConfig.updatePrevTool(userinfo.defaultPen != null ? userinfo.defaultPen : defaultPen)
+      this.toolsConfig.updatePrevTool(userinfo.defaultEraser != null ? userinfo.defaultEraser : defaultEraser)
+
+      this.setState({
+        loading: false,
+        currTool: userinfo.currTool != null ? userinfo.currTool : defaultPen,
+        favorites: userinfo.favorites != null ? userinfo.favorites : [],
+        userBoards: userinfo.userBoards != null ? userinfo.userBoards
+          .map(boardRaw => new BoardData(boardRaw.board.id, boardRaw.board.name)) : [],
+        settings: userinfo.settings != null ? userinfo.settings : [false, false]
+      })
+      const userCurrentBoard = userinfo.currentBoard != null ? userinfo.currentBoard : userinfo.userBoards[0].board // return currBoard. todo: change to userinfo.currBoard
+      // if user has a predefined current board, use it. In other case, use boardId that was passed in url, if present
+      if (boardId != null) {
+        return this.persist.getBoardInfo(boardId)
+      }
+      return userCurrentBoard
+    }).then(currBoard => {
+      persistType === PersistType().WebSockets && this.props.history.replace('/board/' + currBoard.id)
+      this.setState({
+        currentBoard: currBoard
+      })
+      return this.persist.getInitialBoardAsync(boardId == null ? currBoard.id : boardId, userAccessToken)
+    }).then(initBoard => {
+      this.grid = initBoard.grid
+      this.persist.grid = this.grid
+      const canvasSize = initBoard.canvasSize
+      this.setState({
+        canvasSize: {
+          width: canvasSize.width === 0 ? window.innerWidth - 20 : canvasSize.width,
+          height: canvasSize.height === 0 ? window.innerHeight - 20 : canvasSize.height
         }
-
-        // draw initial grid
-        this.grid.draw(this.canvasContext, 1)
-
-        return this.persist.getUserInfoAsync(this.grid, auth.tryGetProfile())
       })
-      .then(userinfo => {
-        // if there is no pen and eraser
-        const defaultPen = new Pen(defaultGrid, 'black', 5)
-        const defaultEraser = new Eraser(this.grid, 5)
 
-        // necessary procedure to avoid bug
-        this.toolsConfig.updatePrevTool(userinfo.defaultPen != null ? userinfo.defaultPen : defaultPen)
-        this.toolsConfig.updatePrevTool(userinfo.defaultEraser != null ? userinfo.defaultEraser : defaultEraser)
+      if (this.persist.persistType === PersistType().WebSockets) {
+        // todo update board id and start web socket connection
+        this.updateBoardId(this.state.currentBoard)
+      }
 
-        this.setState({
-          loading: false,
-          currTool: userinfo.currTool != null ? userinfo.currTool : defaultPen,
-          favorites: userinfo.favorites != null ? userinfo.favorites : [],
-          userBoards: userinfo.userBoards != null ? userinfo.userBoards : [],
-          settings: userinfo.settings != null ? userinfo.settings : [false, false]
-        })
-      }).catch(err => {
-        console.error(err)
-        console.log(err.message)
-        // this must be done because when an error occurs and history is set, initialBoard
-        // is not set anymore
-        this.getInitialBoard(null) // get initial board from Local Storage
-        this.setState({
-          loading: false
-        })
-        this.props.history.push('/') // change current location programmatically in case of error
+      // draw initial grid
+      this.grid.draw(this.canvasContext, 1)
+    }).catch(err => {
+      console.error(err)
+      console.log(err.message)
+      // this must be done because when an error occurs and history is set, initialBoard
+      // is not set anymore
+      this.getInitialBoard(null) // get initial board from Local Storage
+      this.setState({
+        loading: false
       })
+      this.props.history.push('/') // change current location programmatically in case of error
+    })
   }
 
   addFavorite = (tool) => {
@@ -295,13 +316,15 @@ export default class Board extends React.Component {
     this.persist.connectWS(board.id)
   }
 
-  addBoard = (board) => {
-    this.setState(prevState => {
-      prevState.userBoards.push(board)
-      return {
-        currBoard: board
-      }
-    })
+  addBoardAsync = (boardName) => {
+    return this.persist.addUserBoard(boardName, auth.tryGetProfile(), auth.getAccessToken())
+      .then(addedBoard => {
+        this.setState(prevState => {
+          const newBoard = new BoardData(addedBoard.id, addedBoard.name)
+          prevState.userBoards.push(newBoard)
+        })
+        return addedBoard
+      })
   }
 
   updateSettings = (setting, idx) => {
@@ -335,7 +358,7 @@ export default class Board extends React.Component {
           updateCurrentBoard={this.updateBoardId} />
         {/* todo: see if it's possibly to merge saveBoardModal and AddBoardModal */}
         <AddBoardModal history={this.props.history} persist={this.persist} visible={this.state.showAddModal} closeModal={this.toggleAddModal} auth={auth}
-          addBoard={this.addBoard} />
+          addBoardAsync={this.addBoardAsync} />
         <UserAccountModal auth={auth} visible={this.state.showUserAccountModal} closeModal={this.toggleUserAccountModal} />
         <SettingsModal settings={this.state.settings} updateSettings={this.updateSettings} visible={this.state.showSettingsModal} closeModal={this.toggleSettingsModal} />
       </div>
