@@ -17,6 +17,16 @@ namespace API.Services.Utils {
             return this;
         }
 
+        public ValidatorConfiguration<T> UserPredicate<F>(string fieldName, Func<T, F> fieldExtractor, Predicate<F> predicate) {
+            validations.Add(
+                new KeyValuePair<string, Func<T, bool>>(
+                    fieldName,
+                    t => predicate(fieldExtractor(t))
+                )
+            );
+            return this;
+        }
+
         public ValidatorConfiguration<T> UseValidator<F>(string fieldName, Func<T, IEnumerable<F>> fieldExtractor, Validator<F> validator) {
             validations.Add(
                 new KeyValuePair<string, Func<T, bool>>(
