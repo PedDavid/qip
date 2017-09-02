@@ -43,14 +43,18 @@ namespace API.Services {
                 );
             }
 
-            AccessToken token = await _memoryCache.GetAccessToken(_auth0ManagementRepository);
-
-            if(!await _auth0ManagementRepository.UserExistsAsync(userId, token.Access_token)) {
-                throw new NotFoundException($"The User with id {userId} not exists");
+            if(inputUserBoard.Permission == InBoardPermission.Owner) {
+                throw new InvalidFieldsException("It is not possible give owner permissions.");
             }
 
             if(!await _boardRepository.ExistsAsync(boardId)) {
                 throw new NotFoundException($"The Board with id {boardId} not exists");
+            }
+
+            AccessToken token = await _memoryCache.GetAccessToken(_auth0ManagementRepository);
+
+            if(!await _auth0ManagementRepository.UserExistsAsync(userId, token.Access_token)) {
+                throw new NotFoundException($"The User with id {userId} not exists");
             }
 
             UserBoard userBoard = new UserBoard().In(inputUserBoard);
@@ -176,7 +180,14 @@ namespace API.Services {
         private static ValidatorConfiguration<InUserBoard> GetValidationConfigurations() {
             return new ValidatorConfiguration<InUserBoard>()
                 .NotNull("BoardId", i => i.BoardId)
-                .NotNull("UserId", i => i.UserId);
+                .NotNull("UserId", i => i.UserId)
+                .UserPredicate("Permission", i => i.Permission, permission => permission >= InBoardPermission.View && permission <= InBoardPermission.Owner);
+        }
+
+        public async Task<OutBoardPermission> GetPermissionAsync(string userId, long boardId) {
+            BoardPermission permission = await _usersBoardsRepository.FindPermissionAsync(userId, boardId);
+            
+            return BoardPermissionConverter.ConvertToOut(permission);
         }
     }
 }

@@ -27,17 +27,11 @@ namespace Authorization.Handlers {
             Claim nameIdentifierClaim = context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
             string userId = nameIdentifierClaim?.Value;
 
-            OutUserBoard_User user;
-            try {//TODO Tirar
-                user = await _usersBoardsService.GetUserAsync(resource.BoardId, userId);
-            }
-            catch(NotFoundException) {
-                return;
-            }
+            OutBoardPermission permission = await _usersBoardsService.GetPermissionAsync(userId, resource.BoardId);
 
-            if(user.Permission >= requirement.Permission) {
+            if(permission >= requirement.Permission) {
                 context.Succeed(requirement);
-            }
+            } 
         }
     }
 }

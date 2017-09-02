@@ -31,6 +31,22 @@ namespace API.Repositories {
                 .Add("@penColors", SqlDbType.VarChar)
                 .Value = preferences.PenColors;
 
+            parameters
+                .Add("@defaultPen", SqlDbType.VarChar)
+                .Value = preferences.DefaultPen;
+
+            parameters
+                .Add("@defaultEraser", SqlDbType.VarChar)
+                .Value = preferences.DefaultEraser;
+
+            parameters
+                .Add("@currTool", SqlDbType.VarChar)
+                .Value = preferences.CurrTool;
+
+            parameters
+                .Add("@settings", SqlDbType.VarChar)
+                .Value = preferences.Settings;
+
             SqlParameter outParam = parameters.Add("@created", SqlDbType.Bit);
             outParam.Direction = ParameterDirection.Output;
 
@@ -56,7 +72,9 @@ namespace API.Repositories {
         }
 
         //SQL Commands
-        private static readonly string SELECT_PREFERENCES = "SELECT id, favorites, penColors FROM dbo.Preferences WHERE id = @id";
+        private static readonly string SELECT_PREFERENCES = "SELECT id, favorites, penColors, defaultPen, defaultEraser, currTool, settings " +
+                                                            "FROM dbo.Preferences " +
+                                                            "WHERE id = @id";
         private static readonly string DELETE_USER = "DELETE FROM dbo.Preferences WHERE id = @id";
 
         //SQL Stored Procedures
@@ -66,7 +84,11 @@ namespace API.Repositories {
         private static Preferences GetPreferences(SqlDataReader dr) {
             return new Preferences(dr.GetString(0)) {
                 Favorites = dr.GetString(1),
-                PenColors = dr.GetString(2)
+                PenColors = dr.GetString(2),
+                DefaultPen = dr.GetString(3),
+                DefaultEraser = dr.GetString(4),
+                CurrTool = dr.GetString(5),
+                Settings = dr.GetString(6)
             };
         }
     }

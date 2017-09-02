@@ -22,6 +22,7 @@ namespace API.Controllers {
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll(long boardId) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.ReadBoardPolicy))
                 return new ChallengeResult();
@@ -32,6 +33,7 @@ namespace API.Controllers {
         }
 
         [HttpGet("{id}", Name = "GetLine")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(long id, long boardId) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.ReadBoardPolicy))
                 return new ChallengeResult();
@@ -42,6 +44,7 @@ namespace API.Controllers {
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Create(long boardId, [FromBody] InLine inputLine) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.WriteBoadPolicy))
                 return new ChallengeResult();
@@ -53,6 +56,7 @@ namespace API.Controllers {
 
 
         [HttpPut("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> Update(long id, long boardId, [FromBody] InLine inputLine) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.WriteBoadPolicy))
                 return new ChallengeResult();
@@ -63,6 +67,7 @@ namespace API.Controllers {
         }
 
         [HttpDelete("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> Delete(long id, long boardId) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.WriteBoadPolicy))
                 return new ChallengeResult();
