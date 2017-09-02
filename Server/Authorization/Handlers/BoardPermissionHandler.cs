@@ -29,7 +29,7 @@ namespace Authorization.Handlers {
 
             OutBoardPermission permission = await _usersBoardsService.GetPermissionAsync(userId, resource.BoardId);
 
-            if(permission != 0 && permission >= requirement.Permission) {
+            if(permission >= requirement.Permission) {
                 context.Succeed(requirement);
             } 
         }
