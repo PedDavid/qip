@@ -21,5 +21,7 @@ namespace API.Interfaces.IServices {
 
         Task<OutUserBoard_Board> GetBoardAsync(string userId, long boardId);
 
+        Task<OutBoardPermission> GetPermissionAsync(string userId, long boardId);
+
     }
 }

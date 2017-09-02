@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 namespace IODomain.Output {
     public enum OutBoardPermission { 
         // Required Permission Increase Order
-        View = 0,
-        Edit = 1,
-        Owner = 2
+        View = 1,
+        Edit = 2,
+        Owner = 3
     }
 }

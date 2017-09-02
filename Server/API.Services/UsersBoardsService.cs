@@ -178,5 +178,11 @@ namespace API.Services {
                 .NotNull("BoardId", i => i.BoardId)
                 .NotNull("UserId", i => i.UserId);
         }
+
+        public async Task<OutBoardPermission> GetPermissionAsync(string userId, long boardId) {
+            BoardPermission permission = await _usersBoardsRepository.FindPermissionAsync(userId, boardId);
+            
+            return BoardPermissionConverter.ConvertToOut(permission);
+        }
     }
 }

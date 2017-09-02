@@ -55,7 +55,7 @@ namespace API.Repositories {
             return CommandAsync(sql, new List<SqlParameter>());
         }
 
-        public async Task<T> QueryForScalarAsync<T>(string sql, List<SqlParameter> parameters) {
+        public async Task<T> QueryForScalarAsync<T>(string sql, List<SqlParameter> parameters, bool defaultToLackValue = false) {
             using(SqlConnection con = new SqlConnection(_options.Context)) {
                 using(SqlCommand cmd = con.CreateCommand()) {
                     cmd.CommandText = sql;
@@ -63,7 +63,13 @@ namespace API.Repositories {
                     parameters.ForEach(prm => cmd.Parameters.Add(prm));
 
                     await con.OpenAsync();
-                    return (T)await cmd.ExecuteScalarAsync();
+
+                    object scalar = await cmd.ExecuteScalarAsync();
+
+                    if(defaultToLackValue && scalar == null)
+                        return default(T);
+
+                    return (T) scalar;
                 }
             }
         }
@@ -72,7 +78,7 @@ namespace API.Repositories {
             return QueryForScalarAsync<T>(sql, new List<SqlParameter>());
         }
 
-        public async Task<T> QueryForObjectAsync<T>(string sql, List<SqlParameter> parameters, Func<SqlDataReader, T> rowMapper) {
+        public async Task<T> QueryForObjectAsync<T>(string sql, List<SqlParameter> parameters, Func<SqlDataReader, T> rowMapper) where T : class {
             using(SqlConnection con = new SqlConnection(_options.Context)) {
                 using(SqlCommand cmd = con.CreateCommand()) {
                     cmd.CommandText = sql;
@@ -90,7 +96,7 @@ namespace API.Repositories {
             }
         }
 
-        public Task<T> QueryForObjectAsync<T>(string sql, Func<SqlDataReader, T> rowMapper) {
+        public Task<T> QueryForObjectAsync<T>(string sql, Func<SqlDataReader, T> rowMapper) where T : class {
             return QueryForObjectAsync(sql, new List<SqlParameter>(), rowMapper);
         }
 
