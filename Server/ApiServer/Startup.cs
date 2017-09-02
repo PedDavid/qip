@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using WebSockets.StringWebSockets;
+using Newtonsoft.Json.Converters;
 
 namespace ApiServer {
     public class Startup {
@@ -73,7 +74,9 @@ namespace ApiServer {
                                  .RequireAuthenticatedUser()
                                  .Build();
                 config.Filters.Add(new AuthorizeFilter(policy));
-            });
+            })/*.AddJsonOptions(options => {
+                options.SerializerSettings.Converters.Add(new StringEnumConverter());
+            })*/;//TODO VER SE É PREFERIVEL
 
             //Add Db Repositories
             services.AddRepositories();
