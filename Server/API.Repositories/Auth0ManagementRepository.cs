@@ -53,6 +53,7 @@ namespace API.Repositories {
             string query = $"per_page={size}&page={index}&fields={fieldsRequired}";
 
             if(search != null) {
+                search = Uri.EscapeDataString(search);
                 query = $"{query}&q={search}";
             }
 

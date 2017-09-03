@@ -27,8 +27,7 @@ as
 													from dbo.Point as pointTable
 				
 				--apagar todos os tuplos de Figure_Point que pertencem à linha pois é provável que todos os pontos estejam mudados
-				delete from dbo.Line_Point
-					where figureId=@figureId
+				delete from dbo.Line_Point WHERE figureId = @figureId AND boardId = @boardId
 
 				--inserir na tabela Figure_Point os pontos associados à linha inserida, assim como o estilo de cada ponto
 				insert into dbo.Line_Point (figureId, boardId, pointId, pointIdx, pointStyle)
@@ -49,7 +48,7 @@ as
 				set @styleId = SCOPE_IDENTITY() --último id introduzido no scope atual
 			end
 
-			update dbo.Line set isClosedForm = @isClosedForm, lineStyleId = @styleId
+			update dbo.Line set isClosedForm = @isClosedForm, lineStyleId = @styleId WHERE figureId = @figureId AND boardId = @boardId
 
 		commit
 	end try

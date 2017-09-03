@@ -213,10 +213,10 @@ namespace API.Repositories {
         //SQL Functions
         private static readonly string LINE_EXISTS = "SELECT CAST(count(figureId) as BIT) FROM dbo.Line WHERE figureId = @id and boardId = @boardId";
         private static readonly string SELECT_ALL_LINES = "SELECT id, boardId, isClosedForm, lineStyleId, lineColor FROM dbo.GetLinesInfo(@boardId) ORDER BY id";
-        private static readonly string SELECT_ALL_LINES_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointStyle FROM dbo.GetLinesPoints(@boardId) ORDER BY id";
+        private static readonly string SELECT_ALL_LINES_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointStyle FROM dbo.GetLinesPoints(@boardId) ORDER BY id, linePointIdx";
 
         private static readonly string SELECT_LINES = "SELECT id, boardId, isClosedForm, lineStyleId, lineColor FROM dbo.GetLinesInfo(@boardId) WHERE id=@id";
-        private static readonly string SELECT_LINES_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointStyle FROM dbo.GetLinesPoints(@boardId) WHERE id=@id";
+        private static readonly string SELECT_LINES_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointStyle FROM dbo.GetLinesPoints(@boardId) WHERE id=@id ORDER BY linePointIdx";
 
         //SQL Stored Procedures
         private static readonly string INSERT_LINE = "dbo.InsertNewLine";

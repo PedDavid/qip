@@ -12,6 +12,8 @@ namespace API.Interfaces.IRepositories {
 
         Task<UserBoard> FindAsync(long boardId, string userId);
 
+        Task<BoardPermission> FindPermissionAsync(string userId, long boardId);
+
         Task<UserBoard_Board> FindBoardAsync(string userId, long boardId);
 
         Task<UserBoard_User> FindUserAsync(long boardId, string userId);
