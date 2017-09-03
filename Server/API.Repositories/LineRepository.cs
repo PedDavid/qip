@@ -207,10 +207,6 @@ namespace API.Repositories {
             return _queryTemplate.StoredProcedureAsync(UPDATE_LINE, parameters);
         }
 
-        public Task PartialUpdateAsync(Line figure) {
-            throw new NotImplementedException();
-        }
-
         //SQL Functions
         private static readonly string LINE_EXISTS = "SELECT CAST(count(figureId) as BIT) FROM dbo.Line WHERE figureId = @id and boardId = @boardId";
         private static readonly string SELECT_ALL_LINES = "SELECT id, boardId, isClosedForm, lineStyleId, lineColor FROM dbo.GetLinesInfo(@boardId) ORDER BY id";

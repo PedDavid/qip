@@ -130,40 +130,6 @@ namespace API.Repositories {
             return _queryTemplate.StoredProcedureAsync(UPDATE_IMAGE, parameters);
         }
 
-        public Task PartialUpdateAsync(Image image) {
-            List<SqlParameter> parameters = new List<SqlParameter>();
-
-            parameters
-                    .Add("@figureId", SqlDbType.BigInt)
-                    .Value = image.Id;
-
-            parameters
-                .Add("@boardId", SqlDbType.BigInt)
-                .Value = image.BoardId;
-
-            parameters
-                .Add("@x", SqlDbType.Int)
-                .Value = image.Origin.X ?? SqlInt32.Null;
-
-            parameters
-                .Add("@y", SqlDbType.Int)
-                .Value = image.Origin.Y ?? SqlInt32.Null;
-
-            parameters
-                .Add("@width", SqlDbType.Int)
-                .Value = image.Width ?? SqlInt32.Null;
-
-            parameters
-                .Add("@height", SqlDbType.Int)
-                .Value = image.Height ?? SqlInt32.Null;
-
-            parameters
-                .Add("@src", SqlDbType.NVarChar)
-                .Value = image.Src ?? SqlString.Null;
-
-            return _queryTemplate.StoredProcedureAsync(UPDATE_IMAGE, parameters);
-        }
-
         //SQL Functions
         private static readonly string IMAGE_EXISTS = "SELECT CAST(count(figureId) as BIT) FROM dbo.[Image] WHERE figureId = @id and boardId = @boardId";
         private static readonly string SELECT_ALL = "SELECT id, boardId, pointX, pointY, src, imageWidth, imageHeight FROM dbo.GetImages(@boardId)";

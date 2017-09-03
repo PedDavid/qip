@@ -115,28 +115,6 @@ namespace API.Repositories {
             return _queryTemplate.CommandAsync(UPDATE_BOARD, parameters);
         }
 
-        public Task PartialUpdateAsync(Board board) {
-            List<SqlParameter> parameters = new List<SqlParameter>();
-
-            parameters
-                    .Add("@id", SqlDbType.BigInt)
-                    .Value = board.Id.Value;
-
-            parameters
-                 .Add("@name", SqlDbType.VarChar)
-                .Value = board.Name ?? SqlString.Null;
-
-            parameters
-                .Add("@maxDistPoints", SqlDbType.TinyInt)
-                .Value = board.MaxDistPoints ?? SqlByte.Null;
-
-            parameters
-                .Add("@basePermission", SqlDbType.TinyInt)
-                .Value = board.BasePermission;
-
-            return _queryTemplate.CommandAsync(UPDATE_BOARD, parameters);
-        }
-
         //SQL Commands
         private static readonly string BOARD_EXISTS = "SELECT CAST(count(id) as BIT) FROM dbo.Board WHERE id = @id";
         private static readonly string SELECT_ALL = "SELECT id, [name], maxDistPoints " +
@@ -150,9 +128,9 @@ namespace API.Repositories {
                                                        "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
         private static readonly string SELECT_BOARD = "SELECT id, [name], maxDistPoints FROM dbo.Board WHERE id = @id";
         private static readonly string UPDATE_BOARD = "UPDATE dbo.Board " +
-                                                      "SET [name]= isnull(@name, [name]), " +
-                                                          "maxDistPoints = isnull(@maxDistPoints, maxDistPoints), " +
-                                                          "basePermission = @basePermission" +
+                                                      "SET [name]= @name, " +
+                                                          "maxDistPoints = @maxDistPoints, " +
+                                                          "basePermission = @basePermission " +
                                                       "WHERE id = @id";
 
         //SQL Stored Procedures
