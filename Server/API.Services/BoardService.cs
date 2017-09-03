@@ -26,6 +26,10 @@ namespace API.Services {
 
             Validator<InBoard>.Valid(inputBoard, GetCreateValidationConfigurations());
 
+            if(userId == null) {//Caso seja criado por um user anónimo
+                inputBoard.BasePermission = InBoardPermission.Edit;//Forçar o quadro a ter permissões de escrita publicas
+            }
+
             Board board = new Board().In(inputBoard);
             long id = await _boardRepository.AddAsync(board, userId);
 

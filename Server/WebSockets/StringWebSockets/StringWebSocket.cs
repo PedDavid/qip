@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
+using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,9 +10,14 @@ using System.Threading.Tasks;
 namespace WebSockets.StringWebSockets {
     public class StringWebSocket : IDisposable {
         public WebSocket InternalWebSocket { get; }
+        public ClaimsPrincipal User { get; }
 
         public StringWebSocket(WebSocket webSocket) {
             InternalWebSocket = webSocket;
+        }
+
+        public StringWebSocket(WebSocket webSocket, ClaimsPrincipal user) : this(webSocket) {
+            User = user;
         }
 
         public WebSocketCloseStatus? CloseStatus {

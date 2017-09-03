@@ -74,20 +74,6 @@ namespace API.Repositories {
             return _queryTemplate.CommandAsync(UPDATE_LINE_STYLE, parameters);
         }
 
-        public Task PartialUpdateAsync(LineStyle lineStyle) {
-            List<SqlParameter> parameters = new List<SqlParameter>();
-
-            parameters
-                    .Add("@id", SqlDbType.BigInt)
-                    .Value = lineStyle.Id.Value;
-
-            parameters
-                    .Add("@color", SqlDbType.VarChar)
-                .Value = lineStyle.Color ?? SqlString.Null;
-
-            return _queryTemplate.CommandAsync(UPDATE_LINE_STYLE, parameters);
-        }
-
         //SQL Commands
         private static readonly string LINE_STYLE_EXISTS = "SELECT CAST(count(lineStyleId) as BIT) FROM dbo.LineStyle WHERE lineStyleId = @id";
         private static readonly string SELECT_ALL = "SELECT lineStyleId, color " +
@@ -98,7 +84,7 @@ namespace API.Repositories {
         private static readonly string INSERT_LINE_STYLE = "INSERT INTO dbo.LineStyle (color) VALUES (@color); " +
                                                      "SELECT CAST(SCOPE_IDENTITY() AS BIGINT)";
         private static readonly string DELETE_LINE_STYLE = "DELETE FROM dbo.LineStyle WHERE lineStyleId = @id";
-        private static readonly string UPDATE_LINE_STYLE = "UPDATE dbo.LineStyle SET color = isnull(@color, color) WHERE lineStyleId = @id";
+        private static readonly string UPDATE_LINE_STYLE = "UPDATE dbo.LineStyle SET color = @color WHERE lineStyleId = @id";
 
         //Extract Data From Data Reader
         private static LineStyle GetLineStyle(SqlDataReader dr) {
