@@ -1,7 +1,7 @@
 ﻿using Authorization;
 using Authorization.Requirements;
 using Authorization.Extensions.DependencyInjection;
-using API.Repositories;
+using API.Repositories.Options;
 using API.Repositories.Extensions.DependencyInjection;
 using API.Services.Extensions.DependencyInjection;
 using IODomain.Output;
