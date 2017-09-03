@@ -15,6 +15,8 @@ using Microsoft.Extensions.Logging;
 using System;
 using WebSockets.StringWebSockets;
 using Newtonsoft.Json.Converters;
+using Microsoft.Extensions.Primitives;
+using System.Linq;
 
 namespace ApiServer {
     public class Startup {
@@ -96,6 +98,19 @@ namespace ApiServer {
 
             // Shows UseCors with named policy.
             app.UseCors("AllowSpecificOrigin");
+
+            //Transform access_token Query Parameter in Authorization header
+            app.Use(async (context, next) => {//TODO Perguntar se existe uma maneira melhor, tendo em conta que os WebSockets do JS aparentemente não suportam headers
+                if(context.Request.Path.Value.StartsWith("/ws")) {
+                    if(context.Request.Query.TryGetValue("access_token", out StringValues accessToken)) {
+                        if(!StringValues.IsNullOrEmpty(accessToken)) {
+                            var header = new StringValues(accessToken.Select(token => $"Bearer {token}").ToArray());
+                            context.Request.Headers.Add("Authorization", header);
+                        }
+                    }
+                }
+                await next();
+            });
 
             var options = new JwtBearerOptions {
                 Audience = Configuration["Auth0:ApiIdentifier"],

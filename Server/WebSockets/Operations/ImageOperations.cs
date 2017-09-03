@@ -3,8 +3,11 @@ using API.Interfaces.IRepositories;
 using API.Interfaces.IServices;
 using API.Services;
 using API.Services.Extensions;
+using Authorization;
+using Authorization.Resources;
 using IODomain.Extensions;
 using IODomain.Input;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -13,22 +16,28 @@ using System.Threading.Tasks;
 using WebSockets.StringWebSockets;
 
 namespace WebSockets.Operations {
-    public class ImageOperations {
+    public class ImageOperations {// TODO Replace Repositories by Services
         private readonly IImageRepository _imageRepository;
         private readonly IFigureIdService _figureIdService;
+        private readonly IAuthorizationService _authorizationService;
 
-        public ImageOperations(IImageRepository imageRepository, IFigureIdService figureIdService) {
+        public ImageOperations(IImageRepository imageRepository, IFigureIdService figureIdService, IAuthorizationService authorizationService) {
             _imageRepository = imageRepository;
             _figureIdService = figureIdService;
+            _authorizationService = authorizationService;
         }
 
         public async Task CreateImage(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject payload) {//TODO Rever se não pomos os checks aos ids e outros como nos controlers
+            long boardId = session.Id;
+
+            if(!await _authorizationService.AuthorizeAsync(stringWebSocket.User, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
+                return;//TODO REVER
+            }
+
             if(!(payload.TryGetValue("tempId", StringComparison.OrdinalIgnoreCase, out JToken payload_tempId) && payload_tempId.Type == JTokenType.Integer)) {
                 return;//TODO REVER
             }
             long tempId = payload["tempId"].Value<long>();
-
-            long boardId = payload["clientId"].Value<long>();
 
             IFigureIdGenerator idGen = await _figureIdService.GetOrCreateFigureIdGeneratorAsync(boardId);
             long id = idGen.NewId();
@@ -59,7 +68,11 @@ namespace WebSockets.Operations {
         }
 
         public async Task UpdateImage(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject payload) {
-            long boardId = payload["clientId"].Value<long>();
+            long boardId = session.Id;
+
+            if(!await _authorizationService.AuthorizeAsync(stringWebSocket.User, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
+                return;//TODO REVER
+            }
 
             long id = payload["id"].Value<long>();
 
@@ -89,7 +102,11 @@ namespace WebSockets.Operations {
         }
 
         public async Task DeleteImage(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject payload) {
-            long boardId = payload["clientId"].Value<long>();
+            long boardId = session.Id;
+
+            if(!await _authorizationService.AuthorizeAsync(stringWebSocket.User, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
+                return;//TODO REVER
+            }
 
             long id = payload["id"].Value<long>();
 
