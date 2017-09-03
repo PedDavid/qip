@@ -32,8 +32,13 @@ namespace API.Controllers {
 
         [HttpGet("{id}", Name = "GetBoard")]
         [AllowAnonymous]
-        public Task<OutBoard> GetByIdAsync(long id) {
-            return _boardService.GetAsync(id);
+        public async Task<IActionResult> GetByIdAsync(long id) {
+            if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(id), Policies.ReadBoardPolicy))
+                return new ChallengeResult();
+
+            OutBoard board = await _boardService.GetAsync(id);
+
+            return Ok(board);
         }
 
         [HttpPost]
