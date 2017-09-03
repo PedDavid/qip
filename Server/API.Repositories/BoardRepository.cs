@@ -29,8 +29,12 @@ namespace API.Repositories {
                     .Value = board.MaxDistPoints.Value;
 
             parameters
+                    .Add("@basePermission", SqlDbType.TinyInt)
+                    .Value = board.BasePermission;
+
+            parameters
                     .Add("@userId", SqlDbType.VarChar)
-                    .Value = userId;
+                    .Value = userId??SqlString.Null;
 
             SqlParameter boardId = parameters.Add("@boardId", SqlDbType.BigInt);
             boardId.Direction = ParameterDirection.Output;
@@ -104,6 +108,10 @@ namespace API.Repositories {
                 .Add("@maxDistPoints", SqlDbType.TinyInt)
                 .Value = board.MaxDistPoints.Value;
 
+            parameters
+                .Add("@basePermission", SqlDbType.TinyInt)
+                .Value = board.BasePermission;
+
             return _queryTemplate.CommandAsync(UPDATE_BOARD, parameters);
         }
 
@@ -122,6 +130,10 @@ namespace API.Repositories {
                 .Add("@maxDistPoints", SqlDbType.TinyInt)
                 .Value = board.MaxDistPoints ?? SqlByte.Null;
 
+            parameters
+                .Add("@basePermission", SqlDbType.TinyInt)
+                .Value = board.BasePermission;
+
             return _queryTemplate.CommandAsync(UPDATE_BOARD, parameters);
         }
 
@@ -139,7 +151,8 @@ namespace API.Repositories {
         private static readonly string SELECT_BOARD = "SELECT id, [name], maxDistPoints FROM dbo.Board WHERE id = @id";
         private static readonly string UPDATE_BOARD = "UPDATE dbo.Board " +
                                                       "SET [name]= isnull(@name, [name]), " +
-                                                          "maxDistPoints = isnull(@maxDistPoints, maxDistPoints)" +
+                                                          "maxDistPoints = isnull(@maxDistPoints, maxDistPoints), " +
+                                                          "basePermission = @basePermission" +
                                                       "WHERE id = @id";
 
         //SQL Stored Procedures

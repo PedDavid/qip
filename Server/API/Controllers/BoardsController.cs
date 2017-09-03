@@ -37,6 +37,7 @@ namespace API.Controllers {
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] InBoard inputBoard) {
             OutBoard board = await _boardService.CreateAsync(inputBoard, User.GetNameIdentifier());
             return CreatedAtRoute("GetBoard", new { id = board.Id }, board);
