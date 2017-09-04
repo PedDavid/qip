@@ -156,12 +156,16 @@ export default class Board extends React.Component {
           .map(boardRaw => new BoardData(boardRaw.board.id, boardRaw.board.name)) : [],
         settings: userinfo.settings != null ? userinfo.settings : [false, false]
       })
-      const userCurrentBoard = userinfo.currentBoard != null ? userinfo.currentBoard : userinfo.userBoards[0].board // return currBoard. todo: change to userinfo.currBoard
-      // if user has a predefined current board, use it. In other case, use boardId that was passed in url, if present
+      // if user has a predefined current board, use it. However, if it was passed a boardId in url, use it instead
       if (boardId != null) {
         return this.persist.getBoardInfo(boardId)
       }
-      return userCurrentBoard
+      // check if user has not currentBoard predefined. If not, create one
+      if (userinfo.currentBoard == null && userinfo.userBoards.length == 0) { // remove userBoards.length check when userinfo from ws comes with currentBoard
+        return this.persist.addUserBoard("My First Board", userProfile, userAccessToken)
+      }
+      return userinfo.currentBoard != null ? userinfo.currentBoard : userinfo.userBoards[0].board // return currBoard. todo: change to userinfo.currBoard
+
     }).then(currBoard => {
       persistType === PersistType().WebSockets && this.props.history.replace('/board/' + currBoard.id)
       this.setState({
@@ -328,7 +332,7 @@ export default class Board extends React.Component {
 
   updateBoardId = (board) => {
     console.info('current board id: ' + this.props.match.params.board)
-    this.persist.connectWS(board.id)
+    this.persist.connectWS(board.id, this.auth.getAccessToken())
   }
 
   addBoardAsync = (boardName) => {

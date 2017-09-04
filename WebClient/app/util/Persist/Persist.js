@@ -12,11 +12,11 @@ export class Persist {
     this.boardId = null // connected board
   }
 
-  connectWS (boardId) {
+  connectWS (boardId, accessToken) {
     // TODO(peddavid): Configuration of endpoints
     const scheme = document.location.protocol === 'https:' ? 'wss' : 'ws'
     const port = document.location.port ? (57059) : ''
-    const connectionUrl = `${scheme}://localhost:${port}/ws/${boardId}`
+    const connectionUrl = `${scheme}://localhost:${port}/ws/${boardId}?access_token=${accessToken}`
     this.boardId = boardId // this should be here because even if ws connection goes wrong, there is a url to share
     console.log('making web socket connection to: ' + connectionUrl)
     this.socket = new WebSocket(connectionUrl)
