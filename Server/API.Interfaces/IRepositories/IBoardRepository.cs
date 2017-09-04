@@ -13,6 +13,5 @@ namespace API.Interfaces.IRepositories {
         Task<Board> FindAsync(long id);
         Task RemoveAsync(long id);
         Task UpdateAsync(Board board);
-        Task PartialUpdateAsync(Board board);
     }
 }

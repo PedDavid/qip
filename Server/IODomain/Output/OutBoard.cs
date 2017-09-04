@@ -9,5 +9,6 @@ namespace IODomain.Output {
 
         public string Name { get; set; }
         public byte MaxDistPoints { get; set; }
+        public OutBoardPermission BasePermission { get; set; }
     }
 }

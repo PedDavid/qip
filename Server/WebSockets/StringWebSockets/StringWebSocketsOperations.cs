@@ -24,6 +24,9 @@ namespace WebSockets.StringWebSockets {
             do {
                 string msg = await _stringWebSocket.ReceiveAsync();
 
+                if(string.IsNullOrWhiteSpace(msg))//TODO Mostar ao David -> Sem isto dá erro no JObject.Parse
+                    continue;
+
                 JObject info = JObject.Parse(msg);
 
                 if(!(info.TryGetValue("type", StringComparison.OrdinalIgnoreCase, out JToken infoType) && infoType.Type == JTokenType.String)) {
@@ -40,8 +43,6 @@ namespace WebSockets.StringWebSockets {
 
                     continue;//TODO REVER
                 }
-
-                infoPayload["clientId"] = _roomId;
 
                 await _operations[type](_stringWebSocket, _session, (JObject)infoPayload);
 

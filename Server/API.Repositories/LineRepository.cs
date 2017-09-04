@@ -1,6 +1,7 @@
 ﻿using API.Domain;
 using API.Interfaces.IRepositories;
 using API.Repositories.Model;
+using API.Repositories.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -204,10 +205,6 @@ namespace API.Repositories {
                 .Value = line.Closed;
 
             return _queryTemplate.StoredProcedureAsync(UPDATE_LINE, parameters);
-        }
-
-        public Task PartialUpdateAsync(Line figure) {
-            throw new NotImplementedException();
         }
 
         //SQL Functions

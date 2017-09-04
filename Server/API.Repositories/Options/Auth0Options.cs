@@ -1,4 +1,4 @@
-﻿namespace API.Repositories {
+﻿namespace API.Repositories.Options {
     public class Auth0Options {
         public string Domain { get; set; }
 

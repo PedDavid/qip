@@ -12,7 +12,8 @@ namespace IODomain.Extensions {
             return new OutBoard() {
                 Id = board.Id.Value,
                 Name = board.Name,
-                MaxDistPoints = board.MaxDistPoints.Value
+                MaxDistPoints = board.MaxDistPoints.Value,
+                BasePermission = BoardPermissionConverter.ConvertToOut(board.BasePermission)
             };
         }
 
@@ -20,13 +21,15 @@ namespace IODomain.Extensions {
             return new OutBoard() {
                 Id = board.Id??id,
                 Name = board.Name,
-                MaxDistPoints = board.MaxDistPoints.Value
+                MaxDistPoints = board.MaxDistPoints.Value,
+                BasePermission = BoardPermissionConverter.ConvertToOut(board.BasePermission)
             };
         }
 
         public static Board In(this Board board, InBoard inBoard) {
             board.Name = inBoard.Name;
             board.MaxDistPoints = inBoard.MaxDistPoints;
+            board.BasePermission = BoardPermissionConverter.ConvertFromIn(inBoard.BasePermission);
 
             return board;
         }

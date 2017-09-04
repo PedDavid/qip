@@ -14,5 +14,6 @@ namespace API.Domain {
         public long? Id { get; }
         public string Name { get; set; }
         public byte? MaxDistPoints { get; set; }
+        public BoardPermission BasePermission { get; set; }
     }
 }

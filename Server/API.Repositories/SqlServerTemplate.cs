@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
+using API.Repositories.Options;
 
 namespace API.Repositories {
     public class SqlServerTemplate {

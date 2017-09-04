@@ -29,8 +29,12 @@ namespace API.Repositories {
                     .Value = board.MaxDistPoints.Value;
 
             parameters
+                    .Add("@basePermission", SqlDbType.TinyInt)
+                    .Value = board.BasePermission;
+
+            parameters
                     .Add("@userId", SqlDbType.VarChar)
-                    .Value = userId;
+                    .Value = userId??SqlString.Null;
 
             SqlParameter boardId = parameters.Add("@boardId", SqlDbType.BigInt);
             boardId.Direction = ParameterDirection.Output;
@@ -104,23 +108,9 @@ namespace API.Repositories {
                 .Add("@maxDistPoints", SqlDbType.TinyInt)
                 .Value = board.MaxDistPoints.Value;
 
-            return _queryTemplate.CommandAsync(UPDATE_BOARD, parameters);
-        }
-
-        public Task PartialUpdateAsync(Board board) {
-            List<SqlParameter> parameters = new List<SqlParameter>();
-
             parameters
-                    .Add("@id", SqlDbType.BigInt)
-                    .Value = board.Id.Value;
-
-            parameters
-                 .Add("@name", SqlDbType.VarChar)
-                .Value = board.Name ?? SqlString.Null;
-
-            parameters
-                .Add("@maxDistPoints", SqlDbType.TinyInt)
-                .Value = board.MaxDistPoints ?? SqlByte.Null;
+                .Add("@basePermission", SqlDbType.TinyInt)
+                .Value = board.BasePermission;
 
             return _queryTemplate.CommandAsync(UPDATE_BOARD, parameters);
         }
@@ -138,8 +128,9 @@ namespace API.Repositories {
                                                        "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
         private static readonly string SELECT_BOARD = "SELECT id, [name], maxDistPoints FROM dbo.Board WHERE id = @id";
         private static readonly string UPDATE_BOARD = "UPDATE dbo.Board " +
-                                                      "SET [name]= isnull(@name, [name]), " +
-                                                          "maxDistPoints = isnull(@maxDistPoints, maxDistPoints)" +
+                                                      "SET [name]= @name, " +
+                                                          "maxDistPoints = @maxDistPoints, " +
+                                                          "basePermission = @basePermission " +
                                                       "WHERE id = @id";
 
         //SQL Stored Procedures
