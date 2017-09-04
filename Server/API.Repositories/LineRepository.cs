@@ -68,12 +68,12 @@ namespace API.Repositories {
         public async Task<Line> FindAsync(long id, long boardId) {
             using(SqlConnection con = new SqlConnection(_options.Context)) {
                 await con.OpenAsync();
-                SqlTransaction tran = con.BeginTransaction(IsolationLevel.Serializable);//TODO Rever niveis transacionais
+                SqlTransaction tran = con.BeginTransaction(IsolationLevel.ReadCommitted);
                 try {
                     Line line = null;
                     using(SqlCommand cmd = con.CreateCommand()) {
                         cmd.Transaction = tran;
-                        cmd.CommandText = SELECT_LINES;
+                        cmd.CommandText = SELECT_LINE;
 
                         List<SqlParameter> parameters = new List<SqlParameter>();
                         parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
@@ -90,7 +90,7 @@ namespace API.Repositories {
                     if(line != null) {
                         using(SqlCommand cmd = con.CreateCommand()) {
                             cmd.Transaction = tran;
-                            cmd.CommandText = SELECT_LINES_POINTS;
+                            cmd.CommandText = SELECT_LINE_POINTS;
 
                             List<SqlParameter> parameters = new List<SqlParameter>();
                             parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
@@ -121,7 +121,7 @@ namespace API.Repositories {
         public async Task<IEnumerable<Line>> GetAllAsync(long boardId) {
             using(SqlConnection con = new SqlConnection(_options.Context)) {
                 await con.OpenAsync();
-                SqlTransaction tran = con.BeginTransaction(IsolationLevel.Serializable);//TODO Rever niveis transacionais
+                SqlTransaction tran = con.BeginTransaction(IsolationLevel.ReadCommitted);
                 try {
                     List<Line> lines = new List<Line>();
                     using(SqlCommand cmd = con.CreateCommand()) {
@@ -212,8 +212,8 @@ namespace API.Repositories {
         private static readonly string SELECT_ALL_LINES = "SELECT id, boardId, isClosedForm, lineStyleId, lineColor FROM dbo.GetLinesInfo(@boardId) ORDER BY id";
         private static readonly string SELECT_ALL_LINES_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointStyle FROM dbo.GetLinesPoints(@boardId) ORDER BY id, linePointIdx";
 
-        private static readonly string SELECT_LINES = "SELECT id, boardId, isClosedForm, lineStyleId, lineColor FROM dbo.GetLinesInfo(@boardId) WHERE id=@id";
-        private static readonly string SELECT_LINES_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointStyle FROM dbo.GetLinesPoints(@boardId) WHERE id=@id ORDER BY linePointIdx";
+        private static readonly string SELECT_LINE = "SELECT id, boardId, isClosedForm, lineStyleId, lineColor FROM dbo.GetLinesInfo(@boardId) WHERE id=@id";
+        private static readonly string SELECT_LINE_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointStyle FROM dbo.GetLinesPoints(@boardId) WHERE id=@id ORDER BY linePointIdx";
 
         //SQL Stored Procedures
         private static readonly string INSERT_LINE = "dbo.InsertNewLine";
@@ -238,9 +238,16 @@ namespace API.Repositories {
                 long lineId = line.Id;
 
                 List<LinePoint> points = new List<LinePoint>();
+                long currId;
                 do {
-                    if(dr.GetInt64(0) != lineId)
+                    currId = dr.GetInt64(0);
+                    
+                    if(currId != lineId) {
+                        while(currId < lineId && dr.Read()) {
+                            currId = dr.GetInt64(0);
+                        }
                         break;
+                    }
 
                     LinePoint curr = GetPointWithStyle(dr);
 
