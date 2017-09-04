@@ -24,8 +24,10 @@ namespace WebSockets.StringWebSockets {
             do {
                 string msg = await _stringWebSocket.ReceiveAsync();
 
-                if(string.IsNullOrWhiteSpace(msg))//TODO Mostar ao David -> Sem isto dá erro no JObject.Parse
-                    continue;
+                if(string.IsNullOrWhiteSpace(msg)) {
+
+                    continue;//TODO REVER
+                }
 
                 JObject info = JObject.Parse(msg);
 
