@@ -7,7 +7,7 @@
 AS
 begin try
 	begin TRAN
-		INSERT INTO dbo.Board([name], maxDistPoints) VALUES(@name, @maxDistPoints)
+		INSERT INTO dbo.Board([name], maxDistPoints, basePermission) VALUES(@name, @maxDistPoints, @basePermission)
 
 		SET @boardId = SCOPE_IDENTITY()
 
