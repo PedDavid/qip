@@ -53,7 +53,12 @@ namespace WebSockets.Controllers {
                 return;
             }
 
-            if(HttpContext.WebSockets.IsWebSocketRequest && await _boardRepository.ExistsAsync(roomId)) {
+            if(!await _boardRepository.ExistsAsync(roomId)) {
+                HttpContext.Response.StatusCode = 404;
+                return;
+            }
+
+            if(HttpContext.WebSockets.IsWebSocketRequest) {
                 StringWebSocket webSocket = await HttpContext.WebSockets.AcceptStringWebSocketAsync(User);
 
                 var session = _sessionManager.Register(roomId, webSocket);
