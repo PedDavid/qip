@@ -43,7 +43,7 @@ export default class PersistLS {
           console.log('received new line with id ' + payload.figure.Id)
           break
         case 'DELETE_LINE':
-          const figureToDelete = grid.getFigure(payload.figure.Id)
+          const figureToDelete = grid.getFigure(payload.id)
           grid.removeFigure(figureToDelete, canvasContext, 1)
           break
         case 'ALTER_LINE':
@@ -84,8 +84,7 @@ export default class PersistLS {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-          'Access-Control-Allow-Origin': 'http://localhost:8080'
+          'Authorization': `Bearer ${accessToken}`
         },
         method: 'GET'
       }).then(figRes => {
@@ -98,8 +97,7 @@ export default class PersistLS {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-          'Access-Control-Allow-Origin': 'http://localhost:8080'
+          'Authorization': `Bearer ${accessToken}`
         },
         method: 'GET'
       }).then(imgRes => {
@@ -152,8 +150,7 @@ export default class PersistLS {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
-        'Access-Control-Allow-Origin': 'http://localhost:8080'
+        'Authorization': `Bearer ${accessToken}`
       },
       method: 'POST',
       body: JSON.stringify({

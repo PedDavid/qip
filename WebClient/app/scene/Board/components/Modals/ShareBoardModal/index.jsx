@@ -2,7 +2,7 @@ import React from 'react'
 import { Modal, Button, Icon, Input } from 'semantic-ui-react'
 import fetch from 'isomorphic-fetch'
 
-const baseUrl = 'http://localhost:8080/'
+const baseUrl = 'http://localhost:8080/board/'
 
 export default class ShareBoardModal extends React.Component {
   state = {

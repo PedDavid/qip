@@ -11,7 +11,7 @@ export default class Auth {
     scope: 'openid profile'
   })
 
-  constructor () {
+  constructor (onLogin) {
     this.login = this.login.bind(this)
     this.logout = this.logout.bind(this)
     this.handleAuthentication = this.handleAuthentication.bind(this)
@@ -19,6 +19,7 @@ export default class Auth {
     this.getAccessToken = this.getAccessToken.bind(this)
     this.getProfile = this.getProfileAsync.bind(this)
     this.userProfile = null
+    this.onLogin = onLogin
   }
 
   login () {
@@ -33,12 +34,13 @@ export default class Auth {
           if (err) throw new Error(err)
           console.log(profile)
           window.localStorage.setItem('profile', JSON.stringify(profile))
-          props.history.replace('/')
+          props.history.push('/')
+          this.onLogin()
         })
       } else if (err) {
-        props.history.replace('/')
+        props.history.push('/')
+        console.error(`Error: ${err.error}. Check the console for further details.`)
         console.log(err)
-        window.alert(`Error: ${err.error}. Check the console for further details.`)
       }
     })
   }
