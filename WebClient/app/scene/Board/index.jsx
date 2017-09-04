@@ -161,11 +161,10 @@ export default class Board extends React.Component {
         return this.persist.getBoardInfo(boardId)
       }
       // check if user has not currentBoard predefined. If not, create one
-      if (userinfo.currentBoard == null && userinfo.userBoards.length == 0) { // remove userBoards.length check when userinfo from ws comes with currentBoard
-        return this.persist.addUserBoard("My First Board", userProfile, userAccessToken)
+      if (userinfo.currentBoard === null && userinfo.userBoards.length === 0) { // remove userBoards.length check when userinfo from ws comes with currentBoard
+        return this.persist.addUserBoard('My First Board', userProfile, userAccessToken)
       }
       return userinfo.currentBoard != null ? userinfo.currentBoard : userinfo.userBoards[0].board // return currBoard. todo: change to userinfo.currBoard
-
     }).then(currBoard => {
       persistType === PersistType().WebSockets && this.props.history.replace('/board/' + currBoard.id)
       this.setState({
