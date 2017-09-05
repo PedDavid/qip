@@ -106,15 +106,17 @@ export default class ShareBoardModal extends React.Component {
     })
   }
 
-  onChangeUser = (e, { value }) => this.setState({ selectedUsers : value })
+  onChangeUser = (e, { value }) => this.setState({ selectedUsers: value })
 
   changeUsersVisibility = () => {
     this.usersPermission = this.state.usersVisibilityView ? 2 : 1 // it is with opposite values because they going to swap
 
-    this.setState(prev => { return {
-      usersVisibilityView: prev.usersVisibilityEdit,
-      usersVisibilityEdit: !prev.usersVisibilityEdit
-    }})
+    this.setState(prev => {
+      return {
+        usersVisibilityView: prev.usersVisibilityEdit,
+        usersVisibilityEdit: !prev.usersVisibilityEdit
+      }
+    })
 
     console.log(this.usersPermission)
   }
