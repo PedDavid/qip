@@ -50,9 +50,9 @@ export class Persist {
     )
   }
 
-  getBoardInfo (boardId) {
+  getBoardInfo (boardId, profile, accessToken) {
     return this.callWSLSFunc(
-      () => PersistWS._getBoardInfoWS(boardId),
+      () => PersistWS._getBoardInfoWS(boardId, profile, accessToken),
       () => PersistLS._getBoardInfoLS(boardId)
     )
   }
@@ -86,10 +86,7 @@ export class Persist {
   }
 
   addUserBoard (boardName, user, accessToken) {
-    return this.callWSLSFunc(
-      () => PersistWS._addUserBoardWS(boardName, user, accessToken),
-      () => {} // do nothing in localstorage
-    )
+    return PersistWS._addUserBoardWS(boardName, user, accessToken)
   }
 
   callWSLSFunc (WSFunc, LSFunc) {

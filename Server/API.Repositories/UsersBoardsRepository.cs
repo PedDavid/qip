@@ -181,18 +181,18 @@ namespace API.Repositories {
                                                              "WHERE CONTAINS((username, [name]), @search) " +
                                                              "ORDER BY userId " +
                                                              "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
-        private static readonly string SELECT_ALL_BOARDS = "SELECT permission, boardId, boardName, maxDistPoints " +
+        private static readonly string SELECT_ALL_BOARDS = "SELECT permission, boardId, boardName, maxDistPoints, basePermission " +
                                                            "FROM dbo.Full_User_Board WHERE userId=@userId " +
                                                            "ORDER BY boardId " +
                                                            "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
-        private static readonly string SELECT_SEARCH_BOARDS = "SELECT permission, boardId, boardName, maxDistPoints " +
+        private static readonly string SELECT_SEARCH_BOARDS = "SELECT permission, boardId, boardName, maxDistPoints, basePermission " +
                                                               "FROM dbo.Full_User_Board WHERE userId=@userId " +
                                                               "WHERE CONTAINS(boardName, @search) " +
                                                               "ORDER BY boardId " +
                                                               "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
         private static readonly string SELECT_USER_BOARD = "SELECT permission, boardId, userId FROM dbo.User_Board WHERE boardId=@boardId and userId=@userId";
         private static readonly string SELECT_USER = "SELECT permission, userId FROM dbo.Full_User_Board WHERE boardId=@boardId and userId=@userId";
-        private static readonly string SELECT_BOARD = "SELECT permission, boardId, boardName, maxDistPoints FROM dbo.Full_User_Board WHERE userId=@userId and boardId=@boardId";
+        private static readonly string SELECT_BOARD = "SELECT permission, boardId, boardName, maxDistPoints, basePermission FROM dbo.Full_User_Board WHERE userId=@userId and boardId=@boardId";
         private static readonly string SELECT_PERMISSION = "SELECT [dbo].[GetPermission](@userId, @boardId)";
         private static readonly string INSERT_USER_BOARD = "INSERT INTO dbo.User_Board (userId, boardId, permission) VALUES (@userId, @boardId, @permission)";
         private static readonly string DELETE_USER_BOARD = "DELETE FROM dbo.User_Board WHERE userId = @userId and boardId = @boardId";
@@ -215,7 +215,8 @@ namespace API.Repositories {
                 Permission = (BoardPermission)dr.GetByte(0),
                 Board = new Board(dr.GetInt64(1)) {
                     Name = dr.GetString(2),
-                    MaxDistPoints = dr.GetByte(3)
+                    MaxDistPoints = dr.GetByte(3),
+                    BasePermission = (BoardPermission)dr.GetByte(4) 
                 }
             };
         }

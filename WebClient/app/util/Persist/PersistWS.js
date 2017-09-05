@@ -11,8 +11,6 @@ export default class PersistLS {
       const {type, payload} = JSON.parse(event.data)
       switch (type) {
         case 'CREATE_LINE':
-          // update maxFigureId
-          // grid.updateCurrentFigIdIfGreater(payload.id)
           if (payload.tempId != null) {
             // update figure
             const prevFigure = grid.getFigure(payload.tempId)
@@ -61,11 +59,14 @@ export default class PersistLS {
   }
 
   // todo: enviar também os favoritos, current tool e prev tools
+  // this procedure sends to server all data stored in local storage.
+  // it should be called when user authenticates but there was already some information in local storage
   static _persistBoardByWS = function (socket) {
     const figures = JSON.parse(window.localStorage.getItem('figures'))
     figures.forEach(fig => {
       fig.tempId = fig.id
       delete fig.id
+      fig.persistLocalBoard = true
       const objToSend = {
         type: fig.type === 'figure' ? 'CREATE_LINE' : 'CREATE_IMAGE',
         payload: fig
@@ -145,13 +146,14 @@ export default class PersistLS {
 
   static _addUserBoardWS = function (boardName, user, accessToken) {
     console.info('adding new board: ' + boardName)
+    const headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
+    accessToken != null && (headers.Authorization = `Bearer ${accessToken}`)
     // this fetch will create a board and associate it to current user. Current user will be admin
     return fetch(`http://localhost:57059/api/boards/`, {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
-      },
+      headers: headers,
       method: 'POST',
       body: JSON.stringify({
         name: boardName,
@@ -197,8 +199,7 @@ export default class PersistLS {
         if (userBoardsRes.status >= 400) {
           throw new Error('Bad response from server. Check if User Sub is correct')
         }
-        const aux = userBoardsRes.json()
-        return aux
+        return userBoardsRes.json()
       })
     ]).then(allRes => {
       const userInfo = {
@@ -214,22 +215,47 @@ export default class PersistLS {
   }
 
   // get board info from server by web sockets
-  static _getBoardInfoWS = function (boardId) {
+  static _getBoardInfoWS = function (boardId, profile, accessToken) {
     console.info('getting board info from server by web sockets')
+    // if user is not authenticated, user permission is public permission so there is no need to do second fetch
+    const promises = [
+      fetch(`http://localhost:57059/api/boards/${boardId}`, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        method: 'GET'
+      }).then(boardInfoRes => {
+        if (boardInfoRes.status >= 400) {
+          throw new Error('Bad response from server. Check if Board Id is correct')
+        }
+        return boardInfoRes.json()
+      })]
+
+    if (profile != null) {
+      promises.push(
+        fetch(`http://localhost:57059/api/users/${profile.sub}/boards/${boardId}`, {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          },
+          method: 'GET'
+        }).then(boardInfoRes => {
+          if (boardInfoRes.status >= 400) {
+            throw new Error('Bad response from server. Check if Board Id is correct')
+          }
+          return boardInfoRes.json()
+        })
+      )
+    }
     // fetch data of board
-    return fetch(`http://localhost:57059/api/boards/${boardId}`, {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      method: 'GET'
-    }).then(boardInfoRes => {
-      if (boardInfoRes.status >= 400) {
-        throw new Error('Bad response from server. Check if Board Id is correct')
-      }
-      return boardInfoRes.json()
-    }).then(boardInfo => {
-      return new BoardData(boardInfo.id, boardInfo.name)
-    })
+    return Promise.all(promises)
+      .then(allRes => {
+        const boardInfo = allRes[0]
+        const userBoardInfo = allRes.length === 1 ? boardInfo.basePermission : allRes[1] // if user is not authenticated, board permissions is 0
+        return new BoardData(boardInfo.id, boardInfo.name, boardInfo.basePermission, userBoardInfo.permission)
+      })
   }
 }

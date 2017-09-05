@@ -11,7 +11,6 @@ import {
 import SideBarOverlay from './components/SideBarOverlay'
 import Canvas from './components/Canvas'
 import CleanBoardModal from './components/Modals/CleanBoardModal'
-import SaveBoardModal from './components/Modals/SaveBoardModal'
 import AddBoardModal from './components/Modals/AddBoardModal'
 import ShareBoardModal from './components/Modals/ShareBoardModal'
 import SettingsModal from './components/Modals/SettingsModal'
@@ -36,14 +35,13 @@ const maxCanvasSize = 3000
 export default class Board extends React.Component {
   // check if these default tools are necessary
 
-  auth = new Auth(() => this.getInitialBoard(null)) // this lambda may not be the best solution
+  auth = new Auth(() => this.getInitialBoard(null), this.props.history) // this lambda may not be the best solution
   persist = {} // this is necessary because the first time render occurs, there is no this.persist object
 
   state = {
     showCleanModal: false,
     showUserModal: false,
     showShareModal: false,
-    showSaveModal: false,
     showAddModal: false,
     showUserAccountModal: false,
     showSettingsModal: false,
@@ -100,7 +98,7 @@ export default class Board extends React.Component {
     })
   }
 
-  getInitialBoard (boardId) {
+  getInitialBoard = (boardId) => {
     /*
       There is the following possibilities for this initial procedure:
       * User is not authenticated and there is no specific board requested -> persistType is LocalStorage.
@@ -153,23 +151,31 @@ export default class Board extends React.Component {
         currTool: userinfo.currTool != null ? userinfo.currTool : defaultPen,
         favorites: userinfo.favorites != null ? userinfo.favorites : [],
         userBoards: userinfo.userBoards != null ? userinfo.userBoards
-          .map(boardRaw => new BoardData(boardRaw.board.id, boardRaw.board.name)) : [],
+          .map(boardRaw => new BoardData(boardRaw.board.id, boardRaw.board.name, boardRaw.board.basePermission, boardRaw.permission)) : [],
         settings: userinfo.settings != null ? userinfo.settings : [false, false]
       })
+      // if user just authenticated and had some figures in localstorage, create a new board and when websocket connection is oppened, localstorage's figures will be sent to server
+      if (JSON.parse(window.localStorage.getItem('figures')).length > 0 && this.auth.isAuthenticated()) {
+        return this.persist.addUserBoard('Local Board Replied', userProfile, userAccessToken)
+      }
       // if user has a predefined current board, use it. However, if it was passed a boardId in url, use it instead
       if (boardId != null) {
-        return this.persist.getBoardInfo(boardId)
+        return this.persist.getBoardInfo(boardId, userProfile, userAccessToken)
       }
       // check if user has not currentBoard predefined. If not, create one
-      if (userinfo.currentBoard === null && userinfo.userBoards.length === 0) { // remove userBoards.length check when userinfo from ws comes with currentBoard
+      const adminBoards = this.state.userBoards.filter(board => board.userPermission === 3)
+      if (userinfo.currentBoard == null && adminBoards.length === 0) { // remove userBoards.length check when userinfo from ws comes with currentBoard
         return this.persist.addUserBoard('My First Board', userProfile, userAccessToken)
       }
-      return userinfo.currentBoard != null ? userinfo.currentBoard : userinfo.userBoards[0].board // return currBoard. todo: change to userinfo.currBoard
+      return userinfo.currentBoard != null ? userinfo.currentBoard : adminBoards[0] // return currBoard. todo: change to userinfo.currBoard
     }).then(currBoard => {
       persistType === PersistType().WebSockets && this.props.history.replace('/board/' + currBoard.id)
       this.setState({
         currentBoard: currBoard
       })
+      if (currBoard.userPermission === 1) {
+        window.alert('All modifications to board you may do, will not be persisted as you only have view permissions to this board')
+      }
       return this.persist.getInitialBoardAsync(boardId == null ? currBoard.id : boardId, userAccessToken)
     }).then(initBoard => {
       this.grid = initBoard.grid
@@ -179,21 +185,22 @@ export default class Board extends React.Component {
       this.toolsConfig['eraser'].lastValue.grid = this.grid
 
       const canvasSize = initBoard.canvasSize
-      this.setState(prevState => {
-        prevState.currTool.grid = this.grid
-        return {
-          loading: false,
-          canvasSize: {
-            width: canvasSize.width === 0 ? window.innerWidth - 20 : canvasSize.width,
-            height: canvasSize.height === 0 ? window.innerHeight - 20 : canvasSize.height
-          }
-        }
-      })
 
       if (this.persist.persistType === PersistType().WebSockets) {
         // todo update board id and start web socket connection
         this.updateBoardId(this.state.currentBoard)
       }
+
+      this.setState(prevState => {
+        prevState.currTool.grid = this.grid
+        return {
+          loading: false,
+          canvasSize: {
+            width: canvasSize.width === 0 || window.innerWidth > canvasSize.width ? window.innerWidth - 20 : canvasSize.width,
+            height: canvasSize.height === 0 || window.innerHeight > canvasSize.height ? window.innerHeight - 20 : canvasSize.height
+          }
+        }
+      })
 
       // draw initial grid
       this.grid.draw(this.canvasContext, 1)
@@ -308,10 +315,6 @@ export default class Board extends React.Component {
     this.setState(prevState => ({showShareModal: !prevState.showShareModal}))
   }
 
-  toggleSaveModal = () => {
-    this.setState(prevState => { return { showSaveModal: !prevState.showSaveModal } })
-  }
-
   toggleAddModal = () => {
     this.setState(prevState => { return { showAddModal: !prevState.showAddModal } })
   }
@@ -335,10 +338,11 @@ export default class Board extends React.Component {
   }
 
   addBoardAsync = (boardName) => {
+    const userPermission = this.auth.isAuthenticated ? 3 : 2 // if there is a user authenticated, that user is admin. In other cases, it has edit permissions
     return this.persist.addUserBoard(boardName, this.auth.tryGetProfile(), this.auth.getAccessToken())
       .then(addedBoard => {
         this.setState(prevState => {
-          const newBoard = new BoardData(addedBoard.id, addedBoard.name)
+          const newBoard = new BoardData(addedBoard.id, addedBoard.name, addedBoard.basePermission, userPermission)
           prevState.userBoards.push(newBoard)
         })
         return addedBoard
@@ -358,7 +362,7 @@ export default class Board extends React.Component {
         <SideBarOverlay grid={this.grid} changeCurrentTool={this.changeCurrentTool} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
           currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite}
           removeFavorite={this.removeFavorite} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}
-          toggleSaveModal={this.toggleSaveModal} drawImage={this.drawImage} canvasSize={this.state.canvasSize} auth={this.auth}
+          drawImage={this.drawImage} canvasSize={this.state.canvasSize} auth={this.auth} changeCurrentBoard={this.getInitialBoard}
           addBoard={this.toggleAddModal} currentBoard={this.state.currentBoard} userBoards={this.state.userBoards} persist={this.persist}
           openUserAccount={this.toggleUserAccountModal} moveFavorite={this.moveFavorite} openSettings={this.toggleSettingsModal}>
           <Canvas ref={this.refCallback} width={this.state.canvasSize.width} height={this.state.canvasSize.height} {...this.listeners}>
@@ -367,14 +371,12 @@ export default class Board extends React.Component {
         </SideBarOverlay>
         <CleanBoardModal cleanCanvas={this.cleanCanvas} closeModal={this.toggleCleanModal} visible={this.state.showCleanModal} />
         <ShareBoardModal location={this.props.location} history={this.props.history} persist={this.persist}
-          visible={this.state.showShareModal} closeModal={this.toggleShareModal} updateCurrentBoard={this.updateBoardId} />
+          visible={this.state.showShareModal} closeModal={this.toggleShareModal} updateCurrentBoard={this.updateBoardId}
+          addBoardAsync={this.addBoardAsync} auth={this.auth} currentBoard={this.state.currentBoard} />
         <Loader active={this.state.loading} content='Fetching Data ...' />
         <Route exact path='/callback' render={props => {
           return <Callback auth={this.auth} {...props} />
         }} />
-        <SaveBoardModal history={this.props.history} persist={this.persist} visible={this.state.showSaveModal} closeModal={this.toggleSaveModal} auth={this.auth}
-          updateCurrentBoard={this.updateBoardId} />
-        {/* todo: see if it's possibly to merge saveBoardModal and AddBoardModal */}
         <AddBoardModal history={this.props.history} persist={this.persist} visible={this.state.showAddModal} closeModal={this.toggleAddModal} auth={this.auth}
           addBoardAsync={this.addBoardAsync} />
         <UserAccountModal auth={this.auth} visible={this.state.showUserAccountModal} closeModal={this.toggleUserAccountModal} />

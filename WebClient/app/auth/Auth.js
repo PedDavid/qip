@@ -11,7 +11,7 @@ export default class Auth {
     scope: 'openid profile'
   })
 
-  constructor (onLogin) {
+  constructor (getInitialBoard, history) {
     this.login = this.login.bind(this)
     this.logout = this.logout.bind(this)
     this.handleAuthentication = this.handleAuthentication.bind(this)
@@ -19,7 +19,8 @@ export default class Auth {
     this.getAccessToken = this.getAccessToken.bind(this)
     this.getProfile = this.getProfileAsync.bind(this)
     this.userProfile = null
-    this.onLogin = onLogin
+    this.getInitialBoard = getInitialBoard
+    this.history = history
   }
 
   login () {
@@ -35,7 +36,7 @@ export default class Auth {
           console.log(profile)
           window.localStorage.setItem('profile', JSON.stringify(profile))
           props.history.push('/')
-          this.onLogin()
+          this.getInitialBoard()
         })
       } else if (err) {
         props.history.push('/')
@@ -51,14 +52,12 @@ export default class Auth {
     window.localStorage.setItem('access_token', authResult.accessToken)
     window.localStorage.setItem('id_token', authResult.idToken)
     window.localStorage.setItem('expires_at', expiresAt)
-    // navigate to the home route
-    // history.replace('/home')
   }
 
   getAccessToken () {
     const accessToken = window.localStorage.getItem('access_token')
     if (!accessToken) {
-      throw new Error('No access token found')
+      return null
     }
     return accessToken
   }
@@ -88,8 +87,8 @@ export default class Auth {
     window.localStorage.removeItem('expires_at')
     window.localStorage.removeItem('profile')
     this.userProfile = null
-    // navigate to the home route
-    // history.replace('/home')
+    this.history.push('/')
+    this.getInitialBoard()
   }
 
   isAuthenticated () {

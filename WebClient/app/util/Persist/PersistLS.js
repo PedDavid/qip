@@ -67,7 +67,7 @@ export default class PersistLS {
         favorites,
         settings,
         userBoards: [],
-        currentBoard: new BoardData(-1, 'My Board')
+        currentBoard: new BoardData(-1, 'My Board', -1)
       }
 
       resolve(userInfo)
@@ -80,7 +80,7 @@ export default class PersistLS {
     return new Promise((resolve, reject) => {
       // users not authenticated are not able to store boards.
       // therefore, when board is stored in local storage this method only return the default board that is being used
-      resolve(new BoardData(boardId, 'My Board'))
+      resolve(new BoardData(boardId, 'My Board', -1))
     })
   }
 

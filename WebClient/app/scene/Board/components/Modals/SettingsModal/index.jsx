@@ -19,7 +19,8 @@ export default class SettingsModal extends React.Component {
       this.props.updateSettings(false, SettingsConfig.fingerMoveSettingIdx)
     }
     this.setState({
-      fingerMoveSettingDisabled: !data.checked
+      fingerMoveSettingDisabled: !data.checked,
+      dynamicPageSettingState: data.checked
     })
     this.props.updateSettings(data.checked, SettingsConfig.dynamicPageSettingIdx)
   }
@@ -27,7 +28,7 @@ export default class SettingsModal extends React.Component {
   onFingerMoveSettingChange = (event, data) => {
     console.log(data.checked)
     this.setState({
-      fingerMoveSettingDisabled: !data.checked
+      fingerMoveSettingState: !data.checked
     })
     this.props.updateSettings(data.checked, SettingsConfig.fingerMoveSettingIdx)
   }

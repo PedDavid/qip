@@ -10,8 +10,7 @@ import {
   Menu,
   Icon,
   Dropdown,
-  Button,
-  Popup
+  Button
 } from 'semantic-ui-react'
 
 export default class SideBarOverlay extends React.Component {
@@ -38,7 +37,7 @@ export default class SideBarOverlay extends React.Component {
   getAuthView () {
     const auth = this.props.auth
     const authUserIcon = auth.isAuthenticated() ? 'user outline' : 'sign in'
-    const authLabel = auth.isAuthenticated() ? auth.tryGetProfile().given_name : 'Login'
+    const authLabel = auth.isAuthenticated() ? (auth.tryGetProfile().given_name || auth.tryGetProfile().nickname) : 'Login'
     const authOnClick = auth.isAuthenticated() ? () => this.extendMenu(220) : () => this.props.auth.login()
 
     const trigger = (
@@ -61,6 +60,23 @@ export default class SideBarOverlay extends React.Component {
     : trigger
   }
 
+  getShareViewIfAdmin = () => {
+    const auth = this.props.auth
+    if ((!auth.isAuthenticated() && this.props.currentBoard.id < 0) || this.props.currentBoard.userPermission === 3) {
+      return (
+        <a onClick={this.props.toggleShareModal} className='item'>
+          <Icon name='share' />
+          Share board
+        </a>
+      )
+    }
+  }
+
+  changeCurrentBoard = (props) => {
+    const boardId = props[0]
+    this.props.changeCurrentBoard(boardId)
+  }
+
   render () {
     const { visible } = this.state
 
@@ -69,19 +85,29 @@ export default class SideBarOverlay extends React.Component {
         <Sidebar.Pushable as={Segment} className={styles.sidebar}>
           <Sidebar as={Menu} animation='push' direction='left' width='thin' icon='labeled' visible={visible} vertical style={this.state.extraStyle} inverted className={styles.sidebarMenu}>
             {this.getAuthView()}
-            <a onClick={this.props.toggleShareModal} className='item'>
-              <Icon name='share' />
-              Share board
-            </a>
+            {this.getShareViewIfAdmin()}
             <Dropdown onClose={this.closeBoards} onClick={() => this.extendMenu(300)} item text='My Boards'>
               <Dropdown.Menu className={styles.myBoards} >
                 <Dropdown.Header>Current Board</Dropdown.Header>
                 <Dropdown.Item >{this.props.currentBoard.name}</Dropdown.Item>
                 <Dropdown.Divider />
                 <Dropdown.Header>Your Boards</Dropdown.Header>
-                {this.props.userBoards.map(board => {
-                  return <Dropdown.Item key={board.id}>{board.name}</Dropdown.Item>
-                })}
+                {this.props.userBoards
+                  .filter(board => {
+                    return board.userPermission === 3
+                  }).map(board => {
+                    return <Dropdown.Item onClick={this.changeCurrentBoard.bind(this, [board.id])} key={board.id}>{board.name}</Dropdown.Item>
+                  })
+                }
+                <Dropdown.Divider />
+                <Dropdown.Header>Shared Boards</Dropdown.Header>
+                {this.props.userBoards
+                  .filter(board => {
+                    return board.userPermission < 3
+                  }).map(board => {
+                    return <Dropdown.Item onClick={this.changeCurrentBoard.bind(this, [board.id])} key={board.id}>{board.name}</Dropdown.Item>
+                  })
+                }
                 <Dropdown.Item className={styles.addBoard}>
                   <Button onClick={this.props.addBoard} className={styles.btnPlus}>
                     <Icon name='plus' className={styles.iconPlus} />
@@ -89,21 +115,6 @@ export default class SideBarOverlay extends React.Component {
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
-            {/* Only Appears if current scretch is not associated with a board that is saved remotely */}
-            {this.props.persist.connected
-            ? null
-            : (
-              <Popup
-                trigger={
-                  <a onClick={this.props.toggleSaveModal} className='item'>
-                    <Icon name='save' />
-                    Send to Cloud
-                  </a>
-                }
-                content='Save Your Current Board To Cloud'
-                basic
-              />
-            )}
           </Sidebar>
           <Sidebar.Pusher>
             <Segment basic>
