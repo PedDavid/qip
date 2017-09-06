@@ -1,9 +1,9 @@
 import React from 'react'
 import { Modal, Button } from 'semantic-ui-react'
 
-export default function CleanBoardModal ({visible, cleanCanvas, closeModal}) {
+export default function CleanBoardModal ({open, cleanCanvas, closeModal}) {
   return (
-    <Modal size='small' open={visible}>
+    <Modal size='small' open={open}>
       <Modal.Header>
         Clear All Board
       </Modal.Header>

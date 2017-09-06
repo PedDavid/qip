@@ -77,7 +77,7 @@ export default class ShareBoardModal extends React.Component {
     }
 
     return (
-      <Modal size='small' open={this.props.visible} onClose={this.onClose}>
+      <Modal size='small' open={this.props.open} onClose={this.onClose}>
         <Modal.Header>
           <Icon name='share' size='small' />
           Share Your Board

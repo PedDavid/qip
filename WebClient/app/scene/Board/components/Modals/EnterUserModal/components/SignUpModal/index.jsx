@@ -24,7 +24,7 @@ export default class SignUpModal extends React.Component {
 
   render () {
     return (
-      <Modal onClose={this.props.toggleUserModal} className={this.state.classes} size='small' open={this.props.visible}>
+      <Modal onClose={this.props.toggleUserModal} className={this.state.classes} size='small' open={this.props.open}>
         <Modal.Header>
           <Icon name='user' />
           Register

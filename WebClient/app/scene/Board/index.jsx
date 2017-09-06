@@ -13,6 +13,7 @@ import Canvas from './components/Canvas'
 import CleanBoardModal from './components/Modals/CleanBoardModal'
 import EnterUserModal from './components/Modals/EnterUserModal'
 import ShareBoardModal from './components/Modals/ShareBoardModal'
+import ImportImageModal from './components/Modals/ImportImageModal'
 import styles from './styles.scss'
 
 import Pen from './../../model/tools/Pen'
@@ -136,13 +137,6 @@ export default class Board extends React.Component {
   removeFavorite = (tool) => {
     this.setState(prevState => ({favorites: prevState.favorites.filter(favorite => favorite !== tool)}))
   }
-  drawImage = (imageSrc) => {
-    const newImage = new Image({x: 80, y: 80}, imageSrc)
-    // do not change this order. image must be added to grid first to set the new id
-    this.grid.addImage(newImage)
-    newImage.persist(this.persist, this.grid)
-    this.grid.draw(this.canvasContext, 1)
-  }
   changeCurrentTool = (tool) => {
     this.toolsConfig.updatePrevTool(this.state.currTool)
     this.setState({currTool: tool})
@@ -154,6 +148,17 @@ export default class Board extends React.Component {
   }
   toggleCleanModal = () => {
     this.setState(prevState => ({showCleanModal: !prevState.showCleanModal}))
+  }
+
+  drawImage = (imageSrc) => {
+    const newImage = new Image({x: 80, y: 80}, imageSrc)
+    // do not change this order. image must be added to grid first to set the new id
+    this.grid.addImage(newImage)
+    newImage.persist(this.persist, this.grid)
+    this.grid.draw(this.canvasContext, 1)
+  }
+  toggleImportImageModal = () => {
+    this.setState(prevState => ({showImportImageModal: !prevState.showImportImageModal}))
   }
 
   toggleShareModal = () => {
@@ -175,13 +180,14 @@ export default class Board extends React.Component {
         <SideBarOverlay grid={this.grid} changeCurrentTool={this.changeCurrentTool} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
           currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite}
           removeFavorite={this.removeFavorite} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}
-          drawImage={this.drawImage} canvasSize={this.state.canvasSize}>
+          drawImage={this.toggleImportImageModal} canvasSize={this.state.canvasSize}>
           <Canvas ref={this.refCallback} width={this.state.canvasSize.width} height={this.state.canvasSize.height} {...this.listeners}>
             HTML5 Canvas not supported
           </Canvas>
         </SideBarOverlay>
-        <CleanBoardModal cleanCanvas={this.cleanCanvas} closeModal={this.toggleCleanModal} visible={this.state.showCleanModal} />
-        <ShareBoardModal location={this.props.location} history={this.props.history} persist={this.persist} visible={this.state.showShareModal} closeModal={this.toggleShareModal} updateCurrentBoard={this.updateBoardId} />
+        <CleanBoardModal cleanCanvas={this.cleanCanvas} closeModal={this.toggleCleanModal} open={this.state.showCleanModal} />
+        <ImportImageModal open={this.state.showImportImageModal} />
+        <ShareBoardModal location={this.props.location} history={this.props.history} persist={this.persist} open={this.state.showShareModal} closeModal={this.toggleShareModal} updateCurrentBoard={this.updateBoardId} />
         <Route path='/signin' component={EnterUserModal} />
         <Loader active={this.state.loading} content='Fetching Data ...' />
       </div>
