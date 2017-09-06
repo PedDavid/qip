@@ -23,11 +23,11 @@ export default class Tools extends React.Component {
     left: scaleBtnPosition(this.props.canvasSize)
   }
   onOpenImage = (event) => {
-    var file = event.target.files[0]
+    const file = event.target.files[0]
     if (!file) {
       return
     }
-    var reader = new FileReader()
+    const reader = new FileReader()
     reader.onload = (event) => {
       this.props.drawImage(event.target.result)
     }
