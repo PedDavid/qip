@@ -10,10 +10,6 @@ export default class ShareBoardModal extends React.Component {
     loading: false,
     error: false
   }
-  onClose = () => {
-    this.props.closeModal()
-  }
-
   getBoard = () => {
     if (this.state.boardUrl !== '' && !this.state.error) {
       return
@@ -77,7 +73,7 @@ export default class ShareBoardModal extends React.Component {
     }
 
     return (
-      <Modal size='small' open={this.props.open} onClose={this.onClose}>
+      <Modal size='small' open={this.props.open} onClose={this.props.onClose} closeIcon>
         <Modal.Header>
           <Icon name='share' size='small' />
           Share Your Board

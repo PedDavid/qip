@@ -14,7 +14,6 @@ import CleanBoardModal from './components/Modals/CleanBoardModal'
 import EnterUserModal from './components/Modals/EnterUserModal'
 import ShareBoardModal from './components/Modals/ShareBoardModal'
 import ImportImageModal from './components/Modals/ImportImageModal'
-import styles from './styles.scss'
 
 import Pen from './../../model/tools/Pen'
 import Eraser from './../../model/tools/Eraser'
@@ -37,6 +36,7 @@ export default class Board extends React.Component {
     showCleanModal: false,
     showUserModal: false,
     showShareModal: false,
+    showImportImageModal: false,
     currTool: defaultPen,
     canvasSize: {width: 0, height: 0},
     favorites: [], // obtain favorites from server
@@ -176,7 +176,7 @@ export default class Board extends React.Component {
 
   render () {
     return (
-      <div onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.xpto}>
+      <div onPaste={this.onPaste} onKeyDown={this.onKeyDown}>
         <SideBarOverlay grid={this.grid} changeCurrentTool={this.changeCurrentTool} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
           currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite}
           removeFavorite={this.removeFavorite} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}
@@ -185,9 +185,9 @@ export default class Board extends React.Component {
             HTML5 Canvas not supported
           </Canvas>
         </SideBarOverlay>
-        <CleanBoardModal cleanCanvas={this.cleanCanvas} closeModal={this.toggleCleanModal} open={this.state.showCleanModal} />
-        <ImportImageModal open={this.state.showImportImageModal} />
-        <ShareBoardModal location={this.props.location} history={this.props.history} persist={this.persist} open={this.state.showShareModal} closeModal={this.toggleShareModal} updateCurrentBoard={this.updateBoardId} />
+        <CleanBoardModal cleanCanvas={this.cleanCanvas} onClose={this.toggleCleanModal} open={this.state.showCleanModal} />
+        <ImportImageModal onClose={this.toggleImportImageModal} open={this.state.showImportImageModal} />
+        <ShareBoardModal location={this.props.location} history={this.props.history} persist={this.persist} open={this.state.showShareModal} onClose={this.toggleShareModal} updateCurrentBoard={this.updateBoardId} />
         <Route path='/signin' component={EnterUserModal} />
         <Loader active={this.state.loading} content='Fetching Data ...' />
       </div>
