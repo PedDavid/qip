@@ -10,9 +10,7 @@ export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null) {
   let img
 
   function scaleImage () {
-    const auxImg = document.createElement('img')
-    // const auxImg = new Image()
-    auxImg.src = src
+    const auxImg = new window.Image()
     auxImg.onload = (e) => {
       // scale image
       const scale = auxImg.width / 300 // 200 is de default width
@@ -20,6 +18,7 @@ export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null) {
       height === undefined && (height = auxImg.height === 0 ? 200 : auxImg.height / scale)
       img = auxImg
     }
+    auxImg.src = src
   }
 
   scaleImage()
@@ -54,8 +53,7 @@ export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null) {
 
   this.draw = function (ctx, currScale) {
     if (img === undefined) {
-      // todo: (simao) isto não deveria ser através de DOM mas não consegui fazer de outra forma (p.e. com new Image()).
-      const leImg = document.createElement('img')
+      const leImg = new window.Image()
       leImg.onload = (e) => {
         img = leImg
         ctx.drawImage(img, srcPoint.x, srcPoint.y, width, height)
