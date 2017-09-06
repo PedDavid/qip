@@ -151,6 +151,7 @@ export default class Board extends React.Component {
   }
 
   drawImage = (imageSrc) => {
+    console.log(imageSrc)
     const newImage = new Image({x: 80, y: 80}, imageSrc)
     // do not change this order. image must be added to grid first to set the new id
     this.grid.addImage(newImage)
@@ -180,7 +181,7 @@ export default class Board extends React.Component {
         <SideBarOverlay grid={this.grid} changeCurrentTool={this.changeCurrentTool} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
           currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite}
           removeFavorite={this.removeFavorite} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}
-          drawImage={this.toggleImportImageModal} canvasSize={this.state.canvasSize}>
+          drawImage={this.drawImage} canvasSize={this.state.canvasSize}>
           <Canvas ref={this.refCallback} width={this.state.canvasSize.width} height={this.state.canvasSize.height} {...this.listeners}>
             HTML5 Canvas not supported
           </Canvas>
