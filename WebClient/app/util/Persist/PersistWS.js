@@ -3,6 +3,9 @@ import {PointStyle} from './../../model/Point'
 import {SimplePoint} from './../../model/SimplePoint'
 import fetch from 'isomorphic-fetch'
 import Grid from './../../model/Grid'
+import Pen from './../../model/tools/Pen'
+import Eraser from './../../model/tools/Eraser'
+import Move from './../../model/tools/Move'
 import BoardData from './../../model/BoardData'
 
 export default class PersistLS {
@@ -138,11 +141,38 @@ export default class PersistLS {
     })
   }
 
-  static _updateFavoritesWS = function (newFavs) {}
-
-  static _updateCurrToolWS = function (newCurrTool) {}
-
   static _updateCanvasSizeWS = function (canvasSize) {}
+
+  static _updateUserPreferencesWS = function (updatedPreferences, profile, accessToken) {
+    // preferences has
+    // favorites | pen colors | defaultPen
+    // DefaultEraser | CurrTool | Settings
+
+    return fetch(`http://localhost:57059/api/users/${profile.sub}/preferences`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      method: 'PUT',
+      body: JSON.stringify({
+        UserId: profile.sub,
+        Favorites: JSON.stringify(updatedPreferences.favorites),
+        PenColors: JSON.stringify(updatedPreferences.penColors),
+        DefaultPen: JSON.stringify(updatedPreferences.defaultPen),
+        DefaultEraser: JSON.stringify(updatedPreferences.defaultEraser),
+        CurrTool: JSON.stringify(updatedPreferences.currTool),
+        Settings: JSON.stringify(updatedPreferences.settings)
+      })
+    }).then(updatedPreferencesRes => {
+      if (updatedPreferencesRes.status >= 400) {
+        throw new Error('Bad response from server. Check if Board Id is correct')
+      }
+      return updatedPreferencesRes.json()
+    }).then(updatedPreferences => {
+      console.log(updatedPreferences)
+    })
+  }
 
   static _addUserBoardWS = function (boardName, user, accessToken) {
     console.info('adding new board: ' + boardName)
@@ -185,8 +215,7 @@ export default class PersistLS {
         if (preferencesRes.status >= 400) {
           throw new Error('Bad response from server. Check if User Sub is correct')
         }
-        const aux = preferencesRes.text()
-        return aux
+        return preferencesRes.json()
       }),
       fetch(`http://localhost:57059/api/users/${profile.sub}/boards`, {
         headers: {
@@ -202,16 +231,29 @@ export default class PersistLS {
         return userBoardsRes.json()
       })
     ]).then(allRes => {
+      const favorites = JSON.parse(allRes[0].favorites)
+        .map(fav => this._getToolFromWS(grid, fav))
       const userInfo = {
         defaultPen: null,
         defaultEraser: null,
-        currTool: null,
-        favorites: null,
+        currTool: this._getToolFromWS(grid, JSON.parse(allRes[0].currTool)),
+        favorites,
         userBoards: allRes[1],
-        settings: null
+        settings: JSON.parse(allRes[0].settings)
       }
       return userInfo
     })
+  }
+
+  static _getToolFromWS = function (grid, rawTool) {
+    switch (rawTool.type) {
+      case ('pen'):
+        return new Pen(grid, rawTool.color, rawTool.width)
+      case ('eraser'):
+        return new Eraser(grid, rawTool.width)
+      case ('move'):
+        return new Move(grid)
+    }
   }
 
   // get board info from server by web sockets

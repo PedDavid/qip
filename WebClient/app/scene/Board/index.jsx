@@ -220,7 +220,7 @@ export default class Board extends React.Component {
   addFavorite = (tool) => {
     this.setState(() => {
       this.state.favorites.push(tool)
-      this.persist.updateFavorites(this.state.favorites)
+      this.updateUserPreferences('favorites', this.state.favorites)
     }) // not needed to change prevState
   }
   removeFavorite = (tool) => {
@@ -229,8 +229,20 @@ export default class Board extends React.Component {
       if (index > -1) {
         prevState.favorites.splice(index, 1)
       }
-      this.persist.updateFavorites(prevState.favorites)
+      this.updateUserPreferences('favorites', prevState.favorites)
     })
+  }
+  updateUserPreferences = (preferenceNameToUpdate, updatedPreference) => {
+    const updatedPreferences = {
+      favorites: this.state.favorites,
+      penColors: null,
+      defaultPen: this.toolsConfig['pen'].lastValue,
+      defaultEraser: this.toolsConfig['eraser'].lastValue,
+      currTool: this.state.currTool,
+      settings: this.state.settings
+    }
+    updatedPreferences[preferenceNameToUpdate] = updatedPreference
+    this.persist.updateUserPreferences(updatedPreferences, this.auth.tryGetProfile(), this.auth.getAccessToken())
   }
   moveFavorite = (tool, movingUp) => {
     this.setState((prevState) => {
@@ -253,7 +265,7 @@ export default class Board extends React.Component {
         prevState.favorites[index + 1] = tool
         prevState.favorites[index] = auxTool
       }
-      this.persist.updateFavorites(prevState.favorites)
+      this.updateUserPreferences('favorites', prevState.favorites)
     })
   }
   drawImage = (imageSrc) => {
@@ -265,7 +277,7 @@ export default class Board extends React.Component {
   }
   changeCurrentTool = (tool) => {
     this.toolsConfig.updatePrevTool(this.state.currTool)
-    this.persist.updateCurrTool(tool)
+    this.updateUserPreferences('currTool', tool)
     this.setState({currTool: tool})
   }
   cleanCanvas = () => {

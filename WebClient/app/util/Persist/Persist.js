@@ -64,17 +64,10 @@ export class Persist {
     )
   }
 
-  updateFavorites (newFavs) {
+  updateUserPreferences (updatedPreferences, profile, accessToken) {
     return this.callWSLSFunc(
-      () => PersistWS._updateFavoritesWS(newFavs),
-      () => PersistLS._updateFavoritesLS(newFavs)
-    )
-  }
-
-  updateCurrTool (newCurrTool) {
-    return this.callWSLSFunc(
-      () => PersistWS._updateCurrToolWS(newCurrTool),
-      () => PersistLS._updateCurrToolLS(newCurrTool)
+      () => PersistWS._updateUserPreferencesWS(updatedPreferences, profile, accessToken),
+      () => PersistLS._updateUserPreferencesLS(updatedPreferences)
     )
   }
 

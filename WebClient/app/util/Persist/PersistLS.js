@@ -31,12 +31,13 @@ export default class PersistLS {
     this._resetLocalStorage()
   }
 
-  static _updateFavoritesLS = function (newFavs) {
-    window.localStorage.setItem('favorites', JSON.stringify(newFavs))
-  }
-
-  static _updateCurrToolLS = function (newCurrTool) {
-    window.localStorage.setItem('currTool', JSON.stringify(newCurrTool))
+  static _updateUserPreferencesLS = function (updatedPreferences) {
+    window.localStorage.setItem('favorites', JSON.stringify(updatedPreferences.favorites))
+    // window.localStorage.setItem('penColors', JSON.stringify(updatedPreferences.penColors))
+    window.localStorage.setItem('defaultPen', JSON.stringify(updatedPreferences.defaultPen))
+    window.localStorage.setItem('defaultEraser', JSON.stringify(updatedPreferences.defaultEraser))
+    window.localStorage.setItem('currTool', JSON.stringify(updatedPreferences.currTool))
+    window.localStorage.setItem('settings', JSON.stringify(updatedPreferences.settings))
   }
 
   static _updateCanvasSizeLS = function (canvasSize) {
@@ -54,15 +55,13 @@ export default class PersistLS {
         this._resetLocalStorage()
       }
 
-      const tempPen = JSON.parse(window.localStorage.getItem('defaultPen'))
-      const tempEraser = JSON.parse(window.localStorage.getItem('defaultEraser'))
       const tempCurrTool = JSON.parse(window.localStorage.getItem('currTool'))
       const favorites = JSON.parse(window.localStorage.getItem('favorites'))
         .map(fav => this._getToolFromLS(grid, fav))
       const settings = JSON.parse(window.localStorage.getItem('settings'))
       const userInfo = {
-        defaultPen: new Pen(grid, tempPen.color, tempPen.width),
-        defaultEraser: new Eraser(grid, tempEraser.width),
+        defaultPen: null,
+        defaultEraser: null,
         currTool: this._getToolFromLS(grid, tempCurrTool),
         favorites,
         settings,
