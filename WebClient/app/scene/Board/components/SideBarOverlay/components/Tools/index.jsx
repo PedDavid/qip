@@ -29,7 +29,7 @@ export default class Tools extends React.Component {
     }
     const reader = new FileReader()
     reader.onload = (event) => {
-      this.props.drawImage(reader.result)
+      this.props.onImageLoad(reader.result)
     }
     reader.readAsDataURL(file)
   }
