@@ -80,7 +80,7 @@ export default class Pen implements Tool {
       return
     }
     // todo: passar persistencia para o onOut
-    this.grid.addFigure(this.currentFigure)
+    this.grid.addFigure(this.currentFigure, true)
 
     if (persist.connected) {
       persist.socket.send(this.currentFigure.exportWS())
@@ -101,7 +101,7 @@ export default class Pen implements Tool {
     if (this.currentFigure === null) {
       return
     }
-    grid.addFigure(this.currentFigure)
+    grid.addFigure(this.currentFigure, true)
 
     // fazer reset à figura para que não continue a desenhar se o utilizador sair da área do canvas
     // Desta forma, se o utilizador voltar à área do canvas com o ponteiro premido, irá desenhar uma nova figura

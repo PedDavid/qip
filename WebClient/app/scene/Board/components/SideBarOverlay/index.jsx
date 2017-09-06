@@ -123,7 +123,9 @@ export default class SideBarOverlay extends React.Component {
                 removeFavorite={this.props.removeFavorite} addFavorite={this.props.addFavorite}
                 currTool={this.props.currTool} favorites={this.props.favorites}
                 toggleSideBar={this.toggleVisibility} moveFavorite={this.props.moveFavorite} />
-              <Tools currTool={this.props.currTool} grid={this.props.grid} changeCurrentTool={this.props.changeCurrentTool} toolsConfig={this.props.toolsConfig} cleanCanvas={this.props.cleanCanvas} drawImage={this.props.drawImage} canvasSize={this.props.canvasSize} />
+              <Tools currTool={this.props.currTool} grid={this.props.grid} changeCurrentTool={this.props.changeCurrentTool}
+                toolsConfig={this.props.toolsConfig} cleanCanvas={this.props.cleanCanvas} drawImage={this.props.drawImage}
+                canvasSize={this.props.canvasSize} undo={this.props.undo} />
             </Segment>
           </Sidebar.Pusher>
         </Sidebar.Pushable>
