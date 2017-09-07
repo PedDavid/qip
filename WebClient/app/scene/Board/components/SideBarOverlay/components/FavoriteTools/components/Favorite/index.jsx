@@ -42,7 +42,7 @@ export default class Favorite extends React.Component {
           <font className={styles.fontStyle} size='1'> {fav.width} </font>
         </Button>
         <Button onClick={() => this.props.removeFavorite(fav)}
-          icon={{name: 'trash', style: {color: 'red'}}} content=' Remove'
+          icon={{name: 'trash', style: {color: 'red'}}} content='Remove'
           style={{marginLeft: '-25px', visibility: favMenuWidth}} className={styles.favMenu} />
       </div>
     )
