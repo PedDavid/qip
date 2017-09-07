@@ -92,6 +92,11 @@ export default class Tools extends React.Component {
               <GenericTool name='trash' onClick={this.props.cleanCanvas} />
             </Grid.Column>
           </Grid.Row>
+          <Grid.Row columns={1} className={styles.toolRow} style={{padding: '0px'}}>
+            <Grid.Column style={{padding: '0px'}}>
+              <GenericTool name='undo' onClick={this.props.undo} />
+            </Grid.Column>
+          </Grid.Row>
         </Grid>
       </div>
     )

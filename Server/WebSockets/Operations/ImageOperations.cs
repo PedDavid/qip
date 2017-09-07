@@ -54,6 +54,16 @@ namespace WebSockets.Operations {
                     payload = new { id = id, tempId = tempId }
                 }
             );
+            
+            // se há uma flag persistLocalBoard, quer dizer que esta figura foi criada para persistir um board local. Dessa forma, é necessário fazer espelho da figura
+            if((payload.TryGetValue("persistLocalBoard", StringComparison.OrdinalIgnoreCase, out JToken payload_persistLocalBoard) && payload_tempId.Type == JTokenType.Integer)) {
+                jsonRes = JsonConvert.SerializeObject(
+                    new {
+                        type = Models.Action.CREATE_LINE.ToString(),
+                        payload = new { figure = inImage }
+                    }
+                );
+            }
             Task response =  stringWebSocket.SendAsync(jsonRes);
 
             string jsonBroadcast = JsonConvert.SerializeObject(

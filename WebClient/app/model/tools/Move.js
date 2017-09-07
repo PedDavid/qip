@@ -8,6 +8,7 @@ import Tool from './Tool'
 
 export default class Move implements Tool {
   constructor (grid) {
+    this.type = 'move'
     this.grid = grid
     this.movingLine = null
     this.currentFigureMoving = null
@@ -32,13 +33,13 @@ export default class Move implements Tool {
       if (this.currentFigureMoving != null) {
         const canvasContext = event.target.getContext('2d')
         this.selection = new Selection(this.currentFigureMoving.getTopLeftPoint(), this.currentFigureMoving.getBottomRightPoint(), canvasContext)
-        this.selection.select()
+        this.selection.select(event.pointerType === 'touch')
       }
     }
 
     // check if user tap in the scaling circles
     if (this.currentFigureMoving != null) {
-      this.scaling = this.selection.isScaling(new SimplePoint(x, y))
+      this.scaling = this.selection.isScaling(new SimplePoint(x, y), event.pointerType === 'touch')
     }
 
     if (this.selection != null && this.selection.containsPoint(new SimplePoint(x, y))) {
@@ -82,7 +83,7 @@ export default class Move implements Tool {
 
     if (this.currentFigureMoving != null) {
       this.selection.move(this.currentFigureMoving.getTopLeftPoint(), this.currentFigureMoving.getBottomRightPoint())
-      this.selection.select()
+      this.selection.select(event.pointerType === 'touch')
     }
   }
 
@@ -95,7 +96,6 @@ export default class Move implements Tool {
       if (persist.connected) {
         const offsetPoint = new SimplePoint(this.movingLine.end.x - this.movingLine.start.x, this.movingLine.end.y - this.movingLine.start.y)
         const toSend = this.currentFigure.exportWS(
-          persist.boardId,
           fig => { fig.offsetPoint = offsetPoint }
         )
         persist.socket.send(toSend)

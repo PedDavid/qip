@@ -25,7 +25,7 @@ export default class Favorite extends React.Component {
     const favMenuWidth = this.state.openFavMenu ? 'visible' : 'hidden'
     const fav = this.props.fav
 
-    const iconName = this.props.toolsConfig.getDefaultToolOf(fav.constructor.name).icon
+    const iconName = this.props.toolsConfig.getDefaultToolOf(fav.type).icon
     const color = fav.color !== undefined ? fav.color : 'black'
 
     let style = null

@@ -11,7 +11,7 @@
     "dev": "webpack-dev-server",
     "test": "standard && jest",
     "heroku-postbuild": "webpack -p",
-    "start": "node server.js"
+    "start": "webpack-dev-server"
   },
   "devDependencies": {
     "babel-core": "^6.25.0",
@@ -36,9 +36,10 @@
     "semantic-ui-react": "^0.71.3",
     "standard": "^10.0.3",
     "standard-loader": "^6.0.1",
-    "style-loader": "^0.18.2",
-    "webpack": "^3.4.1",
-    "webpack-dev-server": "^2.6.1"
+    "style-loader": "^0.18.1",
+    "webpack": "^2.6.1",
+    "webpack-dev-server": "^2.4.5",
+    "auth0-js": "^8.8.0"
   },
   "standard": {
     "plugins": [
@@ -50,7 +51,8 @@
       "it",
       "expect",
       "WebSocket",
-      "FileReader"
+      "FileReader",
+      "define"
     ]
   },
   "jest": {

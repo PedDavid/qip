@@ -6,6 +6,7 @@ import Tool from './Tool'
 
 export default class Eraser implements Tool {
   constructor (grid, width) {
+    this.type = 'eraser'
     this.width = width
     this.grid = grid
     this.eraseLine = null
@@ -52,7 +53,6 @@ export default class Eraser implements Tool {
       if (persist.connected) {
         const objToSend = {
           type: 'DELETE_LINE',
-          owner: parseInt(persist.boardId),
           payload: {'id': fig.id}
         }
         persist.socket.send(JSON.stringify(objToSend))
