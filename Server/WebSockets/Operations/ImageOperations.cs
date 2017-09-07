@@ -1,14 +1,11 @@
 ﻿using API.Domain;
 using API.Interfaces.IRepositories;
 using API.Interfaces.IServices;
-using API.Services;
-using API.Services.Extensions;
 using Authorization;
 using Authorization.Resources;
 using IODomain.Extensions;
 using IODomain.Input;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -42,9 +39,9 @@ namespace WebSockets.Operations {
             IFigureIdGenerator idGen = await _figureIdService.GetOrCreateFigureIdGeneratorAsync(boardId);
             long id = idGen.NewId();
 
-            InImage inImage = payload.ToObject<InImage>();
-            inImage.Id = id;
-            Image image = new Image(boardId, id).In(inImage);
+            InCreateImage inImage = payload.ToObject<InCreateImage>();
+
+            Image image = new Image { Id = id, BoardId = boardId }.In(inImage);
             Task store = _imageRepository.AddAsync(image);
             OperationUtils.ResolveTaskContinuation(store);
 
@@ -59,7 +56,7 @@ namespace WebSockets.Operations {
             string jsonBroadcast = JsonConvert.SerializeObject(
                 new {
                     type = Models.Action.CREATE_IMAGE.ToString(),
-                    payload = new { figure = inImage } // Usado o InImage porque os WebSockets estão a servir de espelho ao enviado pelo cliente
+                    payload = new { figure = image.Out() }
                 }
             );
             Task broadcast = session.BroadcastAsync(jsonBroadcast);
@@ -76,7 +73,7 @@ namespace WebSockets.Operations {
 
             long id = payload["id"].Value<long>();
 
-            InImage inImage = payload.ToObject<InImage>();
+            InUpdateImage inImage = payload.ToObject<InUpdateImage>();
 
             Task store = StoreUpdateImage(id, boardId, inImage);
             OperationUtils.ResolveTaskContinuation(store);
@@ -84,13 +81,13 @@ namespace WebSockets.Operations {
             string jsonBroadcast = JsonConvert.SerializeObject(
                 new {
                     type = Models.Action.ALTER_IMAGE.ToString(),
-                    payload = new { figure = inImage } // Usado o InImage porque os WebSockets estão a servir de espelho ao enviado pelo cliente
+                    payload = new { figure = inImage } // TODO usar Out
                 }
             );
             await session.BroadcastAsync(jsonBroadcast);
         }
 
-        private async Task StoreUpdateImage(long id, long boardId, InImage inImage) {
+        private async Task StoreUpdateImage(long id, long boardId, InUpdateImage inImage) {
             Image image = await _imageRepository.FindAsync(id, boardId);
             if(image == null) {
                 return;//TODO REVER

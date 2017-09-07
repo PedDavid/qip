@@ -1,18 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace API.Interfaces.IServices {
-    public interface IFigureService<IF,OF> {
-        Task<IEnumerable<OF>> GetAllAsync(long boardId);
+    public interface IFigureService<F> {
+        Task<IEnumerable<F>> GetAllAsync(long boardId);
 
-        Task<OF> GetAsync(long id, long boardId);
+        Task<F> GetAsync(long id, long boardId);
 
-        Task<OF> CreateAsync(long boardId, IF inputFigure);
+        Task CreateAsync(F inputFigure);
 
-        Task<OF> UpdateAsync(long id, long boardId, IF inputFigure);
+        Task UpdateAsync(F inputFigure);
 
         Task DeleteAsync(long id, long boardId);
+
+        Task<bool> ExistsAsync(long id, long boardId);
     }
 }

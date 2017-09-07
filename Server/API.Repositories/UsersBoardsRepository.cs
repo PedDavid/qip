@@ -35,7 +35,7 @@ namespace API.Repositories {
 
             parameters
                 .Add("@boardId", SqlDbType.BigInt)
-                .Value = userBoard.BoardId.Value;
+                .Value = userBoard.BoardId;
 
             parameters
                 .Add("@permission", SqlDbType.TinyInt)
@@ -161,7 +161,7 @@ namespace API.Repositories {
 
             parameters
                     .Add("@boardId", SqlDbType.BigInt)
-                .Value = userBoard.BoardId.Value;
+                .Value = userBoard.BoardId;
 
             parameters
                     .Add("@permission", SqlDbType.TinyInt)
@@ -213,7 +213,8 @@ namespace API.Repositories {
         private static UserBoard_Board GetBoard(SqlDataReader dr) {
             return new UserBoard_Board() {
                 Permission = (BoardPermission)dr.GetByte(0),
-                Board = new Board(dr.GetInt64(1)) {
+                Board = new Board {
+                    Id = dr.GetInt64(1),
                     Name = dr.GetString(2),
                     MaxDistPoints = dr.GetByte(3)
                 }

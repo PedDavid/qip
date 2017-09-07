@@ -1,15 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace IODomain.Input {
-    public class InImage {
-        public long? Id { get; set; }
+    public class InCreateImage {
+        [Required]
         public long? BoardId { get; set; }
+
+        [Required]
         public string Src { get; set; }
+
+        [Required]
         public InPoint Origin { get; set; }
+
+        [Required]
         public int? Width { get; set; }
+
+        [Required]
         public int? Height { get; set; }
     }
 }

@@ -33,16 +33,14 @@ namespace API.Repositories {
             return _queryTemplate.QueryForScalarAsync<bool>(LINE_EXISTS, parameters);
         }
 
-        public async Task<long> AddAsync(Line line) {
-            long lineId = line.Id;
-
+        public async Task AddAsync(Line line) {
             PointsTable points = new PointsTable(line.Points);
 
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
                     .Add("@figureId", SqlDbType.BigInt)
-                    .Value = lineId;
+                    .Value = line.Id;
 
             parameters
                 .Add("@boardId", SqlDbType.BigInt)
@@ -61,8 +59,6 @@ namespace API.Repositories {
                 .Value = line.Closed;
 
             await _queryTemplate.StoredProcedureAsync(INSERT_LINE, parameters);
-
-            return lineId;
         }
 
         public async Task<Line> FindAsync(long id, long boardId) {
@@ -222,9 +218,12 @@ namespace API.Repositories {
 
         //Extract Data From Data Reader
         private static Line GetLine(SqlDataReader dr) {
-            return new Line(dr.GetInt64(1), dr.GetInt64(0)) {
+            return new Line() {
+                Id = dr.GetInt64(0),
+                BoardId = dr.GetInt64(1),
                 Closed = dr.GetBoolean(2),
-                Style = new LineStyle(dr.GetInt64(3)) {
+                Style = new LineStyle() {
+                    Id = dr.GetInt64(3),
                     Color = dr.GetString(4)
                 }
             };

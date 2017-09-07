@@ -1,11 +1,11 @@
-﻿using IODomain.Output;
+﻿using API.Domain;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Authorization.Requirements {
     public class BoardPermissionRequirement : IAuthorizationRequirement {
-        public OutBoardPermission Permission { get; }
+        public BoardPermission Permission { get; }
 
-        public BoardPermissionRequirement(OutBoardPermission permission) {
+        public BoardPermissionRequirement(BoardPermission permission) {
             Permission = permission;
         }
     }

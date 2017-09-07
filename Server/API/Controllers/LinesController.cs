@@ -1,15 +1,18 @@
-﻿using Authorization;
-using Authorization.Resources;
+﻿using API.Domain;
 using API.Filters;
 using API.Interfaces.IServices;
+using Authorization;
+using Authorization.Resources;
+using IODomain.Extensions;
 using IODomain.Input;
-using IODomain.Output;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace API.Controllers {
+    [ValidateModel]
     [ServicesExceptionFilter]
     [Route("api/boards/{boardId}/figures/[controller]")]
     public class LinesController : Controller {
@@ -25,56 +28,91 @@ namespace API.Controllers {
         [AllowAnonymous]
         public async Task<IActionResult> GetAll(long boardId) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.ReadBoardPolicy))
-                return new ChallengeResult();
+                return Challenge();
 
-            IEnumerable<OutLine> lines = await _lineService.GetAllAsync(boardId);
+            IEnumerable<Line> lines = await _lineService.GetAllAsync(boardId);
 
-            return Ok(lines);
+            return Ok(lines.Select(LineExtensions.Out));
         }
 
         [HttpGet("{id}", Name = "GetLine")]
         [AllowAnonymous]
         public async Task<IActionResult> GetById(long id, long boardId) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.ReadBoardPolicy))
-                return new ChallengeResult();
+                return Challenge();
 
-            OutLine line = await _lineService.GetAsync(id, boardId);
+            Line line = await _lineService.GetAsync(id, boardId);
 
-            return Ok(line);
+            if(line == null) {
+                //$"The line with id {id}, belonging to board with id {boardId}, does not exist"
+                return NotFound();
+            }
+
+            return Ok(line.Out());
         }
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Create(long boardId, [FromBody] InLine inputLine) {
+        public async Task<IActionResult> Create(long boardId, [FromBody] InCreateLine inLine) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.WriteBoadPolicy))
-                return new ChallengeResult();
+                return Challenge();
 
-            OutLine line = await _lineService.CreateAsync(boardId, inputLine);
+            if(inLine.BoardId != boardId) {
+                //$"The board id present on update is different of the expected. {Environment.NewLine}Expected: {boardId}{Environment.NewLine}Current: {inLine.BoardId}"
+                return BadRequest();
+            }
 
-            return CreatedAtRoute("GetLine", new { id = line.Id, boardId = boardId }, line);
+            Line line = new Line { BoardId = boardId }.In(inLine);
+
+            await _lineService.CreateAsync(line);
+
+            return CreatedAtRoute("GetLine", new { id = line.Id, boardId = boardId }, line.Out());
         }
 
 
         [HttpPut("{id}")]
         [AllowAnonymous]
-        public async Task<IActionResult> Update(long id, long boardId, [FromBody] InLine inputLine) {
+        public async Task<IActionResult> Update(long id, long boardId, [FromBody] InUpdateLine inLine) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.WriteBoadPolicy))
-                return new ChallengeResult();
+                return Challenge();
 
-            await _lineService.UpdateAsync(id, boardId, inputLine);
+            if(inLine.Id != id) {
+                //$"The id present on update is different of the expected. {Environment.NewLine}Expected: {id}{Environment.NewLine}Current: {inLine.Id}"
+                return BadRequest();
+            }
 
-            return new NoContentResult();
+            if(inLine.BoardId != boardId) {
+                //$"The board id present on update is different of the expected. {Environment.NewLine}Expected: {boardId}{Environment.NewLine}Current: {inLine.BoardId}"
+                return BadRequest();
+            }
+
+            Line line = await _lineService.GetAsync(id, boardId);
+            if(line == null) {
+                //$"The line with id {id}, belonging to board with id {boardId}, does not exist"
+                return NotFound();
+            }
+
+            line.In(inLine);
+
+            await _lineService.UpdateAsync(line);
+
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> Delete(long id, long boardId) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.WriteBoadPolicy))
-                return new ChallengeResult();
+                return Challenge();
+
+            if(!await _lineService.ExistsAsync(id, boardId)) {
+                //$"The line with id {id}, belonging to board with id {boardId}, does not exist"
+                return NotFound();
+            }
 
             await _lineService.DeleteAsync(id, boardId);
 
-            return new NoContentResult();
+            return NoContent();
         }
     }
 }

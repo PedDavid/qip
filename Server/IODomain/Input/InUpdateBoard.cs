@@ -1,14 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace IODomain.Input {
-    public class InBoard {
+    public class InUpdateBoard {
+        [Required]
         public long? Id { get; set; }
 
+        [Required]
+        [StringLength(100)]
         public string Name { get; set; }
+
+        [Required]
         public byte? MaxDistPoints { get; set; }
+
+        [Required]
+        [Range(0,2)]
         public InBoardPermission BasePermission { get; set; }
     }
 }

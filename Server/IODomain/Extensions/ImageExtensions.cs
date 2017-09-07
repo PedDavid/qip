@@ -1,10 +1,6 @@
 ﻿using API.Domain;
 using IODomain.Input;
 using IODomain.Output;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace IODomain.Extensions {
     public static class ImageExtensions {
@@ -14,18 +10,25 @@ namespace IODomain.Extensions {
                 BoardId = image.BoardId,
                 Src = image.Src,
                 Origin = image.Origin.Out(),
-                Width = image.Width.Value,
-                Height = image.Height.Value
+                Width = image.Width,
+                Height = image.Height
             };
             return outImage;
         }
 
-        public static Image In(this Image image, InImage inImage) {
+        public static Image In(this Image image, InCreateImage inImage) {
             image.Src = inImage.Src;
             image.Origin = (image.Origin ?? new Point()).In(inImage.Origin);
-            image.Width = inImage.Width;
-            image.Height = inImage.Height;
+            image.Width = inImage.Width.Value;
+            image.Height = inImage.Height.Value;
+            return image;
+        }
 
+        public static Image In(this Image image, InUpdateImage inImage) {
+            image.Src = inImage.Src;
+            image.Origin = (image.Origin ?? new Point()).In(inImage.Origin);
+            image.Width = inImage.Width.Value;
+            image.Height = inImage.Height.Value;
             return image;
         }
     }

@@ -42,10 +42,9 @@ namespace WebSockets.Operations {
             IFigureIdGenerator idGen = await _figureIdService.GetOrCreateFigureIdGeneratorAsync(boardId);
             long id = idGen.NewId();
 
-            InLine inLine = payload.ToObject<InLine>();
-            inLine.Id = id;
+            InCreateLine inLine = payload.ToObject<InCreateLine>();
 
-            Line line = new Line(boardId, id).In(inLine);
+            Line line = new Line { Id = id, BoardId = boardId }.In(inLine);
             Task store = _lineRepository.AddAsync(line);
             OperationUtils.ResolveTaskContinuation(store);
 
@@ -60,7 +59,7 @@ namespace WebSockets.Operations {
             string jsonBroadcast = JsonConvert.SerializeObject(
                 new {
                     type = Models.Action.CREATE_LINE.ToString(),
-                    payload = new { figure = inLine } // Usado o InLine porque os WebSockets estão a servir de espelho ao enviado pelo cliente
+                    payload = new { figure = line.Out() }
                 }
             );
             Task broadcast = session.BroadcastAsync(jsonBroadcast);
@@ -79,7 +78,7 @@ namespace WebSockets.Operations {
 
             int offsetPoint = payload["offsetPoint"].Value<int>();
 
-            InLine inLine = payload.ToObject<InLine>();
+            InUpdateLine inLine = payload.ToObject<InUpdateLine>();
 
             Task store = StoreUpdateLine(id, boardId, inLine);
             OperationUtils.ResolveTaskContinuation(store);
@@ -89,14 +88,14 @@ namespace WebSockets.Operations {
                     type = Models.Action.ALTER_LINE.ToString(),
                     payload = new {
                         offsetPoint = offsetPoint,
-                        figure = inLine // Usado o InLine porque os WebSockets estão a servir de espelho ao enviado pelo cliente
+                        figure = inLine // TODO Usar Out
                     }
                 }
             );
             await session.BroadcastAsync(jsonBroadcast);
         }
 
-        private async Task StoreUpdateLine(long id, long boardId, InLine inLine) {
+        private async Task StoreUpdateLine(long id, long boardId, InUpdateLine inLine) {
             Line line = await _lineRepository.FindAsync(id, boardId);
             if(line == null) {
                 return;//TODO REVER

@@ -1,15 +1,18 @@
-﻿using Authorization;
-using Authorization.Resources;
+﻿using API.Domain;
 using API.Filters;
 using API.Interfaces.IServices;
+using Authorization;
+using Authorization.Resources;
+using IODomain.Extensions;
 using IODomain.Input;
-using IODomain.Output;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace API.Controllers {
+    [ValidateModel]
     [ServicesExceptionFilter]
     [Route("api/boards/{boardId}/figures/[controller]")]
     public class ImagesController : Controller {
@@ -25,56 +28,91 @@ namespace API.Controllers {
         [AllowAnonymous]
         public async Task<IActionResult> GetAll(long boardId) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.ReadBoardPolicy))
-                return new ChallengeResult();
+                return Challenge();
 
-            IEnumerable < OutImage > images = await _imageService.GetAllAsync(boardId);
+            IEnumerable<Image> images = await _imageService.GetAllAsync(boardId);
 
-            return Ok(images);
+            return Ok(images.Select(ImageExtensions.Out));
         }
 
         [HttpGet("{id}", Name = "GetImage")]
         [AllowAnonymous]
         public async Task<IActionResult> GetById(long id, long boardId) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.ReadBoardPolicy))
-                return new ChallengeResult();
+                return Challenge();
 
-            OutImage image = await _imageService.GetAsync(id, boardId);
+            Image image = await _imageService.GetAsync(id, boardId);
 
-            return Ok(image);
+            if(image == null) {
+                //$"The image with id {id}, belonging to board with id {boardId}, does not exist"
+                return NotFound();
+            }
+
+            return Ok(image.Out());
         }
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Create(long boardId, [FromBody] InImage inputImage) {
+        public async Task<IActionResult> Create(long boardId, [FromBody] InCreateImage inImage) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.WriteBoadPolicy))
-                return new ChallengeResult();
+                return Challenge();
 
-            OutImage image = await _imageService.CreateAsync(boardId, inputImage);
+            if(inImage.BoardId != boardId) {
+                //$"The board id present on update is different of the expected. {Environment.NewLine}Expected: {boardId}{Environment.NewLine}Current: {inImage.BoardId}"
+                return BadRequest();
+            }
 
-            return CreatedAtRoute("GetImage", new { id = image.Id, boardId = boardId }, image);
+            Image image = new Image { BoardId = boardId }.In(inImage);
+
+            await _imageService.CreateAsync(image);
+
+            return CreatedAtRoute("GetImage", new { id = image.Id, boardId = boardId }, image.Out());
         }
 
 
         [HttpPut("{id}")]
         [AllowAnonymous]
-        public async Task<IActionResult> Update(long id, long boardId, [FromBody] InImage inputImage) {
+        public async Task<IActionResult> Update(long id, long boardId, [FromBody] InUpdateImage inImage) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.WriteBoadPolicy))
-                return new ChallengeResult();
+                return Challenge();
 
-            await _imageService.UpdateAsync(id, boardId, inputImage);
+            if(inImage.Id != id) {
+                //$"The id present on update is different of the expected. {Environment.NewLine}Expected: {id}{Environment.NewLine}Current: {inImage.Id}"
+                return BadRequest();
+            }
 
-            return new NoContentResult();
+            if(inImage.BoardId != boardId) {
+                //$"The board id present on update is different of the expected. {Environment.NewLine}Expected: {boardId}{Environment.NewLine}Current: {inImage.BoardId}"
+                return BadRequest();
+            }
+
+            Image image = await _imageService.GetAsync(id, boardId);
+            if(image == null) {
+                //$"The image with id {id}, belonging to board with id {boardId}, does not exist"
+                return NotFound();
+            }
+
+            image.In(inImage);
+
+            await _imageService.UpdateAsync(image);
+
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> Delete(long id, long boardId) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.WriteBoadPolicy))
-                return new ChallengeResult();
+                return Challenge();
+
+            if(!await _imageService.ExistsAsync(id, boardId)) {
+                //$"The image with id {id}, belonging to board with id {boardId}, does not exist"
+                return NotFound();
+            }
 
             await _imageService.DeleteAsync(id, boardId);
 
-            return new NoContentResult();
+            return NoContent();
         }
     }
 }

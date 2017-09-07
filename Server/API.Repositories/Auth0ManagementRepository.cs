@@ -45,7 +45,7 @@ namespace API.Repositories {
             return JsonConvert.DeserializeObject<AccessToken>(json);
         }
 
-        public async Task<List<User>> GetUsersAsync(string access_token, long index, long size, string search) {
+        public async Task<IEnumerable<User>> GetUsersAsync(string access_token, long index, long size, string search) {
             _client.DefaultRequestHeaders.Clear();
             _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {access_token}");
 
@@ -63,7 +63,7 @@ namespace API.Repositories {
             return JsonConvert.DeserializeObject<List<User>>(json);
         }
 
-        public Task<List<User>> GetUsersAsync(string access_token, long index, long size) {
+        public Task<IEnumerable<User>> GetUsersAsync(string access_token, long index, long size) {
             return GetUsersAsync(access_token, index, size, null);
         }
 

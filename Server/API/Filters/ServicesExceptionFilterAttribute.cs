@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Net;
 
 namespace API.Filters {
     public class ServicesExceptionFilterAttribute : ExceptionFilterAttribute { //TODO Rever o Problem+JSON
@@ -16,9 +17,7 @@ namespace API.Filters {
 
             _exceptionHandlers = new Dictionary<Type, Func<Exception, IActionResult>> {
                 { typeof(NotFoundException), NotFoundExceptionHandler },
-                { typeof(InconsistentRequestException), InconsistentRequestExceptionHandler },
                 { typeof(InvalidFieldsException), InvalidFieldsExceptionHandler },
-                { typeof(MissingInputException), MissingInputExceptionHandler },
                 { typeof(InvalidChangeException), InvalidChangeExceptionHandler }
             };
         }
@@ -33,7 +32,7 @@ namespace API.Filters {
             NotFoundException notFound = exception as NotFoundException;
 
             var problem = new ProblemPlusJson() {
-                Status = 404,
+                Status = HttpStatusCode.NotFound,
                 Title = "Resource Not Found",
                 Details = notFound.Message
             };
@@ -43,25 +42,11 @@ namespace API.Filters {
             return result;
         }
 
-        private static IActionResult InconsistentRequestExceptionHandler(Exception exception) {
-            InconsistentRequestException notFound = exception as InconsistentRequestException;
-
-            var problem = new ProblemPlusJson() {
-                Status = 400,
-                Title = "The request has inconsistent data",
-                Details = notFound.Message
-            };
-
-            var result = new BadRequestObjectResult(JsonConvert.SerializeObject(problem));
-            result.ContentTypes.Add(MEDIA_TYPE);
-            return result;
-        }
-
         private static IActionResult InvalidFieldsExceptionHandler(Exception exception) {
             InvalidFieldsException notFound = exception as InvalidFieldsException;
 
             var problem = new ProblemPlusJson() {
-                Status = 400,
+                Status = HttpStatusCode.BadRequest,
                 Title = "The request body has invalid fields",
                 Details = notFound.Message
             };
@@ -71,23 +56,11 @@ namespace API.Filters {
             return result;
         }
 
-        private static IActionResult MissingInputExceptionHandler(Exception exception) {
-            MissingInputException notFound = exception as MissingInputException;
-
-            var problem = new ProblemPlusJson() {
-                Status = 400,
-                Title = "The body of the request is necessary",
-            };
-
-            var result = new BadRequestObjectResult(JsonConvert.SerializeObject(problem));
-            result.ContentTypes.Add(MEDIA_TYPE);
-            return result;
-        }
         private static IActionResult InvalidChangeExceptionHandler(Exception exception) {
             InvalidChangeException invalidChange = exception as InvalidChangeException;
 
             var problem = new ProblemPlusJson() {
-                Status = 400,
+                Status = HttpStatusCode.BadRequest,
                 Title = "The change required is not valid",
                 Details = invalidChange.Message
             };

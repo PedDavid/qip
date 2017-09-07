@@ -1,12 +1,14 @@
-﻿using Authorization;
-using Authorization.Resources;
+﻿using API.Domain;
 using API.Filters;
 using API.Interfaces.IServices;
-using IODomain.Input;
+using Authorization;
+using Authorization.Resources;
+using IODomain.Extensions;
 using IODomain.Output;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace API.Controllers {
@@ -24,28 +26,34 @@ namespace API.Controllers {
         }
 
         [HttpGet]
-        public Task<IEnumerable<OutUser>> GetAll(string search, long index = 0, long size = 10) {
-            return _userService.GetAllAsync(index, size, search);
+        public async Task<IEnumerable<OutUser>> GetAll(string search, long index = 0, long size = 10) {
+            IEnumerable<User> users = await _userService.GetAllAsync(index, size, search);
+            return users.Select(UserExtensions.Out);
         }
 
         [HttpGet("{userId}/boards")]
         public async Task<IActionResult> GetAll(string userId, string search, long index = 0, long size = 10) {
             if(!await _authorizationService.AuthorizeAsync(User, new UserRequest(userId), Policies.UserIsOwnPolicy))
-                return new ChallengeResult();
+                return Challenge();
 
-            IEnumerable<OutUserBoard_Board> userBoards = await _usersBoardsService.GetAllBoardsAsync(userId, index, size, search);
+            IEnumerable<UserBoard_Board> userBoards = await _usersBoardsService.GetAllBoardsAsync(userId, index, size, search);
 
-            return Ok(userBoards);
+            return Ok(userBoards.Select(UserBoard_BoardExtensions.Out));
         }
 
         [HttpGet("{userId}/boards/{boardId}")]
         public async Task<IActionResult> GetById(string userId, long boardId) {
             if(!await _authorizationService.AuthorizeAsync(User, new UserRequest(userId), Policies.UserIsOwnPolicy))
-                return new ChallengeResult();
+                return Challenge();
 
-            OutUserBoard_Board userBoard = await _usersBoardsService.GetBoardAsync(userId, boardId);
+            UserBoard_Board userBoard = await _usersBoardsService.GetBoardAsync(userId, boardId);
 
-            return Ok(userBoard);
+            if(userBoard == null) {
+                //$"The UserBoard with board id {boardId} and user id {userId} not exists"
+                return NotFound();
+            }
+
+            return Ok(userBoard.Out());
         }
     }
 }

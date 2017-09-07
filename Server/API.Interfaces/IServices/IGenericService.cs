@@ -4,15 +4,17 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace API.Interfaces.IServices {
-    public interface IGenericService<I, O> {
-        Task<IEnumerable<O>> GetAllAsync(long index, long size);
+    public interface IGenericService<T> {
+        Task<IEnumerable<T>> GetAllAsync(long index, long size);
 
-        Task<O> GetAsync(long id);
+        Task<T> GetAsync(long id);
 
-        Task<O> CreateAsync(I input);
+        Task CreateAsync(T input);
 
-        Task<O> UpdateAsync(long id, I input);
+        Task UpdateAsync(T input);
 
         Task DeleteAsync(long id);
+
+        Task<bool> ExistsAsync(long id);
     }
 }
