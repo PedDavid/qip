@@ -176,17 +176,17 @@ export default class Board extends React.Component {
 
   render () {
     return (
-      <div onPaste={this.onPaste} onKeyDown={this.onKeyDown}>
+      <div>
         <SideBarOverlay grid={this.grid} changeCurrentTool={this.changeCurrentTool} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
           currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite}
           removeFavorite={this.removeFavorite} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}
-          onImageLoad={this.onImageLoad} canvasSize={this.state.canvasSize}>
+          onImageLoad={this.toggleImportImageModal} canvasSize={this.state.canvasSize}>
           <Canvas ref={this.refCallback} width={this.state.canvasSize.width} height={this.state.canvasSize.height} {...this.listeners}>
             HTML5 Canvas not supported
           </Canvas>
         </SideBarOverlay>
         <CleanBoardModal cleanCanvas={this.cleanCanvas} onClose={this.toggleCleanModal} open={this.state.showCleanModal} />
-        <ImportImageModal onClose={this.toggleImportImageModal} open={this.state.showImportImageModal} />
+        <ImportImageModal onClose={this.toggleImportImageModal} open={this.state.showImportImageModal} onImageLoad={this.onImageLoad} />
         <ShareBoardModal location={this.props.location} history={this.props.history} persist={this.persist} open={this.state.showShareModal} onClose={this.toggleShareModal} updateCurrentBoard={this.updateBoardId} />
         <Route path='/signin' component={EnterUserModal} />
         <Loader active={this.state.loading} content='Fetching Data ...' />

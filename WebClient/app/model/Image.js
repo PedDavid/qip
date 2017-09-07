@@ -6,7 +6,7 @@ export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null) {
   let srcPoint = imgSrcPoint
   let width = imgWidth
   let height = imgHeight
-  let src = imgSrc
+  const src = imgSrc
   let img
 
   function scaleImage () {
