@@ -33,9 +33,9 @@ export default class Selection {
     this._updateCircleProperties()
   }
 
-  select = function () {
+  select = function (isTouch) {
     this._drawRect('gray')
-    this._drawCircles('gray')
+    isTouch ? this._drawCircles('gray', 10) : this._drawCircles('gray') // draw bigger circles if user uses finger
   }
 
   _drawRect = function (color, margin = 0, func) {
@@ -77,9 +77,10 @@ export default class Selection {
   }
 
   // function to check if user has the pointer over some circle to scale figure
-  isScaling = function (point) {
+  isScaling = function (point, isTouch) {
+    const circleMargin = isTouch ? 20 : 4
     let toRet = false
-    this._drawCircles('rgba(0,0,0,0)', 4, 0, Math.PI * 2, (prop) => {
+    this._drawCircles('rgba(0,0,0,0)', circleMargin, 0, Math.PI * 2, (prop) => {
       if (this.canvasContext.isPointInPath(point.x, point.y)) {
         toRet = prop.scale
       }

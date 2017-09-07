@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace IODomain.Output {
     public class OutLine {
+        public string type = "figure";
         public long Id { get; set; }
         public long BoardId { get; set; }
         public IEnumerable<OutLinePoint> Points { get; set; }

@@ -20,10 +20,12 @@ export function Figure (figureStyle, id = null) {
     let mostUpperLeftPointY = null
     this.points.forEach(point => {
       if (mostUpperLeftPointX == null || (point.x < mostUpperLeftPointX)) {
-        mostUpperLeftPointX = point.x
+        const margin = point.getStyleOf(this.id).width
+        mostUpperLeftPointX = point.x - margin
       }
       if (mostUpperLeftPointY == null || (point.y < mostUpperLeftPointY)) {
-        mostUpperLeftPointY = point.y
+        const margin = point.getStyleOf(this.id).width / 2
+        mostUpperLeftPointY = point.y - margin
       }
     })
     return new SimplePoint(mostUpperLeftPointX, mostUpperLeftPointY)
@@ -34,10 +36,12 @@ export function Figure (figureStyle, id = null) {
     let mostBottomRightPointY = null
     this.points.forEach(point => {
       if (mostBottomRightPointX == null || (point.x > mostBottomRightPointX)) {
-        mostBottomRightPointX = point.x
+        const margin = point.getStyleOf(this.id).width / 2
+        mostBottomRightPointX = point.x + margin
       }
       if (mostBottomRightPointY == null || (point.y > mostBottomRightPointY)) {
-        mostBottomRightPointY = point.y
+        const margin = point.getStyleOf(this.id).width
+        mostBottomRightPointY = point.y + margin
       }
     })
     return new SimplePoint(mostBottomRightPointX, mostBottomRightPointY)
@@ -134,7 +138,7 @@ export function Figure (figureStyle, id = null) {
     return id + 1 / Math.pow(2, this.subFigureLevel)
   }
 
-  this.exportWS = function (boardId, extraFunc) {
+  this.exportWS = function (extraFunc) {
     const toExportFig = this._export()
     toExportFig.tempId = toExportFig.id
     delete toExportFig.id
@@ -145,7 +149,6 @@ export function Figure (figureStyle, id = null) {
 
     const objToSend = {
       type: 'CREATE_LINE',
-      owner: parseInt(boardId), // todo: retirar isto daqui
       payload: toExportFig
     }
 

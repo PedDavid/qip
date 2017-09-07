@@ -141,10 +141,12 @@ export default function Grid (initialFigures, currIdx) {
     context.clearRect(0, 0, width, height)
   }
 
-  this.addFigure = function (figure) {
+  this.addFigure = function (figure, undoable) {
     if (figure.id === null) {
       figure.id = this.getNewFigureIdx()
     }
+
+    figure.undoable = undoable // tells grid if this figure can be undone
 
     let prev = null
     const auxPoints = figure.points
@@ -223,6 +225,30 @@ export default function Grid (initialFigures, currIdx) {
   this.getImagesArray = function () {
     return Array.from(figures.values())
       .filter(fig => fig instanceof Image)
+  }
+
+  this.undo = function (context, persist) {
+    const undoableFigures = Array.from(figures.values())
+      .filter(fig => fig.undoable === true)
+      .sort((fig1, fig2) => fig2.id - fig1.id)
+    const undoableFigure = undoableFigures[undoableFigures.length - 1]
+    // get this out of here
+    if (undoableFigure != null) {
+      this.removeFigure(undoableFigure, context, 1)
+      if (persist.connected) {
+        const objToSend = {
+          type: 'DELETE_LINE',
+          payload: {'id': undoableFigure.id}
+        }
+        persist.socket.send(JSON.stringify(objToSend))
+      } else {
+        // remove from localstorage
+        const dataFigure = JSON.parse(window.localStorage.getItem('figures'))
+        const figIdx = dataFigure.findIndex(f => f.tempId === undoableFigure.id)
+        dataFigure.splice(figIdx, 1) // use splice (not delete) beacause this way the array updated and reindexed
+        window.localStorage.setItem('figures', JSON.stringify(dataFigure))
+      }
+    }
   }
 
   this.updateMapFigure = function (previousId, figure) {
