@@ -12,12 +12,12 @@ using System.Threading.Tasks;
 namespace API.Services {
     class LineService : ILineService {
         private readonly ILineRepository _lineRepository;
-        private readonly IBoardRepository _boardRepository;
+        private readonly IBoardService _boardService;
         private readonly IFigureIdService _figureIdService;
 
-        public LineService(ILineRepository lineRepository, IBoardRepository boardRepository, IFigureIdService figureIdService) {
+        public LineService(ILineRepository lineRepository, IBoardService boardService, IFigureIdService figureIdService) {
             _lineRepository = lineRepository;
-            _boardRepository = boardRepository;
+            _boardService = boardService;
             _figureIdService = figureIdService;
         }
 
@@ -26,7 +26,7 @@ namespace API.Services {
                 throw new ArgumentNullException("Argument line can not be null");
             }
 
-            if(!await _boardRepository.ExistsAsync(line.BoardId)) {
+            if(!await _boardService.ExistsAsync(line.BoardId)) {
                 throw new NotFoundException($"The Board with id {line.BoardId} not exists");
             }
 
@@ -48,7 +48,7 @@ namespace API.Services {
         }
 
         public async Task<IEnumerable<Line>> GetAllAsync(long boardId) {
-            if(!await _boardRepository.ExistsAsync(boardId)) {
+            if(!await _boardService.ExistsAsync(boardId)) {
                 throw new NotFoundException($"The Board with id {boardId} not exists");
             }
 

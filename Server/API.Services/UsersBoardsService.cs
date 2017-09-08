@@ -11,12 +11,12 @@ namespace API.Services {
     class UsersBoardsService : IUsersBoardsService {
         private readonly IUsersBoardsRepository _usersBoardsRepository;
         private readonly IUserService _userService;
-        private readonly IBoardRepository _boardRepository;
+        private readonly IBoardService _boardService;
 
-        public UsersBoardsService(IUsersBoardsRepository usersBoardsRepository, IUserService userService, IBoardRepository boardRepository) {
+        public UsersBoardsService(IUsersBoardsRepository usersBoardsRepository, IUserService userService, IBoardService boardService) {
             _usersBoardsRepository = usersBoardsRepository;
             _userService = userService;
-            _boardRepository = boardRepository;
+            _boardService = boardService;
         }
 
         public async Task CreateAsync(UserBoard userBoard) {
@@ -28,7 +28,7 @@ namespace API.Services {
                 throw new InvalidFieldsException("It is not possible give owner permissions.");
             }
 
-            if(!await _boardRepository.ExistsAsync(userBoard.BoardId)) {
+            if(!await _boardService.ExistsAsync(userBoard.BoardId)) {
                 throw new NotFoundException($"The Board with id {userBoard.BoardId} not exists");
             }
 

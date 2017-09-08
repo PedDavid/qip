@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace API.Services {
     class ImageService : IImageService {
-        private readonly IImageRepository _imageRepository;
-        private readonly IBoardRepository _boardRepository;
+        private readonly IImageRepository _imageService;
+        private readonly IBoardService _boardRepository;
         private readonly IFigureIdService _figureIdService;
 
-        public ImageService(IImageRepository imageRepository, IBoardRepository boardRepository, IFigureIdService figureIdService) {
-            _imageRepository = imageRepository;
-            _boardRepository = boardRepository;
+        public ImageService(IImageRepository imageRepository, IBoardService boardService, IFigureIdService figureIdService) {
+            _imageService = imageRepository;
+            _boardRepository = boardService;
             _figureIdService = figureIdService;
         }
 
@@ -33,15 +33,15 @@ namespace API.Services {
                 image.Id = idGen.NewId();
             }
 
-            await _imageRepository.AddAsync(image);
+            await _imageService.AddAsync(image);
         }
 
         public Task DeleteAsync(long id, long boardId) {
-            return _imageRepository.RemoveAsync(id, boardId);
+            return _imageService.RemoveAsync(id, boardId);
         }
 
         public Task<bool> ExistsAsync(long id, long boardId) {
-            return _imageRepository.ExistsAsync(id, boardId);
+            return _imageService.ExistsAsync(id, boardId);
         }
 
         public async Task<IEnumerable<Image>> GetAllAsync(long boardId) {
@@ -49,11 +49,11 @@ namespace API.Services {
                 throw new NotFoundException($"The Board with id {boardId} not exists");
             }
 
-            return await _imageRepository.GetAllAsync(boardId);
+            return await _imageService.GetAllAsync(boardId);
         }
 
         public Task<Image> GetAsync(long id, long boardId) {
-            return _imageRepository.FindAsync(id, boardId);
+            return _imageService.FindAsync(id, boardId);
         }
 
         public Task UpdateAsync(Image image) {
@@ -61,7 +61,7 @@ namespace API.Services {
                 throw new ArgumentNullException("Argument image can not be null");
             }
 
-            return _imageRepository.UpdateAsync(image);
+            return _imageService.UpdateAsync(image);
         }
     }
 }
