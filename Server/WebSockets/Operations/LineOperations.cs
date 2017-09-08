@@ -1,138 +1,152 @@
 ﻿using API.Domain;
-using API.Interfaces.IRepositories;
 using API.Interfaces.IServices;
-using API.Services;
-using API.Services.Extensions;
 using Authorization;
 using Authorization.Resources;
 using IODomain.Extensions;
 using IODomain.Input;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using WebSockets.Extensions;
+using WebSockets.Models;
 using WebSockets.StringWebSockets;
 
 namespace WebSockets.Operations {
-    public class LineOperations {// TODO Replace Repositories by Services
-        private readonly ILineRepository _lineRepository;
+    public class LineOperations {
+        private static readonly JsonSerializerSettings serializerSettings;
+
+        private readonly ILineService _lineService;
         private readonly IFigureIdService _figureIdService;
         private readonly IAuthorizationService _authorizationService;
 
-        public LineOperations(ILineRepository lineRepository, IFigureIdService figureIdService, IAuthorizationService authorizationService) {
-            _lineRepository = lineRepository;
+        static LineOperations() {
+            serializerSettings = new JsonSerializerSettings() {
+                Converters = { new StringEnumConverter() }
+            };
+        }
+
+        public LineOperations(ILineService lineService, IFigureIdService figureIdService, IAuthorizationService authorizationService) {
+            _lineService = lineService;
             _figureIdService = figureIdService;
             _authorizationService = authorizationService;
         }
 
-        public async Task CreateLine(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject payload) {//TODO Rever se não pomos os checks aos ids e outros como nos controlers
+        public async Task CreateLine(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject jPayload) {
             long boardId = session.Id;
 
             if(!await _authorizationService.AuthorizeAsync(stringWebSocket.User, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
                 return;//TODO REVER
             }
 
-            if(!(payload.TryGetValue("tempId", StringComparison.OrdinalIgnoreCase, out JToken payload_tempId) && payload_tempId.Type == JTokenType.Integer)) {
+            InCreateWSLine inLine = jPayload.ToObject<InCreateWSLine>();
+
+            if(inLine.BoardId != boardId) {
                 return;//TODO REVER
             }
-            long tempId = payload["tempId"].Value<long>();
+
+            var validationResults = new List<ValidationResult>();
+            if(!Validator.TryValidateObject(inLine, new ValidationContext(inLine), validationResults, true)) {
+                return;//TODO REVER
+            }
 
             IFigureIdGenerator idGen = await _figureIdService.GetOrCreateFigureIdGeneratorAsync(boardId);
             long id = idGen.NewId();
 
-            InCreateLine inLine = payload.ToObject<InCreateLine>();
+            Line line = new Line { Id = id }.In(inLine);
 
-            Line line = new Line { Id = id, BoardId = boardId }.In(inLine);
-            Task store = _lineRepository.AddAsync(line);
+            Task store = _lineService.CreateAsync(line, autoGenerateId: false);
             OperationUtils.ResolveTaskContinuation(store);
 
-            string jsonRes = JsonConvert.SerializeObject(
+            Task response = stringWebSocket.SendAsync(
                 new {
-                    type = Models.Action.CREATE_LINE.ToString(),
-                    payload = new { id = id, tempId = tempId }
-                }
+                    type = OperationType.CREATE_LINE,
+                    payload = new { id = id, tempId = inLine.TempId }
+                },
+                serializerSettings
             );
-            Task response = stringWebSocket.SendAsync(jsonRes);
 
-            string jsonBroadcast = JsonConvert.SerializeObject(
+            Task broadcast = session.BroadcastAsync(
                 new {
-                    type = Models.Action.CREATE_LINE.ToString(),
+                    type = OperationType.CREATE_LINE,
                     payload = new { figure = line.Out() }
-                }
+                },
+                serializerSettings
             );
-            Task broadcast = session.BroadcastAsync(jsonBroadcast);
 
             await Task.WhenAll(response, broadcast);
         }
 
-        public async Task UpdateLine(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject payload) {
+        public async Task UpdateLine(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject jPayload) {
             long boardId = session.Id;
 
             if(!await _authorizationService.AuthorizeAsync(stringWebSocket.User, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
                 return;//TODO REVER
             }
 
-            long id = payload["id"].Value<long>();
+            InUpdateWSLine inLine = jPayload.ToObject<InUpdateWSLine>();
 
-            int offsetPoint = payload["offsetPoint"].Value<int>();
+            if(inLine.BoardId != boardId) {
+                return;//TODO REVER
+            }
 
-            InUpdateLine inLine = payload.ToObject<InUpdateLine>();
+            var validationResults = new List<ValidationResult>();
+            if(!Validator.TryValidateObject(inLine, new ValidationContext(inLine), validationResults, true)) {
+                return;//TODO REVER
+            }
 
-            Task store = StoreUpdateLine(id, boardId, inLine);
-            OperationUtils.ResolveTaskContinuation(store);
-
-            string jsonBroadcast = JsonConvert.SerializeObject(
-                new {
-                    type = Models.Action.ALTER_LINE.ToString(),
-                    payload = new {
-                        offsetPoint = offsetPoint,
-                        figure = inLine // TODO Usar Out
-                    }
-                }
-            );
-            await session.BroadcastAsync(jsonBroadcast);
-        }
-
-        private async Task StoreUpdateLine(long id, long boardId, InUpdateLine inLine) {
-            Line line = await _lineRepository.FindAsync(id, boardId);
+            Line line = await _lineService.GetAsync(inLine.Id.Value, boardId);
             if(line == null) {
                 return;//TODO REVER
             }
 
             line.In(inLine);
 
-            await _lineRepository.UpdateAsync(line);
+            Task store = _lineService.UpdateAsync(line);
+            OperationUtils.ResolveTaskContinuation(store);
+
+            await session.BroadcastAsync(
+                new {
+                    type = OperationType.ALTER_LINE,
+                    payload = new {
+                        offsetPoint = inLine.OffsetPoint,
+                        figure = line.Out()
+                    }
+                },
+                serializerSettings
+            );
         }
 
-        public async Task DeleteLine(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject payload) {
+        public async Task DeleteLine(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject jPayload) {
             long boardId = session.Id;
 
             if(!await _authorizationService.AuthorizeAsync(stringWebSocket.User, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
                 return;//TODO REVER
             }
 
-            long id = payload["id"].Value<long>();
+            if(!(jPayload.TryGetValue("id", System.StringComparison.OrdinalIgnoreCase, out JToken payload_id) && payload_id.Type == JTokenType.Integer)) {
+                return;//TODO REVER
+            }
+            long id = payload_id.Value<long>();
 
-            Task store = StoreDeleteLine(id, boardId);
-            OperationUtils.ResolveTaskContinuation(store);
-
-            string jsonBroadcast = JsonConvert.SerializeObject(
-                new {
-                    type = Models.Action.DELETE_LINE.ToString(),
-                    payload = new { id = id }
-                }
-            );
-            await session.BroadcastAsync(jsonBroadcast);
-        }
-
-        private async Task StoreDeleteLine(long id, long boardId) {
-            Line line = await _lineRepository.FindAsync(id, boardId);
+            Line line = await _lineService.GetAsync(id, boardId);
             if(line == null) {
                 return;//TODO REVER
             }
-            await _lineRepository.RemoveAsync(id, boardId);
+
+            Task store = _lineService.DeleteAsync(id, boardId);
+            OperationUtils.ResolveTaskContinuation(store);
+
+            await session.BroadcastAsync(
+                new {
+                    type = OperationType.DELETE_LINE,
+                    payload = new { id = id }
+                },
+                serializerSettings
+            );
         }
     }
 }

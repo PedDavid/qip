@@ -7,7 +7,7 @@ namespace API.Interfaces.IServices {
 
         Task<F> GetAsync(long id, long boardId);
 
-        Task CreateAsync(F inputFigure);
+        Task CreateAsync(F inputFigure, bool autoGenerateId = true);
 
         Task UpdateAsync(F inputFigure);
 

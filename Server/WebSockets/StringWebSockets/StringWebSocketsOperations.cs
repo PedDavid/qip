@@ -1,19 +1,20 @@
-﻿using System;
+﻿using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
+using WebSockets.Models;
 using WebSockets.Operations;
-using Newtonsoft.Json.Linq;
 
 namespace WebSockets.StringWebSockets {
     public class StringWebSocketsOperations {
         private readonly StringWebSocket _stringWebSocket;
-        private readonly Dictionary<Models.Action, Operation> _operations;
+        private readonly Dictionary<Models.OperationType, Operation> _operations;
 
         private readonly IStringWebSocketSession _session;
         private readonly long _roomId;
 
-        public StringWebSocketsOperations(long roomId, StringWebSocket stringWebSocket, IStringWebSocketSession session, Dictionary<Models.Action, Operation> operations) { // TODO(peddavid): Change this "hard constructor"
+        public StringWebSocketsOperations(long roomId, StringWebSocket stringWebSocket, IStringWebSocketSession session, Dictionary<Models.OperationType, Operation> operations) { // TODO(peddavid): Change this "hard constructor"
             _roomId = roomId;
             _stringWebSocket = stringWebSocket;
             _session = session;
@@ -29,24 +30,16 @@ namespace WebSockets.StringWebSockets {
                     continue;//TODO REVER
                 }
 
-                JObject info = JObject.Parse(msg);
+                WSMessage info = JsonConvert.DeserializeObject<WSMessage>(msg);
 
-                if(!(info.TryGetValue("type", StringComparison.OrdinalIgnoreCase, out JToken infoType) && infoType.Type == JTokenType.String)) {
-
-                    continue;//TODO REVER
+                var validationResults = new List<ValidationResult>();
+                if(!Validator.TryValidateObject(info, new ValidationContext(info), validationResults, true)) {
+                    return;//TODO REVER
                 }
 
-                if(!Enum.TryParse(infoType.Value<string>(), true, out Models.Action type)) {
+                OperationType type = info.Type.Value;
 
-                    continue;//TODO REVER
-                }
-
-                if(!(info.TryGetValue("payload", StringComparison.OrdinalIgnoreCase, out JToken infoPayload) && infoPayload.Type == JTokenType.Object)) {
-
-                    continue;//TODO REVER
-                }
-
-                await _operations[type](_stringWebSocket, _session, (JObject)infoPayload);
+                await _operations[type](_stringWebSocket, _session, info.Payload);
 
             } while(!_stringWebSocket.CloseStatus.HasValue);
 

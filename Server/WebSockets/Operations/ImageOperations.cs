@@ -1,5 +1,4 @@
 ﻿using API.Domain;
-using API.Interfaces.IRepositories;
 using API.Interfaces.IServices;
 using Authorization;
 using Authorization.Resources;
@@ -7,124 +6,144 @@ using IODomain.Extensions;
 using IODomain.Input;
 using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using WebSockets.Extensions;
+using WebSockets.Models;
 using WebSockets.StringWebSockets;
 
 namespace WebSockets.Operations {
-    public class ImageOperations {// TODO Replace Repositories by Services
-        private readonly IImageRepository _imageRepository;
+    public class ImageOperations {
+        private static readonly JsonSerializerSettings serializerSettings;
+
+        private readonly IImageService _imageService;
         private readonly IFigureIdService _figureIdService;
         private readonly IAuthorizationService _authorizationService;
 
-        public ImageOperations(IImageRepository imageRepository, IFigureIdService figureIdService, IAuthorizationService authorizationService) {
-            _imageRepository = imageRepository;
+        static ImageOperations() {
+            serializerSettings = new JsonSerializerSettings() {
+                Converters = { new StringEnumConverter() }
+            };
+        }
+
+        public ImageOperations(IImageService imageService, IFigureIdService figureIdService, IAuthorizationService authorizationService) {
+            _imageService = imageService;
             _figureIdService = figureIdService;
             _authorizationService = authorizationService;
         }
 
-        public async Task CreateImage(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject payload) {//TODO Rever se não pomos os checks aos ids e outros como nos controlers
+        public async Task CreateImage(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject payload) {
             long boardId = session.Id;
 
             if(!await _authorizationService.AuthorizeAsync(stringWebSocket.User, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
                 return;//TODO REVER
             }
 
-            if(!(payload.TryGetValue("tempId", StringComparison.OrdinalIgnoreCase, out JToken payload_tempId) && payload_tempId.Type == JTokenType.Integer)) {
+            InCreateWSImage inImage = payload.ToObject<InCreateWSImage>();
+
+            if(inImage.BoardId != boardId) {
                 return;//TODO REVER
             }
-            long tempId = payload["tempId"].Value<long>();
+
+            var validationResults = new List<ValidationResult>();
+            if(!Validator.TryValidateObject(inImage, new ValidationContext(inImage), validationResults, true)) {
+                return;//TODO REVER
+            }
 
             IFigureIdGenerator idGen = await _figureIdService.GetOrCreateFigureIdGeneratorAsync(boardId);
             long id = idGen.NewId();
 
-            InCreateImage inImage = payload.ToObject<InCreateImage>();
+            Image image = new Image { Id = id }.In(inImage);
 
-            Image image = new Image { Id = id, BoardId = boardId }.In(inImage);
-            Task store = _imageRepository.AddAsync(image);
+            Task store = _imageService.CreateAsync(image, autoGenerateId: false);
             OperationUtils.ResolveTaskContinuation(store);
 
-            string jsonRes = JsonConvert.SerializeObject(
+            Task response = stringWebSocket.SendAsync(
                 new {
-                    type = Models.Action.CREATE_IMAGE.ToString(),
-                    payload = new { id = id, tempId = tempId }
-                }
+                    type = OperationType.CREATE_IMAGE,
+                    payload = new { id = id, tempId = inImage.TempId }
+                },
+               serializerSettings
             );
-            Task response =  stringWebSocket.SendAsync(jsonRes);
 
-            string jsonBroadcast = JsonConvert.SerializeObject(
-                new {
-                    type = Models.Action.CREATE_IMAGE.ToString(),
-                    payload = new { figure = image.Out() }
-                }
+            Task broadcast = session.BroadcastAsync(
+               new {
+                   type = OperationType.CREATE_IMAGE,
+                   payload = new { figure = image.Out() }
+               },
+               serializerSettings
             );
-            Task broadcast = session.BroadcastAsync(jsonBroadcast);
 
             await Task.WhenAll(response, broadcast);
         }
 
-        public async Task UpdateImage(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject payload) {
+        public async Task UpdateImage(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject jPayload) {
             long boardId = session.Id;
 
             if(!await _authorizationService.AuthorizeAsync(stringWebSocket.User, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
                 return;//TODO REVER
             }
 
-            long id = payload["id"].Value<long>();
+            InUpdateImage inImage = jPayload.ToObject<InUpdateImage>();
 
-            InUpdateImage inImage = payload.ToObject<InUpdateImage>();
+            if(inImage.BoardId != boardId) {
+                return;//TODO REVER
+            }
 
-            Task store = StoreUpdateImage(id, boardId, inImage);
-            OperationUtils.ResolveTaskContinuation(store);
+            var validationResults = new List<ValidationResult>();
+            if(!Validator.TryValidateObject(inImage, new ValidationContext(inImage), validationResults, true)) {
+                return;//TODO REVER
+            }
 
-            string jsonBroadcast = JsonConvert.SerializeObject(
-                new {
-                    type = Models.Action.ALTER_IMAGE.ToString(),
-                    payload = new { figure = inImage } // TODO usar Out
-                }
-            );
-            await session.BroadcastAsync(jsonBroadcast);
-        }
-
-        private async Task StoreUpdateImage(long id, long boardId, InUpdateImage inImage) {
-            Image image = await _imageRepository.FindAsync(id, boardId);
+            Image image = await _imageService.GetAsync(inImage.Id.Value, boardId);
             if(image == null) {
                 return;//TODO REVER
             }
 
             image.In(inImage);
 
-            await _imageRepository.UpdateAsync(image);
+            Task store = _imageService.UpdateAsync(image);
+            OperationUtils.ResolveTaskContinuation(store);
+
+            await session.BroadcastAsync(
+                new {
+                    type = OperationType.ALTER_IMAGE,
+                    payload = new { figure = image.Out() }
+                },
+                serializerSettings
+            );
         }
 
-        public async Task DeleteImage(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject payload) {
+        public async Task DeleteImage(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject jPayload) {
             long boardId = session.Id;
 
             if(!await _authorizationService.AuthorizeAsync(stringWebSocket.User, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
                 return;//TODO REVER
             }
 
-            long id = payload["id"].Value<long>();
+            if(!(jPayload.TryGetValue("id", System.StringComparison.OrdinalIgnoreCase, out JToken payload_id) && payload_id.Type == JTokenType.Integer)) {
+                return;//TODO REVER
+            }
+            long id = payload_id.Value<long>();
 
-            Task store = StoreDeleteImage(id, boardId);
-            OperationUtils.ResolveTaskContinuation(store);
-
-            string jsonBroadcast = JsonConvert.SerializeObject(
-                new {
-                    type = Models.Action.DELETE_IMAGE.ToString(),
-                    payload = new {id = id}
-                }
-            );
-            await session.BroadcastAsync(jsonBroadcast);
-        }
-
-        private async Task StoreDeleteImage(long id, long boardId) {
-            Image image = await _imageRepository.FindAsync(id, boardId);
+            Image image = await _imageService.GetAsync(id, boardId);
             if(image == null) {
                 return;//TODO REVER
             }
-            await _imageRepository.RemoveAsync(id, boardId);
+
+            Task store = _imageService.DeleteAsync(id, boardId);
+            OperationUtils.ResolveTaskContinuation(store);
+
+            await session.BroadcastAsync(
+                new {
+                    type = OperationType.DELETE_IMAGE,
+                    payload = new { id = id }
+                },
+                serializerSettings
+            );
         }
     }
 }

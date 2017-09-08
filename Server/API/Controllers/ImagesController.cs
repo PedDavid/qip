@@ -62,7 +62,7 @@ namespace API.Controllers {
                 return BadRequest();
             }
 
-            Image image = new Image { BoardId = boardId }.In(inImage);
+            Image image = new Image().In(inImage);
 
             await _imageService.CreateAsync(image);
 

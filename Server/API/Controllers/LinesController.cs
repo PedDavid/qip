@@ -62,7 +62,7 @@ namespace API.Controllers {
                 return BadRequest();
             }
 
-            Line line = new Line { BoardId = boardId }.In(inLine);
+            Line line = new Line().In(inLine);
 
             await _lineService.CreateAsync(line);
 

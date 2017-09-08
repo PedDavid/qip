@@ -17,6 +17,7 @@ namespace WebSockets.Operations {
                 }
             }
             else {
+                //TODO Ver se não devia esperar que ela termine, pq embora prenda a thread garante que a db está consiste na altura
                 //TODO Rever o que fazer caso mais tarde dê excepção
                 //task.ContinueWith()
             }

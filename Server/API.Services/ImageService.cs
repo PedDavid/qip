@@ -18,7 +18,7 @@ namespace API.Services {
             _figureIdService = figureIdService;
         }
 
-        public async Task CreateAsync(Image image) {
+        public async Task CreateAsync(Image image, bool autoGenerateId) {
             if(image == null) {
                 throw new ArgumentNullException("Argument image can not be null");
             }
@@ -27,9 +27,11 @@ namespace API.Services {
                 throw new NotFoundException($"The Board with id {image.BoardId} not exists");
             }
 
-            IFigureIdGenerator idGen = await _figureIdService.GetOrCreateFigureIdGeneratorAsync(image.BoardId);
+            if(autoGenerateId) {
+                IFigureIdGenerator idGen = await _figureIdService.GetOrCreateFigureIdGeneratorAsync(image.BoardId);
 
-            image.Id = idGen.NewId();
+                image.Id = idGen.NewId();
+            }
 
             await _imageRepository.AddAsync(image);
         }

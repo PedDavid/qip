@@ -17,6 +17,7 @@ namespace IODomain.Extensions {
         }
 
         public static Image In(this Image image, InCreateImage inImage) {
+            image.BoardId = inImage.BoardId.Value;
             image.Src = inImage.Src;
             image.Origin = (image.Origin ?? new Point()).In(inImage.Origin);
             image.Width = inImage.Width.Value;

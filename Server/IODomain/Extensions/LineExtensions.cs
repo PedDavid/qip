@@ -16,6 +16,7 @@ namespace IODomain.Extensions {
         }
 
         public static Line In(this Line line, InCreateLine inLine) {
+            line.BoardId = inLine.BoardId.Value;
             line.Points = inLine.Points.Select(inPoint => new LinePoint().In(inPoint));
             line.Closed = inLine.Closed;
             line.Style = (line.Style ?? new LineStyle()).In(inLine.Style);
