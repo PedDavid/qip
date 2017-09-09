@@ -1,9 +1,12 @@
-﻿using API.Interfaces.IRepositories;
+﻿using API.Interfaces;
+using API.Interfaces.IRepositories;
 using API.Interfaces.IServices;
 using Authorization;
+using Authorization.Extensions;
 using Authorization.Resources;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using WebSockets.Extensions;
@@ -18,6 +21,7 @@ namespace WebSockets.Controllers {
         private readonly LineOperations _lineOperations;
         private readonly ImageOperations _imageOperations;
         private readonly IAuthorizationService _authorizationService;
+        private readonly ILogger<WebSocketsController> _logger;
 
         private readonly Dictionary<Models.OperationType, Operation> _operations;  // TODO(peddavid): Should this be immutable?
 
@@ -27,13 +31,15 @@ namespace WebSockets.Controllers {
             IAuthorizationService authorizationService,
             IFigureIdService figureIdService,
             IImageService imageService,
-            ILineService lineService
+            ILineService lineService,
+            ILoggerFactory logger
         ) {
             _boardService = boardService;
             _sessionManager = sessionManager;
             _authorizationService = authorizationService;
-            _imageOperations = new ImageOperations(imageService, figureIdService, authorizationService);
-            _lineOperations = new LineOperations(lineService, figureIdService, authorizationService);
+            _imageOperations = new ImageOperations(imageService, figureIdService, authorizationService, new Logger<ImageOperations>(logger));
+            _lineOperations = new LineOperations(lineService, figureIdService, authorizationService, new Logger<LineOperations>(logger));
+            _logger = new Logger<WebSocketsController>(logger);
 
             _operations = new Dictionary<Models.OperationType, Operation>() {
                 { Models.OperationType.CREATE_IMAGE, _imageOperations.CreateImage },
@@ -47,18 +53,21 @@ namespace WebSockets.Controllers {
 
         [HttpGet("{roomId}")]
         [AllowAnonymous]
-        public async Task Index(long roomId) {
+        public async Task Connect(long roomId) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(roomId), Policies.ReadBoardPolicy)) {
+                _logger.LogWarning(LoggingEvents.ConnectWebSocketNotAuthorized, "Connect({roomId}) NOT AUTHORIZED {user_id}", roomId, User.GetNameIdentifier());
                 await Challenge().ExecuteResultAsync(ControllerContext);
                 return;
             }
 
             if(!await _boardService.ExistsAsync(roomId)) {
+                _logger.LogWarning(LoggingEvents.ConnectWebSocketNotFound, "Connect({roomId}) NOT FOUND", roomId);
                 HttpContext.Response.StatusCode = 404;
                 return;
             }
 
             if(HttpContext.WebSockets.IsWebSocketRequest) {
+                _logger.LogInformation(LoggingEvents.ConnectWebSocket, "Connect WebSocket {roomId}", roomId);
                 StringWebSocket webSocket = await HttpContext.WebSockets.AcceptStringWebSocketAsync(User);
 
                 var session = _sessionManager.Register(roomId, webSocket);
@@ -67,6 +76,7 @@ namespace WebSockets.Controllers {
                 await swsopers.AcceptRequests();
             }
             else {
+                _logger.LogDebug(LoggingEvents.ConnectWebSocketWrongProtocol, "Connect({roomId}) WRONG PROTOCOL", roomId);
                 HttpContext.Response.StatusCode = 400;
             }
         }

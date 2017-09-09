@@ -1,15 +1,19 @@
 ﻿using API.Domain;
+using API.Interfaces;
 using API.Interfaces.IServices;
 using Authorization;
+using Authorization.Extensions;
 using Authorization.Resources;
 using IODomain.Extensions;
 using IODomain.Input;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using WebSockets.Extensions;
 using WebSockets.Models;
@@ -22,6 +26,7 @@ namespace WebSockets.Operations {
         private readonly IImageService _imageService;
         private readonly IFigureIdService _figureIdService;
         private readonly IAuthorizationService _authorizationService;
+        private readonly ILogger<ImageOperations> _logger;
 
         static ImageOperations() {
             serializerSettings = new JsonSerializerSettings() {
@@ -29,28 +34,33 @@ namespace WebSockets.Operations {
             };
         }
 
-        public ImageOperations(IImageService imageService, IFigureIdService figureIdService, IAuthorizationService authorizationService) {
+        public ImageOperations(IImageService imageService, IFigureIdService figureIdService, IAuthorizationService authorizationService, ILogger<ImageOperations> logger) {
             _imageService = imageService;
             _figureIdService = figureIdService;
             _authorizationService = authorizationService;
+            _logger = logger;
         }
 
         public async Task CreateImage(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject payload) {
+            ClaimsPrincipal user = stringWebSocket.User;
             long boardId = session.Id;
 
-            if(!await _authorizationService.AuthorizeAsync(stringWebSocket.User, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
-                return;//TODO REVER
+            if(!await _authorizationService.AuthorizeAsync(user, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
+                _logger.LogWarning(LoggingEvents.InsertWSImageNotAuthorized, "CreateImage (Board {boardId}) NOT AUTHORIZED {userId}", boardId, user.GetNameIdentifier());
+                return;
             }
 
             InCreateWSImage inImage = payload.ToObject<InCreateWSImage>();
 
             if(inImage.BoardId != boardId) {
-                return;//TODO REVER
+                _logger.LogDebug(LoggingEvents.InsertWSImageWrongBoardId, "CreateImage (Board {boardId}) WRONG BOARD ID {otherBoardId}", boardId, inImage.BoardId);
+                return;
             }
 
             var validationResults = new List<ValidationResult>();
             if(!Validator.TryValidateObject(inImage, new ValidationContext(inImage), validationResults, true)) {
-                return;//TODO REVER
+                _logger.LogDebug(LoggingEvents.InsertWSImageInvalidModel, "CreateImage (Board {boardId}) INVALID MODEL", boardId);
+                return;
             }
 
             IFigureIdGenerator idGen = await _figureIdService.GetOrCreateFigureIdGeneratorAsync(boardId);
@@ -81,26 +91,31 @@ namespace WebSockets.Operations {
         }
 
         public async Task UpdateImage(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject jPayload) {
+            ClaimsPrincipal user = stringWebSocket.User;
             long boardId = session.Id;
 
-            if(!await _authorizationService.AuthorizeAsync(stringWebSocket.User, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
-                return;//TODO REVER
+            if(!await _authorizationService.AuthorizeAsync(user, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
+                _logger.LogWarning(LoggingEvents.UpdateWSImageNotAuthorized, "UpdateImage (Board {boardId}) NOT AUTHORIZED {userId}", boardId, user.GetNameIdentifier());
+                return;
             }
 
             InUpdateImage inImage = jPayload.ToObject<InUpdateImage>();
 
             if(inImage.BoardId != boardId) {
-                return;//TODO REVER
+                _logger.LogDebug(LoggingEvents.UpdateWSImageWrongBoardId, "UpdateImage (Board {boardId}) WRONG BOARD ID {otherBoardId}", boardId, inImage.BoardId);
+                return;
             }
 
             var validationResults = new List<ValidationResult>();
             if(!Validator.TryValidateObject(inImage, new ValidationContext(inImage), validationResults, true)) {
-                return;//TODO REVER
+                _logger.LogDebug(LoggingEvents.UpdateWSImageInvalidModel, "UpdateImage (Board {boardId}) INVALID MODEL", boardId);
+                return;
             }
 
             Image image = await _imageService.GetAsync(inImage.Id.Value, boardId);
             if(image == null) {
-                return;//TODO REVER
+                _logger.LogWarning(LoggingEvents.UpdateWSImageNotFound, "UpdateImage {id} (Board {boardId}) NOT FOUND", image.Id, boardId);
+                return;
             }
 
             image.In(inImage);
@@ -118,20 +133,24 @@ namespace WebSockets.Operations {
         }
 
         public async Task DeleteImage(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject jPayload) {
+            ClaimsPrincipal user = stringWebSocket.User;
             long boardId = session.Id;
 
-            if(!await _authorizationService.AuthorizeAsync(stringWebSocket.User, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
-                return;//TODO REVER
+            if(!await _authorizationService.AuthorizeAsync(user, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
+                _logger.LogWarning(LoggingEvents.DeleteWSImageNotAuthorized, "DeleteImage (Board {boardId}) NOT AUTHORIZED {userId}", boardId, user.GetNameIdentifier());
+                return;
             }
 
             if(!(jPayload.TryGetValue("id", System.StringComparison.OrdinalIgnoreCase, out JToken payload_id) && payload_id.Type == JTokenType.Integer)) {
-                return;//TODO REVER
+                _logger.LogDebug(LoggingEvents.DeleteWSImageInvalidModel, "DeleteImage (Board {boardId}) INVALID MODEL", boardId);
+                return;
             }
             long id = payload_id.Value<long>();
 
             Image image = await _imageService.GetAsync(id, boardId);
             if(image == null) {
-                return;//TODO REVER
+                _logger.LogWarning(LoggingEvents.DeleteWSImageNotFound, "DeleteImage {id} (Board {boardId}) NOT FOUND", image.Id, boardId);
+                return;
             }
 
             Task store = _imageService.DeleteAsync(id, boardId);

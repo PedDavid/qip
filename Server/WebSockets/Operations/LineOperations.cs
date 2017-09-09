@@ -1,15 +1,18 @@
 ﻿using API.Domain;
+using API.Interfaces;
 using API.Interfaces.IServices;
 using Authorization;
+using Authorization.Extensions;
 using Authorization.Resources;
 using IODomain.Extensions;
-using IODomain.Input;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using WebSockets.Extensions;
 using WebSockets.Models;
@@ -22,6 +25,7 @@ namespace WebSockets.Operations {
         private readonly ILineService _lineService;
         private readonly IFigureIdService _figureIdService;
         private readonly IAuthorizationService _authorizationService;
+        private readonly ILogger<LineOperations> _logger;
 
         static LineOperations() {
             serializerSettings = new JsonSerializerSettings() {
@@ -29,28 +33,33 @@ namespace WebSockets.Operations {
             };
         }
 
-        public LineOperations(ILineService lineService, IFigureIdService figureIdService, IAuthorizationService authorizationService) {
+        public LineOperations(ILineService lineService, IFigureIdService figureIdService, IAuthorizationService authorizationService, ILogger<LineOperations> logger) {
             _lineService = lineService;
             _figureIdService = figureIdService;
             _authorizationService = authorizationService;
+            _logger = logger;
         }
 
         public async Task CreateLine(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject jPayload) {
+            ClaimsPrincipal user = stringWebSocket.User;
             long boardId = session.Id;
 
-            if(!await _authorizationService.AuthorizeAsync(stringWebSocket.User, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
-                return;//TODO REVER
+            if(!await _authorizationService.AuthorizeAsync(user, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
+                _logger.LogWarning(LoggingEvents.InsertWSLineNotAuthorized, "CreateLine (Board {boardId}) NOT AUTHORIZED {userId}", boardId, user.GetNameIdentifier());
+                return;
             }
 
             InCreateWSLine inLine = jPayload.ToObject<InCreateWSLine>();
 
             if(inLine.BoardId != boardId) {
-                return;//TODO REVER
+                _logger.LogDebug(LoggingEvents.InsertWSLineWrongBoardId, "CreateLine (Board {boardId}) WRONG BOARD ID {otherBoardId}", boardId, inLine.BoardId);
+                return;
             }
 
             var validationResults = new List<ValidationResult>();
             if(!Validator.TryValidateObject(inLine, new ValidationContext(inLine), validationResults, true)) {
-                return;//TODO REVER
+                _logger.LogDebug(LoggingEvents.InsertWSLineInvalidModel, "CreateLine (Board {boardId}) INVALID MODEL", boardId);
+                return;
             }
 
             IFigureIdGenerator idGen = await _figureIdService.GetOrCreateFigureIdGeneratorAsync(boardId);
@@ -81,26 +90,31 @@ namespace WebSockets.Operations {
         }
 
         public async Task UpdateLine(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject jPayload) {
+            ClaimsPrincipal user = stringWebSocket.User;
             long boardId = session.Id;
 
-            if(!await _authorizationService.AuthorizeAsync(stringWebSocket.User, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
-                return;//TODO REVER
+            if(!await _authorizationService.AuthorizeAsync(user, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
+                _logger.LogWarning(LoggingEvents.UpdateWSLineNotAuthorized, "UpdateLine (Board {boardId}) NOT AUTHORIZED {userId}", boardId, user.GetNameIdentifier());
+                return;
             }
 
             InUpdateWSLine inLine = jPayload.ToObject<InUpdateWSLine>();
 
             if(inLine.BoardId != boardId) {
-                return;//TODO REVER
+                _logger.LogDebug(LoggingEvents.UpdateWSLineWrongBoardId, "UpdateLine (Board {boardId}) WRONG BOARD ID {otherBoardId}", boardId, inLine.BoardId);
+                return;
             }
 
             var validationResults = new List<ValidationResult>();
             if(!Validator.TryValidateObject(inLine, new ValidationContext(inLine), validationResults, true)) {
-                return;//TODO REVER
+                _logger.LogDebug(LoggingEvents.UpdateWSLineInvalidModel, "UpdateLine (Board {boardId}) INVALID MODEL", boardId);
+                return;
             }
 
             Line line = await _lineService.GetAsync(inLine.Id.Value, boardId);
             if(line == null) {
-                return;//TODO REVER
+                _logger.LogWarning(LoggingEvents.UpdateWSLineNotFound, "UpdateLine {id} (Board {boardId}) NOT FOUND", line.Id, boardId);
+                return;
             }
 
             line.In(inLine);
@@ -121,20 +135,24 @@ namespace WebSockets.Operations {
         }
 
         public async Task DeleteLine(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject jPayload) {
+            ClaimsPrincipal user = stringWebSocket.User;
             long boardId = session.Id;
 
-            if(!await _authorizationService.AuthorizeAsync(stringWebSocket.User, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
-                return;//TODO REVER
+            if(!await _authorizationService.AuthorizeAsync(user, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
+                _logger.LogWarning(LoggingEvents.DeleteWSLineNotAuthorized, "DeleteLine (Board {boardId}) NOT AUTHORIZED {userId}", boardId, user.GetNameIdentifier());
+                return;
             }
 
             if(!(jPayload.TryGetValue("id", System.StringComparison.OrdinalIgnoreCase, out JToken payload_id) && payload_id.Type == JTokenType.Integer)) {
-                return;//TODO REVER
+                _logger.LogDebug(LoggingEvents.DeleteWSLineInvalidModel, "DeleteLine (Board {boardId}) INVALID MODEL", boardId);
+                return;
             }
             long id = payload_id.Value<long>();
 
             Line line = await _lineService.GetAsync(id, boardId);
             if(line == null) {
-                return;//TODO REVER
+                _logger.LogWarning(LoggingEvents.DeleteWSLineNotFound, "DeleteLine {id} (Board {boardId}) NOT FOUND", line.Id, boardId);
+                return;
             }
 
             Task store = _lineService.DeleteAsync(id, boardId);

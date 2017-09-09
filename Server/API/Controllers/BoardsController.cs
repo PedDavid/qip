@@ -33,7 +33,7 @@ namespace API.Controllers {
         [HttpGet]
         [Authorize("Administrator")]
         public async Task<IEnumerable<OutBoard>> GetAllAsync(string search, long index = 0, long size = 10) {
-            _logger.LogInformation(LoggingEvents.ListBoards, "Listing all Boards");
+            _logger.LogInformation(LoggingEvents.ListBoards, "Listing page {index} of Boards with size {size}", index, size);
             IEnumerable<Board> boards = await _boardService.GetAllAsync(index, size, search);
 
             return boards.Select(BoardExtensions.Out);
@@ -47,11 +47,11 @@ namespace API.Controllers {
         [ProducesResponseType(404)]
         public async Task<IActionResult> GetByIdAsync(long id) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(id), Policies.ReadBoardPolicy)) {
-                _logger.LogWarning(LoggingEvents.UpdateBoardNotAuthorized, "GetByIdAsync({ id}) NOT AUTHORIZED {userId}", id, User.GetNameIdentifier());
+                _logger.LogWarning(LoggingEvents.GetBoardNotAuthorized, "GetByIdAsync({id}) NOT AUTHORIZED {user_id}", id, User.GetNameIdentifier());
                 return Challenge();
             }
 
-            _logger.LogInformation(LoggingEvents.GetBoard, "Getting item {ID}", id);
+            _logger.LogInformation(LoggingEvents.GetBoard, "Getting Board {ID}", id);
             Board board = await _boardService.GetAsync(id);
 
             if(board == null) {
@@ -68,7 +68,7 @@ namespace API.Controllers {
         [ProducesResponseType(typeof(OutBoard), 201)]
         public async Task<IActionResult> Create([FromBody] InCreateBoard inputBoard) {
             if(inputBoard == null) {
-                _logger.LogDebug(LoggingEvents.CreateWithoutBody, "Create() WITHOUT BODY");
+                _logger.LogDebug(LoggingEvents.InsertBoardWithoutBody, "Create() WITHOUT BODY");
                 return BadRequest();
             }
 
@@ -86,18 +86,18 @@ namespace API.Controllers {
         [ProducesResponseType(404)]
         public async Task<IActionResult> Update(long id, [FromBody] InUpdateBoard inputBoard) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(id), Policies.BoardIsOwnPolicy)) {
-                _logger.LogWarning(LoggingEvents.UpdateBoardNotAuthorized, "Update({ id}) NOT AUTHORIZED {userId}", id, User.GetNameIdentifier());
+                _logger.LogWarning(LoggingEvents.UpdateBoardNotAuthorized, "Update({ id}) NOT AUTHORIZED {user_id}", id, User.GetNameIdentifier());
                 return Challenge();
             }
 
             if(inputBoard == null) {
-                _logger.LogDebug(LoggingEvents.UpdateWithoutBody, "Update() WITHOUT BODY");
+                _logger.LogDebug(LoggingEvents.UpdateBoardWithoutBody, "Update({id}) WITHOUT BODY", id);
                 return BadRequest();
             }
 
             if(inputBoard.Id != id) {
                 //$"The id present on update is different of the expected. {Environment.NewLine}Expected: {id}{Environment.NewLine}Current: {inputBoard.Id}"
-                _logger.LogDebug(LoggingEvents.UpdateBoardWrongId, "Update({ID}) WRONG ID {wrongId}", id);
+                _logger.LogDebug(LoggingEvents.UpdateBoardWrongId, "Update({ID}) WRONG ID {wrongId}", id, inputBoard.Id);
                 return BadRequest();
             }
 
@@ -121,7 +121,7 @@ namespace API.Controllers {
         [ProducesResponseType(404)]
         public async Task<IActionResult> Delete(long id) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(id), Policies.BoardIsOwnPolicy)) {
-                _logger.LogWarning(LoggingEvents.UpdateBoardNotAuthorized, "Delete({ id}) NOT AUTHORIZED {userId}", id, User.GetNameIdentifier());
+                _logger.LogWarning(LoggingEvents.DeleteBoardNotAuthorized, "Delete({id}) NOT AUTHORIZED {user_id}", id, User.GetNameIdentifier());
                 return Challenge();
             }
 
