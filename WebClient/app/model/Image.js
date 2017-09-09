@@ -6,22 +6,18 @@ export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null) {
   let srcPoint = imgSrcPoint
   let width = imgWidth
   let height = imgHeight
-  const src = imgSrc
+  let src = imgSrc
   let img
 
-  function scaleImage () {
+  {
     const auxImg = new window.Image()
     auxImg.onload = (e) => {
-      // scale image
-      const scale = auxImg.width / 300 // 200 is de default width
-      width === undefined && (width = auxImg.width === 0 ? 200 : auxImg.width / scale)
-      height === undefined && (height = auxImg.height === 0 ? 200 : auxImg.height / scale)
+      width = width || auxImg.width
+      height = height || auxImg.height
       img = auxImg
     }
     auxImg.src = src
   }
-
-  scaleImage()
 
   this.getTopLeftPoint = function () {
     return srcPoint
@@ -29,6 +25,10 @@ export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null) {
 
   this.getBottomRightPoint = function () {
     return new SimplePoint(srcPoint.x + width, srcPoint.y + height)
+  }
+
+  this.setImageSrc = function (imageSrc) {
+    src = imageSrc
   }
 
   this.getSrcPoint = function () {

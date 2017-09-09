@@ -30,6 +30,8 @@ import Auth from './../../auth/Auth'
 import Callback from './../../auth/Callback/SignInCallback.js'
 import SettingsConfig from './../../util/SettingsConfig.js'
 
+import { uploadImage } from './../../services/imgur'
+
 const defaultGrid = new Grid([], 0)
 const defaultPen = new Pen(defaultGrid, 'black', 5)
 const maxCanvasSize = 3000
@@ -321,9 +323,12 @@ export default class Board extends React.Component {
 
   onImageLoad = (imageSrc) => {
     const newImage = new Image({x: 80, y: 80}, imageSrc)
-    // do not change this order. image must be added to grid first to set the new id
+    uploadImage(imageSrc)
+      .then(res => {
+        newImage.setImageSrc(res.data.link)
+        newImage.persist(this.persist, this.grid)
+      })
     this.grid.addImage(newImage)
-    newImage.persist(this.persist, this.grid)
     this.grid.draw(this.canvasContext, 1)
   }
   toggleImportImageModal = () => {
