@@ -71,6 +71,8 @@ export default class Eraser implements Tool {
     this.eraseLine = null // TODO(simaovii): this will throw error if user draws back in the canvas. insert a check in onSwipe
   }
 
+  onContextMenu (event) {}
+
   equals (eraser) {
     return eraser instanceof Eraser && this.width === eraser.width && this.eraserType === eraser.eraserType
   }

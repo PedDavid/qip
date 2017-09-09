@@ -102,6 +102,8 @@ export default class Pen implements Tool {
     this.currentFigure = new Figure(figStyle)
   }
 
+  onContextMenu (event) {}
+
   equals (pen) {
     return pen instanceof Pen && this.width === pen.width && this.color === pen.color
   }

@@ -129,6 +129,18 @@ export class Persist {
     }
   }
 
+  removeImage (imageId) {
+    if (this.connected) {
+      const objToSend = {
+        type: 'DELETE_IMAGE',
+        payload: {'id': imageId}
+      }
+      this.socket.send(JSON.stringify(objToSend))
+    } else {
+      PersistLS._sendEraserActionLS(imageId)
+    }
+  }
+
   sendMoveAction (figure, offsetPoint) {
     if (this.connected) {
       this.socket.send(

@@ -20,6 +20,8 @@ export default class Move implements Tool {
     const x = event.offsetX
     const y = event.offsetY
 
+    this.tryCloseContextMenu()
+
     // get line figures
     if (this.currentFigureMoving === null) {
       const figures = this.grid.getNearestFigures(x / scale, y / scale)
@@ -99,6 +101,32 @@ export default class Move implements Tool {
 
     this.movingLine = null
     this.scaling = false
+  }
+
+  onContextMenu (event, persist, addContextMenuFunc, closeContextMenu, canvasContext) {
+    event.preventDefault()
+    if (this.currentFigureMoving === null) {
+      return // todo: possible default contextMenu
+    }
+    this.onCloseContextMenu = closeContextMenu
+    const contextMenuRaw = [{
+      header: {icon: null, text: 'Edit'},
+      menuItems: [{
+        icon: 'trash',
+        text: 'remove',
+        onClick: () => {
+          this.grid.removeImage(this.currentFigureMoving.id, canvasContext, 1)
+          persist.removeImage(this.currentFigureMoving.id)
+          this.tryCloseContextMenu()
+        }}]
+    }]
+    addContextMenuFunc(event.clientX, event.clientY, contextMenuRaw)
+  }
+
+  tryCloseContextMenu () {
+    if (this.onCloseContextMenu != null) {
+      this.onCloseContextMenu()
+    }
   }
 
   equals (move) {

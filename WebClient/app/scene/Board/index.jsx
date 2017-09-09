@@ -28,6 +28,7 @@ import {Persist, PersistType} from './../../util/Persist/Persist'
 import Auth from './../../auth/Auth'
 import Callback from './../../auth/Callback/SignInCallback.js'
 import SettingsConfig from './../../util/SettingsConfig.js'
+import ContextMenu from './components/ContextMenu'
 
 const maxCanvasSize = 3000
 
@@ -51,7 +52,8 @@ export default class Board extends React.Component {
     loading: true,
     currentBoard: new BoardData(), // this is necessary because currentBoard is only fetched after first render
     userBoards: [],
-    settings: [false, false]
+    settings: [false, false],
+    contextMenuVisibility: false
   }
   toolsConfig = new ToolsConfig(defaultToolsConfig)
 
@@ -60,7 +62,8 @@ export default class Board extends React.Component {
     onDown: event => this.state.currTool.onPress(event, 1, (x, y) => this.updateCanvasSize(x, y), this.state.settings),
     onUp: event => this.state.currTool.onPressUp(event, this.persist),
     onMove: event => this.state.currTool.onSwipe(event, 1, (x, y) => this.updateCanvasSize(x, y), this.state.settings), // change the way canvas size is updated
-    onOut: event => this.state.currTool.onOut(event, this.persist)
+    onOut: event => this.state.currTool.onOut(event, this.persist),
+    onContextMenu: event => this.state.currTool.onContextMenu(event, this.persist, this.openContextMenu, this.closeContextMenu, this.canvasContext)
   }
 
   componentDidMount () {
@@ -269,6 +272,7 @@ export default class Board extends React.Component {
     newImage.persist(this.persist, this.grid)
     this.grid.draw(this.canvasContext, 1)
   }
+
   changeCurrentTool = (tool) => {
     this.toolsConfig.updatePrevTool(this.state.currTool)
     this.updateUserPreferences('currTool', tool)
@@ -370,6 +374,17 @@ export default class Board extends React.Component {
     this.grid.undo(this.canvasContext, this.persist)
   }
 
+  openContextMenu = (clientX, clientY, contextMenuRaw) => {
+    this.clientX = clientX
+    this.clientY = clientY
+    this.contextMenuRaw = contextMenuRaw
+    this.setState({contextMenuVisibility: true})
+  }
+
+  closeContextMenu = () => {
+    this.setState({contextMenuVisibility: false})
+  }
+
   render () {
     return (
       <div ref='maindiv' onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.boardStyle} style={{width: this.state.canvasSize.width, height: this.state.canvasSize.height}}>
@@ -397,6 +412,7 @@ export default class Board extends React.Component {
         <UserAccountModal auth={this.auth} visible={this.state.showUserAccountModal} closeModal={this.toggleUserAccountModal} />
         <SettingsModal settings={this.state.settings} updateSettings={this.updateSettings} visible={this.state.showSettingsModal} closeModal={this.toggleSettingsModal} />
         <UsersManagementModal visible={this.state.showUsersManagementModal} closeModal={this.toggleUsersManagementModal} persist={this.persist} auth={this.auth} />
+        <ContextMenu canvasSize={this.state.canvasSize} visible={this.state.contextMenuVisibility} top={this.clientY} left={this.clientX} contextMenuRaw={this.contextMenuRaw} />
       </div>
     )
   }

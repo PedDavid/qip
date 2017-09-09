@@ -196,6 +196,11 @@ export default function Grid (initialFigures, currIdx) {
     this.draw(context, currScale)
   }
 
+  this.removeImage = function (imageId, context, currScale) {
+    this.removeFigureFromGrid(imageId)
+    this.draw(context, currScale)
+  }
+
   this.moveImage = function (img, newSrcPoint, context, currScale) {
     img.setSrcPoint(newSrcPoint)
     this.draw(context, currScale)
