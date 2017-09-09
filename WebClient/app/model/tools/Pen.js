@@ -9,6 +9,7 @@ export default class Pen implements Tool {
     this.type = 'pen'
     this.color = color
     this.width = width
+    this.fontText = width
 
     this.grid = grid
     this.currentFigure = null
@@ -82,15 +83,7 @@ export default class Pen implements Tool {
     // todo: passar persistencia para o onOut
     this.grid.addFigure(this.currentFigure, true)
 
-    if (persist.connected) {
-      persist.socket.send(this.currentFigure.exportWS())
-    } else {
-      // add to localstorage
-      const dataFigure = JSON.parse(window.localStorage.getItem('figures'))
-      dataFigure.push(this.currentFigure.exportLS()) // it can be push instead of dataFigure[id] because it will not have crashes with external id's because it's only used when there is no connection
-      window.localStorage.setItem('figures', JSON.stringify(dataFigure))
-      window.localStorage.setItem('currFigureId', JSON.stringify(this.grid.getCurrentFigureId()))
-    }
+    persist.sendPenAction(this.currentFigure, this.grid.getCurrentFigureId())
 
     // reset current figure
     this.currentFigure = null

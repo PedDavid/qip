@@ -71,6 +71,12 @@ export function Figure (figureStyle, id = null) {
     })
   }
 
+  this.getSimplePoints = function () {
+    return this.points.map((point, idx) => {
+      return new SimplePoint(point.x, point.y, point.getStyleOf(this.id), idx)
+    })
+  }
+
   this.removePoint = function (point) {
     const idxToRem = this.points.indexOf(point)
     const pts = this.points

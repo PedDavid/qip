@@ -17,7 +17,7 @@ export default function ToolsSideMenu (props) {
     if (props.tool.type === 'pen') {
       tool = new Pen(props.grid, toolInst.value, pen.width)
     } else if (props.tool.type === 'eraser') {
-      tool = new Eraser(props.grid, toolInst.value)
+      tool = new Eraser(props.grid, toolInst.value, toolInst.type)
     } else if (props.tool.type === 'width') {
       tool = new Pen(props.grid, pen.color, toolInst.value)
     }

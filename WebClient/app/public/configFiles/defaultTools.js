@@ -20,19 +20,19 @@ module.exports = [
   {type: 'width',
     icon: 'selected radio',
     content: [
-      {value: '5', color: 'black', size: 'mini'},
-      {value: '10', color: 'black', size: 'tiny'},
-      {value: '15', color: 'black', size: 'small'},
-      {value: '20', color: 'black', size: 'large'}
+      {value: 5, color: 'black', size: 'mini'},
+      {value: 10, color: 'black', size: 'tiny'},
+      {value: 15, color: 'black', size: 'small'},
+      {value: 20, color: 'black', size: 'large'}
     ]
   },
   {type: 'eraser',
     icon: 'eraser',
     content: [
-      {value: '5', color: 'black', size: 'mini'},
-      {value: '10', color: 'black', size: 'tiny'},
-      {value: '15', color: 'black', size: 'small'},
-      {value: '20', color: 'black', size: 'large'}
+      {value: 5, color: 'black', size: 'tiny', type:'normal'},
+      {value: 10, color: 'black', size: 'small', type:'normal'},
+      {value: 15, color: 'black', size: 'large', type:'normal'},
+      {value: 15, color: 'black', size: 'large', type:'stroke'}
     ],
     lastValue: null,
     toolType: Eraser

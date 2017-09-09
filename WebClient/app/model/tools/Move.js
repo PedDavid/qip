@@ -93,20 +93,8 @@ export default class Move implements Tool {
 
   onOut (event, persist) {
     if (this.movingLine != null && this.movingLine.start !== this.movingLine.end) {
-      if (persist.connected) {
-        const offsetPoint = new SimplePoint(this.movingLine.end.x - this.movingLine.start.x, this.movingLine.end.y - this.movingLine.start.y)
-        const toSend = this.currentFigure.exportWS(
-          fig => { fig.offsetPoint = offsetPoint }
-        )
-        persist.socket.send(toSend)
-      } else {
-        // move from localstorage
-        const dataFigure = JSON.parse(window.localStorage.getItem('figures'))
-        const toPersist = this.currentFigureMoving.exportLS()
-        let figIdx = dataFigure.findIndex(f => f.id === toPersist.id)
-        dataFigure[figIdx] = toPersist
-        window.localStorage.setItem('figures', JSON.stringify(dataFigure))
-      }
+      const offsetPoint = new SimplePoint(this.movingLine.end.x - this.movingLine.start.x, this.movingLine.end.y - this.movingLine.start.y)
+      persist.sendMoveAction(this.currentFigureMoving, offsetPoint)
     }
 
     this.movingLine = null

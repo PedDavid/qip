@@ -2,7 +2,6 @@ import {Figure, FigureStyle} from './../../model/Figure'
 import {PointStyle} from './../../model/Point'
 import {SimplePoint} from './../../model/SimplePoint'
 import fetch from 'isomorphic-fetch'
-import Grid from './../../model/Grid'
 import Pen from './../../model/tools/Pen'
 import Eraser from './../../model/tools/Eraser'
 import Move from './../../model/tools/Move'
@@ -115,11 +114,9 @@ export default class PersistLS {
       let maxId = -1
       console.log('figures fetched from initial board:')
       console.log(figures)
-      // todo: make possible to get images too
-      const grid = new Grid(figures, maxId)
 
       const initBoard = {
-        grid,
+        grid: {figures, maxId},
         canvasSize: { // todo: get from server
           width: 0,
           height: 0
@@ -250,7 +247,7 @@ export default class PersistLS {
       case ('pen'):
         return new Pen(grid, rawTool.color, rawTool.width)
       case ('eraser'):
-        return new Eraser(grid, rawTool.width)
+        return new Eraser(grid, rawTool.width, rawTool.eraserType)
       case ('move'):
         return new Move(grid)
     }
@@ -299,5 +296,70 @@ export default class PersistLS {
         const userBoardInfo = allRes.length === 1 ? boardInfo.basePermission : allRes[1] // if user is not authenticated, board permissions is 0
         return new BoardData(boardInfo.id, boardInfo.name, boardInfo.basePermission, userBoardInfo.permission)
       })
+  }
+
+  static _updateBoardBasePermissionWS = function (boardId, boardName, basePermission, accessToken) {
+    return fetch(`http://localhost:57059/api/boards/${boardId}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      method: 'PUT',
+      body: JSON.stringify({
+        id: boardId,
+        name: boardName,
+        basePermission: basePermission,
+        maxDistPoints: 0
+      })
+    }).then(usersRes => {
+      if (usersRes.status >= 400) {
+        throw new Error('Bad response from server.')
+      }
+      return usersRes.json()
+    })
+  }
+
+  static _updateUsersPermissionWS = function(users, boardId, usersPermission, accessToken) {
+    const promises = []   
+    users.forEach(userId => {
+      promises.push(
+        fetch(`http://localhost:57059/api/boards/${boardId}/usersboards`, {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          },
+          method: 'POST',
+          body: JSON.stringify({
+            userId: userId,
+            boardId,
+            permission:usersPermission
+          })
+        }).then(updatedPermissionRes => {
+          if (updatedPermissionRes.status >= 400) {
+            throw new Error('Bad response from server.')
+          }
+          return updatedPermissionRes.json()
+        })
+      )
+    })
+    return Promise.all(promises)
+  }
+
+  static _getUsersWS = function(accessToken) {
+    return fetch(`http://localhost:57059/api/users/`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      method: 'GET'
+    }).then(usersRes => {
+      if (usersRes.status >= 400) {
+        throw new Error('Bad response from server. Check if Board Id is correct')
+      }
+      return usersRes.json()
+    })
   }
 }

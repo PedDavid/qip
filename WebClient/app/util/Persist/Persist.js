@@ -82,6 +82,49 @@ export class Persist {
     return PersistWS._addUserBoardWS(boardName, user, accessToken)
   }
 
+  updateBoardBasePermission(boardId, boardName, basePermission, accessToken) {
+    return PersistWS._updateBoardBasePermissionWS(boardId, boardName, basePermission, accessToken)
+  }
+
+  updateUsersPermission (users, boardId, usersPermission, accessToken) {
+    return PersistWS._updateUsersPermissionWS(users, boardId, usersPermission, accessToken)
+  }
+
+  getUsers (accessToken) {
+    return PersistWS._getUsersWS(accessToken)
+  }
+
+  sendPenAction (figure, currentFigureId) {
+    if (this.connected) {
+      this.socket.send(figure.exportWS())
+    } else {
+      PersistLS._sendPenActionLS(figure, currentFigureId)
+    }
+  }
+
+  sendEraserAction (figureId) {
+    if (this.connected) {
+      const objToSend = {
+        type: 'DELETE_LINE',
+        payload: {'id': figureId}
+      }
+      this.socket.send(JSON.stringify(objToSend))
+    } else {
+      PersistLS._sendEraserActionLS(figureId)
+    }
+  }
+
+  sendMoveAction (figure, offsetPoint) {
+    if (this.connected) {
+      this.socket.send(
+        figure.exportWS(
+          fig => { fig.offsetPoint = offsetPoint }
+        ))
+    } else {
+      PersistLS._sendMoveActionLS(figure)
+    }
+  }
+
   callWSLSFunc (WSFunc, LSFunc) {
     if (this.persistType === PersistType().WebSockets) {
       return WSFunc()

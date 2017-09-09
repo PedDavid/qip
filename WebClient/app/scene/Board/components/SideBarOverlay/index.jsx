@@ -72,6 +72,18 @@ export default class SideBarOverlay extends React.Component {
     }
   }
 
+  getUsersViewIfAdmin = () => {
+    const auth = this.props.auth
+    if ((!auth.isAuthenticated() && this.props.currentBoard.id < 0) || this.props.currentBoard.userPermission === 3) {
+      return (
+        <a onClick={this.props.toggleUsersManagementModal} className='item'>
+          <Icon name='users' />
+          Users Management
+        </a>
+      )
+    }
+  }
+
   changeCurrentBoard = (props) => {
     const boardId = props[0]
     this.props.changeCurrentBoard(boardId)
