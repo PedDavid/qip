@@ -22,7 +22,7 @@ namespace IODomain.Extensions {
         public static UserBoard In(this UserBoard userBoard, InUpdateUserBoard inUserBoard) {
             userBoard.UserId = inUserBoard.UserId;
             userBoard.BoardId = inUserBoard.BoardId.Value;
-            userBoard.Permission = BoardPermissionConverter.ConvertFromIn(inUserBoard.Permission);
+            userBoard.Permission = BoardPermissionConverter.ConvertFromIn(inUserBoard.Permission.Value);
             return userBoard;
         }
     }

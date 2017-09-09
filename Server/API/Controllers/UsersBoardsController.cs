@@ -75,7 +75,7 @@ namespace API.Controllers {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.BoardIsOwnPolicy))
                 return Challenge();
 
-            if(inUserBoard == null) {
+            if(inputUserBoard == null) {
                 return BadRequest();
             }
 
