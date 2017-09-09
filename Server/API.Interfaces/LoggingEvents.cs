@@ -9,6 +9,15 @@
         public const int UpdateBoard = 1003;
         public const int DeleteBoard = 1004;
 
+        public const int GetBoardNotAuthorized = 4004;
+        public const int UpdateBoardNotAuthorized = 4004;
+
+        public const int CreateWithoutBody = 4004;
+        public const int UpdateWithoutBody = 4004;
+        public const int UpdateBoardWrongId= 4004;
+
+        public const int GetBoardNotFound = 4004;
+        public const int UpdateBoardNotFound = 4004;
         public const int DeleteBoardNotFound = 4004;
 
         /*

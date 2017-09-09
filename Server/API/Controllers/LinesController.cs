@@ -57,6 +57,10 @@ namespace API.Controllers {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.WriteBoadPolicy))
                 return Challenge();
 
+            if(inLine == null) {
+                return BadRequest();
+            }
+
             if(inLine.BoardId != boardId) {
                 //$"The board id present on update is different of the expected. {Environment.NewLine}Expected: {boardId}{Environment.NewLine}Current: {inLine.BoardId}"
                 return BadRequest();
@@ -75,6 +79,10 @@ namespace API.Controllers {
         public async Task<IActionResult> Update(long id, long boardId, [FromBody] InUpdateLine inLine) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.WriteBoadPolicy))
                 return Challenge();
+
+            if(inLine == null) {
+                return BadRequest();
+            }
 
             if(inLine.Id != id) {
                 //$"The id present on update is different of the expected. {Environment.NewLine}Expected: {id}{Environment.NewLine}Current: {inLine.Id}"

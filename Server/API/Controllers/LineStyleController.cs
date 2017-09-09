@@ -45,6 +45,10 @@ namespace API.Controllers {
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] InCreateLineStyle inputLineStyle) {
+            if(inputLineStyle == null) {
+                return BadRequest();
+            }
+
             LineStyle style = new LineStyle().In(inputLineStyle);
 
             await _lineStyleService.CreateAsync(style);
@@ -55,6 +59,10 @@ namespace API.Controllers {
         [HttpPut("{id}")]
         [Authorize("Administrator")]
         public async Task<IActionResult> Update(long id, [FromBody] InUpdateLineStyle inLineStyle) {
+            if(inLineStyle == null) {
+                return BadRequest();
+            }
+
             if(inLineStyle.Id != id) {
                 //$"The id present on update is different of the expected. {Environment.NewLine}Expected: {id}{Environment.NewLine}Current: {inLineStyle.Id}"
                 return BadRequest();

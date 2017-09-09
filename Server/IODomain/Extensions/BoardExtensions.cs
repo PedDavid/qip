@@ -23,7 +23,7 @@ namespace IODomain.Extensions {
         public static Board In(this Board board, InUpdateBoard inBoard) {
             board.Name = inBoard.Name;
             board.MaxDistPoints = inBoard.MaxDistPoints.Value;
-            board.BasePermission = BoardPermissionConverter.ConvertFromIn(inBoard.BasePermission);
+            board.BasePermission = BoardPermissionConverter.ConvertFromIn(inBoard.BasePermission.Value);
             return board;
         }
     }

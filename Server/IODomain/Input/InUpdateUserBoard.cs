@@ -11,6 +11,6 @@ namespace IODomain.Input {
 
         [Required]
         [Range(1, 2)]
-        public InBoardPermission Permission { get; set; }
+        public InBoardPermission? Permission { get; set; }
     }
 }

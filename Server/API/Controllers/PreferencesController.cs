@@ -42,6 +42,10 @@ namespace API.Controllers {
             if(!await _authorizationService.AuthorizeAsync(User, new UserRequest(userId), Policies.UserIsOwnPolicy))
                 return Challenge();
 
+            if(inPreferences == null) {
+                return BadRequest();
+            }
+
             if(inPreferences.UserId != userId) {
                 return BadRequest();
             }
