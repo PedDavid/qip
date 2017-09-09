@@ -53,7 +53,7 @@ export default class Eraser implements Tool {
     const canvasContext = canvas.getContext('2d')
 
     this.erasedFigures.forEach(fig => {
-      this.grid.removeFigure(fig, canvasContext, 1, true)      
+      this.grid.removeFigure(fig, canvasContext, 1, true)
       persist.sendEraserAction(fig.id)
     })
 
@@ -181,7 +181,6 @@ export default class Eraser implements Tool {
                   this.erasedFigures.push(figure)
 
                   console.log('numero de figuras a inserir: ' + this.addedFigures.length)
-
                 } else if (this.eraserType === 'stroke') {
                   this.erasedFigures.push(figure)
                 }

@@ -82,7 +82,7 @@ export class Persist {
     return PersistWS._addUserBoardWS(boardName, user, accessToken)
   }
 
-  updateBoardBasePermission(boardId, boardName, basePermission, accessToken) {
+  updateBoardBasePermission (boardId, boardName, basePermission, accessToken) {
     return PersistWS._updateBoardBasePermissionWS(boardId, boardName, basePermission, accessToken)
   }
 

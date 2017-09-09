@@ -307,5 +307,4 @@ export default function Grid (initialFigures, currIdx) {
   }
 
   this.addInitialFigures(initialFigures)
-
 }

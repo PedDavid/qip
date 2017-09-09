@@ -320,8 +320,8 @@ export default class PersistLS {
     })
   }
 
-  static _updateUsersPermissionWS = function(users, boardId, usersPermission, accessToken) {
-    const promises = []   
+  static _updateUsersPermissionWS = function (users, boardId, usersPermission, accessToken) {
+    const promises = []
     users.forEach(userId => {
       promises.push(
         fetch(`http://localhost:57059/api/boards/${boardId}/usersboards`, {
@@ -334,7 +334,7 @@ export default class PersistLS {
           body: JSON.stringify({
             userId: userId,
             boardId,
-            permission:usersPermission
+            permission: usersPermission
           })
         }).then(updatedPermissionRes => {
           if (updatedPermissionRes.status >= 400) {
@@ -347,7 +347,7 @@ export default class PersistLS {
     return Promise.all(promises)
   }
 
-  static _getUsersWS = function(accessToken) {
+  static _getUsersWS = function (accessToken) {
     return fetch(`http://localhost:57059/api/users/`, {
       headers: {
         'Accept': 'application/json',
