@@ -7,7 +7,7 @@ import { Image } from './Image'
 export default function Grid (initialFigures, currIdx) {
   let figures = new Map()
   let currFigureId = currIdx
-  this.history = []
+  let history = []
 
   // return the new figure idx. If there is already the next idx, return the idx plus 0.1. This is because the concurrency
   // Estão a ser usados id's negativos pois se este id for maior que o id retornado pelo servidor vai gerar colisões com outras figuras
@@ -18,6 +18,11 @@ export default function Grid (initialFigures, currIdx) {
     }
     currFigureId--
     return toRet
+  }
+
+  this.updateHistoryFigureId = function (prevId, newId) {
+    const toUpdate = history.find(fig => fig.figureId === prevId)
+    toUpdate != null && (toUpdate.figureId = newId)
   }
 
   this.getCurrentFigureId = function () {
@@ -146,7 +151,7 @@ export default function Grid (initialFigures, currIdx) {
     }
 
     if (undoable) {
-      this.history.push({figureId: figure.id, action: 'add'})
+      history.push({figureId: figure.id, action: 'add'})
     }
 
     let prev = null
@@ -183,7 +188,7 @@ export default function Grid (initialFigures, currIdx) {
     if (undoable) {
       const figureCopy = new Figure(figure.figureStyle)
       figureCopy.points = figure.getSimplePoints()
-      this.history.push({figureId: figure.id, action: 'remove', figure: figureCopy})
+      history.push({figureId: figure.id, action: 'remove', figure: figureCopy})
     }
     // remove figure from all points
     figure.points.forEach(point => point.removeFigure(figure.id))
@@ -235,10 +240,10 @@ export default function Grid (initialFigures, currIdx) {
   }
 
   this.undo = function (context, persist) {
-    if (this.history.length <= 0) {
+    if (history.length <= 0) {
       return
     }
-    const undoableAction = this.history.pop()
+    const undoableAction = history.pop()
     // get this out of here
     if (undoableAction.action === 'add') {
       this.removeFigure(this.getFigure(undoableAction.figureId), context, 1)

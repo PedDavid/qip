@@ -73,8 +73,7 @@ export default class SideBarOverlay extends React.Component {
   }
 
   getUsersViewIfAdmin = () => {
-    const auth = this.props.auth
-    if ((!auth.isAuthenticated() && this.props.currentBoard.id < 0) || this.props.currentBoard.userPermission === 3) {
+    if (this.props.currentBoard.userPermission === 3) {
       return (
         <a onClick={this.props.toggleUsersManagementModal} className='item'>
           <Icon name='users' />
@@ -98,6 +97,7 @@ export default class SideBarOverlay extends React.Component {
           <Sidebar as={Menu} animation='push' direction='left' width='thin' icon='labeled' visible={visible} vertical style={this.state.extraStyle} inverted className={styles.sidebarMenu}>
             {this.getAuthView()}
             {this.getShareViewIfAdmin()}
+            {this.getUsersViewIfAdmin()}
             <Dropdown onClose={this.closeBoards} onClick={() => this.extendMenu(300)} item text='My Boards'>
               <Dropdown.Menu className={styles.myBoards} >
                 <Dropdown.Header>Current Board</Dropdown.Header>

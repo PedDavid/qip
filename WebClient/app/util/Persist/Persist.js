@@ -16,7 +16,8 @@ export class Persist {
     // TODO(peddavid): Configuration of endpoints
     const scheme = document.location.protocol === 'https:' ? 'wss' : 'ws'
     const port = document.location.port ? (57059) : ''
-    const connectionUrl = `${scheme}://localhost:${port}/ws/${boardId}?access_token=${accessToken}`
+    const authorization = accessToken != null ? `?access_token=${accessToken}` : ''
+    const connectionUrl = `${scheme}://localhost:${port}/ws/${boardId}${authorization}`
     this.boardId = boardId // this should be here because even if ws connection goes wrong, there is a url to share
     console.log('making web socket connection to: ' + connectionUrl)
     this.socket = new WebSocket(connectionUrl)
@@ -33,6 +34,11 @@ export class Persist {
     this.socket.onerror = (event) => {
       console.error('an error occurred on web socket connection to: ' + connectionUrl)
       this.connected = false
+    }
+
+    this.socket.onclose = (event) => {
+      console.error('WebSocket connection is closing without being handled!! Restarting WebSocket connection ...')
+      this.connectWS(boardId, accessToken)
     }
   }
 
@@ -57,6 +63,10 @@ export class Persist {
     )
   }
 
+  getBoardUsers (boardId, accessToken) {
+    return PersistWS._getBoardUsers(boardId, accessToken)
+  }
+
   cleanCanvas () {
     return this.callWSLSFunc(
       () => PersistWS._cleanCanvasWS(this.grid, this.socket),
@@ -64,11 +74,12 @@ export class Persist {
     )
   }
 
-  updateUserPreferences (updatedPreferences, profile, accessToken) {
-    return this.callWSLSFunc(
-      () => PersistWS._updateUserPreferencesWS(updatedPreferences, profile, accessToken),
-      () => PersistLS._updateUserPreferencesLS(updatedPreferences)
-    )
+  updateUserPreferences (isAuthenticated, updatedPreferences, profile, accessToken) {
+    if (isAuthenticated && this.persistType === PersistType().WebSockets) {
+      PersistWS._updateUserPreferencesWS(updatedPreferences, profile, accessToken)
+    } else {
+      PersistLS._updateUserPreferencesLS(updatedPreferences)
+    }
   }
 
   updateCanvasSize (canvasSize) {
@@ -86,11 +97,15 @@ export class Persist {
     return PersistWS._updateBoardBasePermissionWS(boardId, boardName, basePermission, accessToken)
   }
 
-  updateUsersPermission (users, boardId, usersPermission, accessToken) {
-    return PersistWS._updateUsersPermissionWS(users, boardId, usersPermission, accessToken)
+  createUsersPermission (users, boardId, usersPermission, accessToken) {
+    return PersistWS._createUsersPermissionWS(users, boardId, usersPermission, accessToken)
   }
 
-  getUsers (accessToken) {
+  updateUserPermission (userId, boardId, userPermission, accessToken) {
+    return PersistWS._updateUserPermissionWS(userId, boardId, userPermission, accessToken)
+  }
+
+  getUsersAsync (accessToken) {
     return PersistWS._getUsersWS(accessToken)
   }
 

@@ -135,7 +135,7 @@ export default class Eraser implements Tool {
               //   currentFigure.addPoint(point)
               // }
             } else if (this.eraserType === 'stroke') {
-              grid.removeFigure(figure, canvasContext, currScale)
+              grid.removeFigure(figure, canvasContext, currScale, true)
               this.erasedFigures.push(figure)
             }
             return

@@ -22,7 +22,8 @@ export default class PersistLS {
               point.removeFigure(payload.tempId)
               point.addFigure(payload.id, pointStyle)
             })
-            // update figure id
+            // update figure id and history
+            grid.updateHistoryFigureId(prevFigure.id, payload.id)
             prevFigure.id = payload.id
 
             // update grid map of figures
@@ -165,9 +166,7 @@ export default class PersistLS {
       if (updatedPreferencesRes.status >= 400) {
         throw new Error('Bad response from server. Check if Board Id is correct')
       }
-      return updatedPreferencesRes.json()
-    }).then(updatedPreferences => {
-      console.log(updatedPreferences)
+      return updatedPreferencesRes
     })
   }
 
@@ -212,6 +211,15 @@ export default class PersistLS {
         if (preferencesRes.status >= 400) {
           throw new Error('Bad response from server. Check if User Sub is correct')
         }
+        if (preferencesRes.status === 204) { // .json cannot handle response without content and server has not a default preferences response
+          return {
+            favorites: '[]',
+            currTool: 'null',
+            settings: '[]',
+            defaultEraser: 'null',
+            defaultPen: 'null'
+          }
+        }
         return preferencesRes.json()
       }),
       fetch(`http://localhost:57059/api/users/${profile.sub}/boards`, {
@@ -243,13 +251,15 @@ export default class PersistLS {
   }
 
   static _getToolFromWS = function (grid, rawTool) {
-    switch (rawTool.type) {
-      case ('pen'):
-        return new Pen(grid, rawTool.color, rawTool.width)
-      case ('eraser'):
-        return new Eraser(grid, rawTool.width, rawTool.eraserType)
-      case ('move'):
-        return new Move(grid)
+    if (rawTool != null) {
+      switch (rawTool.type) {
+        case ('pen'):
+          return new Pen(grid, rawTool.color, rawTool.width)
+        case ('eraser'):
+          return new Eraser(grid, rawTool.width, rawTool.eraserType)
+        case ('move'):
+          return new Move(grid)
+      }
     }
   }
 
@@ -293,9 +303,27 @@ export default class PersistLS {
     return Promise.all(promises)
       .then(allRes => {
         const boardInfo = allRes[0]
-        const userBoardInfo = allRes.length === 1 ? boardInfo.basePermission : allRes[1] // if user is not authenticated, board permissions is 0
+        const userBoardInfo = allRes.length === 1 ? {permission: boardInfo.basePermission} : allRes[1] // if user is not authenticated, board permissions is 0
         return new BoardData(boardInfo.id, boardInfo.name, boardInfo.basePermission, userBoardInfo.permission)
       })
+  }
+
+  static _getBoardUsers = function (boardId, accessToken) {
+    return fetch(`http://localhost:57059/api/boards/${boardId}/usersboards`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      method: 'GET'
+    }).then(boardUsersRes => {
+      if (boardUsersRes.status >= 400) {
+        throw new Error('Bad response from server.')
+      }
+      return boardUsersRes.json()
+    }).then(boardUsers => {
+      return boardUsers
+    })
   }
 
   static _updateBoardBasePermissionWS = function (boardId, boardName, basePermission, accessToken) {
@@ -316,11 +344,11 @@ export default class PersistLS {
       if (usersRes.status >= 400) {
         throw new Error('Bad response from server.')
       }
-      return usersRes.json()
+      return usersRes
     })
   }
 
-  static _updateUsersPermissionWS = function (users, boardId, usersPermission, accessToken) {
+  static _createUsersPermissionWS = function (users, boardId, usersPermission, accessToken) {
     const promises = []
     users.forEach(userId => {
       promises.push(
@@ -345,6 +373,27 @@ export default class PersistLS {
       )
     })
     return Promise.all(promises)
+  }
+
+  static _updateUserPermissionWS = function (userId, boardId, userPermission, accessToken) {
+    return fetch(`http://localhost:57059/api/boards/${boardId}/usersboards/${userId}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      method: 'PUT',
+      body: JSON.stringify({
+        userId: userId,
+        boardId,
+        permission: userPermission
+      })
+    }).then(updatedPermissionRes => {
+      if (updatedPermissionRes.status >= 400) {
+        throw new Error('Bad response from server.')
+      }
+      return updatedPermissionRes
+    })
   }
 
   static _getUsersWS = function (accessToken) {

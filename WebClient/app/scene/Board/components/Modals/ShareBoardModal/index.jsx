@@ -101,7 +101,7 @@ export default class ShareBoardModal extends React.Component {
   }
 
   shareWithUsers = () => {
-    this.props.persist.updateUsersPermission(this.state.selectedUsers, this.props.currentBoard.id, this.usersPermission, this.props.auth.getAccessToken())
+    this.props.persist.createUsersPermission(this.state.selectedUsers, this.props.currentBoard.id, this.usersPermission, this.props.auth.getAccessToken())
       .then(allRes => {
         this.setState({
           userVisibilityLoading: false,
@@ -144,7 +144,7 @@ export default class ShareBoardModal extends React.Component {
     if (!this.props.auth.isAuthenticated()) {
       return
     }
-    this.props.persist.getUsers(this.props.auth.getAccessToken())
+    this.props.persist.getUsersAsync(this.props.auth.getAccessToken())
       .then(users => {
         const profile = this.props.auth.tryGetProfile()
         profile !== null && (this.users = users.filter(user => user.id !== profile.sub))

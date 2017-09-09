@@ -35,7 +35,7 @@ export default class Board extends React.Component {
   // check if these default tools are necessary
   grid = new Grid([], 0)
   auth = new Auth(() => this.getInitialBoard(null), this.props.history) // this lambda may not be the best solution
-  persist = {} // this is necessary because the first time render occurs, there is no this.persist object
+  persist = new Persist(null, null, null) // this is necessary because the first time render occurs, there is no this.persist object
 
   state = {
     showCleanModal: false,
@@ -170,6 +170,8 @@ export default class Board extends React.Component {
       })
       if (currBoard.userPermission === 1) {
         window.alert('All modifications to board you may do, will not be persisted as you only have view permissions to this board')
+      } else if (currBoard.userPermission === 0) {
+        window.alert('You do not have public access to this board!. Redirecting to home board ...')
       }
       return this.persist.getInitialBoardAsync(boardId == null ? currBoard.id : boardId, userAccessToken)
     }).then(initBoard => {
@@ -234,7 +236,7 @@ export default class Board extends React.Component {
       settings: this.state.settings
     }
     updatedPreferences[preferenceNameToUpdate] = updatedPreference
-    this.persist.updateUserPreferences(updatedPreferences, this.auth.tryGetProfile(), this.auth.getAccessToken())
+    this.persist.updateUserPreferences(this.auth.isAuthenticated(), updatedPreferences, this.auth.tryGetProfile(), this.auth.getAccessToken())
   }
   moveFavorite = (tool, movingUp) => {
     this.setState((prevState) => {
@@ -394,7 +396,7 @@ export default class Board extends React.Component {
           addBoardAsync={this.addBoardAsync} />
         <UserAccountModal auth={this.auth} visible={this.state.showUserAccountModal} closeModal={this.toggleUserAccountModal} />
         <SettingsModal settings={this.state.settings} updateSettings={this.updateSettings} visible={this.state.showSettingsModal} closeModal={this.toggleSettingsModal} />
-        <UsersManagementModal visible={this.state.showUsersManagementModal} closeModal={this.toggleUsersManagementModal} />
+        <UsersManagementModal visible={this.state.showUsersManagementModal} closeModal={this.toggleUsersManagementModal} persist={this.persist} auth={this.auth} />
       </div>
     )
   }
