@@ -402,7 +402,7 @@ export default class Board extends React.Component {
         <CleanBoardModal cleanCanvas={this.cleanCanvas} closeModal={this.toggleCleanModal} visible={this.state.showCleanModal} />
         <ShareBoardModal location={this.props.location} history={this.props.history} persist={this.persist}
           visible={this.state.showShareModal} closeModal={this.toggleShareModal} updateCurrentBoard={this.updateBoardId}
-          addBoardAsync={this.addBoardAsync} auth={this.auth} currentBoard={this.state.currentBoard} getInitialBoard={} />
+          addBoardAsync={this.addBoardAsync} auth={this.auth} currentBoard={this.state.currentBoard} getInitialBoard={this.getInitialBoard} />
         <Loader active={this.state.loading} content='Fetching Data ...' />
         <Route exact path='/callback' render={props => {
           return <Callback auth={this.auth} {...props} />

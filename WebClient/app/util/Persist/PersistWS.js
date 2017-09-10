@@ -52,7 +52,7 @@ export default class PersistLS {
           // todo: por estes comentários em vez de apagar e criar a figura quando o servidor estiver a enviar o offsetPoint
           const figureToMove = grid.getFigure(payload.figure.Id)
           const isScaling = payload.isScaling
-          if (isScaling != 'False') {
+          if (isScaling !== 'False') {
             const offsetPoint = {x: payload.offsetPoint.X, y: payload.offsetPoint.Y} // translate from server model
             figureToMove.scale(isScaling, offsetPoint, grid, canvasContext)
             grid.draw(canvasContext, 1)
