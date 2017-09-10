@@ -5,7 +5,8 @@ import {
 } from 'react-router-dom'
 
 import {
-  Loader
+  Loader,
+  Message
 } from 'semantic-ui-react'
 
 import SideBarOverlay from './components/SideBarOverlay'
@@ -56,7 +57,8 @@ export default class Board extends React.Component {
     loading: true,
     currentBoard: new BoardData(), // this is necessary because currentBoard is only fetched after first render
     userBoards: [],
-    settings: [false, false]
+    settings: [false, false],
+    notification: null
   }
   toolsConfig = new ToolsConfig(defaultToolsConfig)
 
@@ -325,8 +327,13 @@ export default class Board extends React.Component {
     const newImage = new Image({x: 80, y: 80}, imageSrc)
     uploadImage(imageSrc)
       .then(res => {
+        console.info(`Image uploaded to ${res.data.link}`)
+        this.notifySuccess(`Image uploaded to imgur`)
         newImage.setImageSrc(res.data.link)
         newImage.persist(this.persist, this.grid)
+      })
+      .catch(() => {
+        this.notifyError('Error uploading image to imgur')
       })
     this.grid.addImage(newImage)
     this.grid.draw(this.canvasContext, 1)
@@ -384,6 +391,17 @@ export default class Board extends React.Component {
     this.grid.undo(this.canvasContext, this.persist)
   }
 
+  notifyError = (message) => {
+    this.setState({notification: {props: {error: true}, message}}, () => setTimeout(this.dismissNotification, 3000))
+  }
+  notifySuccess = (message) => {
+    this.setState({notification: {props: {success: true}, message}}, () => setTimeout(this.dismissNotification, 2000))
+  }
+
+  dismissNotification = () => {
+    this.setState({notification: null})
+  }
+
   render () {
     return (
       <div ref='maindiv' onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.boardStyle} style={{width: this.state.canvasSize.width, height: this.state.canvasSize.height}}>
@@ -397,6 +415,11 @@ export default class Board extends React.Component {
           <Canvas ref={this.refCallback} width={this.state.canvasSize.width} height={this.state.canvasSize.height} {...this.listeners}>
             HTML5 Canvas not supported
           </Canvas>
+          {this.state.notification !== null &&
+            <Message style={{position: 'fixed', textAlign: 'center', bottom: '0'}} onDismiss={this.dismissNotification} {...this.state.notification.props}>
+              {this.state.notification.message}
+            </Message>
+          }
         </SideBarOverlay>
         <CleanBoardModal cleanCanvas={this.cleanCanvas} onClose={this.toggleCleanModal} open={this.state.showCleanModal} />
         <ImportImageModal onClose={this.toggleImportImageModal} open={this.state.showImportImageModal} onImageLoad={this.onImageLoad} />

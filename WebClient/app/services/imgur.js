@@ -1,7 +1,18 @@
 import fetch from 'isomorphic-fetch'
 
-function extractBase64ImageFromImageSrc (imageSrc) {
+function isUrl (string) {
+  return string.startsWith('http')
+}
+
+function getBase64ImageFromImageSrc (imageSrc) {
   return imageSrc.slice(imageSrc.indexOf(',') + 1, imageSrc.length)
+}
+
+function imageFromSrc (imageSrc) {
+  if (isUrl(imageSrc)) {
+    return imageSrc
+  }
+  return getBase64ImageFromImageSrc(imageSrc)
 }
 
 export function uploadImage (imageSrc) {
@@ -9,7 +20,7 @@ export function uploadImage (imageSrc) {
     'Authorization': 'Client-ID 925c1bb08a795be',
     'Content-Type': 'application/json'
   })
-  const image = extractBase64ImageFromImageSrc(imageSrc)
+  const image = imageFromSrc(imageSrc)
   const body = JSON.stringify({image})
   const options = { method: 'POST', headers, body }
   return fetch('https://api.imgur.com/3/image', options)
