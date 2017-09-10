@@ -14,7 +14,7 @@ export default class ContextMenu extends React.Component {
     let menuHeight = 0
     this.props.contextMenuRaw.forEach(menuSection => {
       menuHeight += itemHeight
-      menuSection.menuItems.forEach(menuItem => menuHeight += itemHeight)
+      menuSection.menuItems.forEach(menuItem => { menuHeight += itemHeight })
     })
 
     const dynamicPositionStyle = {

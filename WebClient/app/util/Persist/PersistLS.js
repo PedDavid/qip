@@ -118,7 +118,7 @@ export default class PersistLS {
   }
 
   static _addClipboardLS = function (figure) {
-    window.localStorage.setItem('clipboard', JSON.stringify(figure))    
+    window.localStorage.setItem('clipboard', JSON.stringify(figure))
   }
 
   static _getClipboardLS = function () {

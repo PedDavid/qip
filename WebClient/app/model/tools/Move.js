@@ -139,7 +139,7 @@ export default class Move implements Tool {
           persist.removeImage(this.currentFigureMoving.id)
           this.tryCloseContextMenu()
         }},
-        copyMenuItem,pasteMenuItem]
+        copyMenuItem, pasteMenuItem]
     }])
 
     this.currentFigureMoving instanceof Figure && (contextMenuRaw = [{
@@ -161,7 +161,7 @@ export default class Move implements Tool {
     }
   }
 
-  _pasteFigure(event, type, figure, persist, canvasContext) {
+  _pasteFigure (event, type, figure, persist, canvasContext) {
     if (type === 'figure') {
       const newFig = new Figure(new FigureStyle(figure.style.color, 1))
       newFig.points = figure.points
@@ -173,7 +173,7 @@ export default class Move implements Tool {
       }, canvasContext, 1)
       const movedFigure = this.grid.getFigure(copiedFigure.id) // send figure after it was moved
       persist.sendPenAction(movedFigure, this.grid.getCurrentFigureId())
-      this.tryCloseContextMenu()      
+      this.tryCloseContextMenu()
     } else if (type === 'image') {
       const newImage = new Image({x: event.clientX, y: event.clientY}, figure.Src, figure.Width, figure.Height)
       // do not change this order. image must be added to grid first to set the new id
