@@ -7,10 +7,10 @@ as
 			select @pointId = id from dbo.Point where x=@x and y=@y
 			--verificar se o ponto já existe
 			--caso exista chamar proc com o id 
-			if(@pointId is null) begin
+			if(@pointId is null) 
+			BEGIN
 				insert into dbo.Point (x, y) values(@x, @y)
 				SET @pointId = SCOPE_IDENTITY()
-				return 
 			end
 			--caso não exista, criar e chamar proc com o id 
 			

@@ -43,7 +43,7 @@ namespace API.Controllers {
                 //Ideia fornecer default preferences
             }
 
-            return Ok(preferences.Out());
+            return Ok(preferences?.Out());//O método OK ao receber null transforma o OK(200) num NoContent(204)
         }
 
         [HttpPut]

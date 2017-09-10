@@ -171,7 +171,7 @@ namespace API.Repositories {
         }
 
         //SQL Commands
-        private static readonly string USER_BOARD_EXISTS = "SELECT CAST(count(id) as BIT) FROM dbo.User_Board WHERE userId = @userId and boardId = @boardId";
+        private static readonly string USER_BOARD_EXISTS = "SELECT CAST(count(*) as BIT) FROM dbo.User_Board WHERE userId = @userId and boardId = @boardId";
         private static readonly string SELECT_ALL_USERS = "SELECT permission, userId " +
                                                           "FROM dbo.Full_User_Board WHERE boardId=@boardId " +
                                                           "ORDER BY userId " +

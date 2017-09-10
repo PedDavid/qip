@@ -233,14 +233,17 @@ namespace API.Repositories {
             if(!dr.Read())
                 return orderedLines;
 
+            bool areMoreRows = true;
             foreach(Line line in orderedLines) {
+                if(!areMoreRows) break;
+
                 long lineId = line.Id;
 
                 List<LinePoint> points = new List<LinePoint>();
                 long currId;
                 do {
                     currId = dr.GetInt64(0);
-                    
+
                     if(currId != lineId) {
                         while(currId < lineId && dr.Read()) {
                             currId = dr.GetInt64(0);
@@ -251,7 +254,7 @@ namespace API.Repositories {
                     LinePoint curr = GetPointWithStyle(dr);
 
                     points.Add(curr);
-                } while(dr.Read());
+                } while(areMoreRows = dr.Read());
 
                 line.Points = points;
             }

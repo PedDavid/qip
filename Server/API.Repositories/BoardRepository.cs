@@ -1,12 +1,9 @@
 ﻿using API.Domain;
 using API.Interfaces.IRepositories;
-using API.Repositories;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace API.Repositories {
@@ -41,7 +38,7 @@ namespace API.Repositories {
 
             await _queryTemplate.StoredProcedureAsync(INSERT_BOARD, parameters);
 
-            board.Id = (long) boardId.Value;
+            board.Id = (long)boardId.Value;
         }
 
         public Task<Board> FindAsync(long id) {
@@ -117,16 +114,16 @@ namespace API.Repositories {
 
         //SQL Commands
         private static readonly string BOARD_EXISTS = "SELECT CAST(count(id) as BIT) FROM dbo.Board WHERE id = @id";
-        private static readonly string SELECT_ALL = "SELECT id, [name], maxDistPoints " +
+        private static readonly string SELECT_ALL = "SELECT id, [name], maxDistPoints, basePermission " +
                                                     "FROM dbo.Board " +
                                                     "ORDER BY id " +
                                                     "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
-        private static readonly string SELECT_SEARCH = "SELECT id, [name], maxDistPoints " +
+        private static readonly string SELECT_SEARCH = "SELECT id, [name], maxDistPoints, basePermission " +
                                                        "FROM dbo.Board " +
                                                        "WHERE CONTAINS([name], @search)" +
                                                        "ORDER BY id " +
                                                        "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
-        private static readonly string SELECT_BOARD = "SELECT id, [name], maxDistPoints FROM dbo.Board WHERE id = @id";
+        private static readonly string SELECT_BOARD = "SELECT id, [name], maxDistPoints, basePermission FROM dbo.Board WHERE id = @id";
         private static readonly string UPDATE_BOARD = "UPDATE dbo.Board " +
                                                       "SET [name]= @name, " +
                                                           "maxDistPoints = @maxDistPoints, " +
@@ -143,7 +140,8 @@ namespace API.Repositories {
             return new Board {
                 Id = dr.GetInt64(0),
                 Name = dr.GetString(1),
-                MaxDistPoints = dr.GetByte(2)
+                MaxDistPoints = dr.GetByte(2),
+                BasePermission = (BoardPermission)dr.GetByte(3)
             };
         }
     }

@@ -114,7 +114,7 @@ namespace API.Services {
                 throw new InvalidChangeException("It is not possible change the permissions owner.");
             }
 
-            await _usersBoardsRepository.UpdateAsync(user);
+            await _usersBoardsRepository.UpdateAsync(userBoard);
         }
 
         public Task<BoardPermission> GetPermissionAsync(string userId, long boardId) {

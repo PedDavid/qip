@@ -62,7 +62,7 @@ namespace API.Controllers {
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(long boardId, [FromBody] InUpdateUserBoard inUserBoard) {
+        public async Task<IActionResult> Create(long boardId, [FromBody] InCreateUserBoard inUserBoard) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.BoardIsOwnPolicy)) {
                 _logger.LogWarning(LoggingEvents.InsertUserBoardNotAuthorized, "Create({boardId}) NOT AUTHORIZED {user_id}", boardId, User.GetNameIdentifier());
                 return Challenge();

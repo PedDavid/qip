@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Data.SqlTypes;
 using API.Interfaces.IRepositories;
 using API.Domain;
+using API.Repositories.Extensions;
 
 namespace API.Repositories {
     public class PreferencesRepository : IPreferencesRepository {
@@ -93,12 +94,12 @@ namespace API.Repositories {
         private static Preferences GetPreferences(SqlDataReader dr) {
             return new Preferences() {
                 UserId = dr.GetString(0),
-                Favorites = dr.GetString(1),
-                PenColors = dr.GetString(2),
-                DefaultPen = dr.GetString(3),
-                DefaultEraser = dr.GetString(4),
-                CurrTool = dr.GetString(5),
-                Settings = dr.GetString(6)
+                Favorites = dr.GetSqlString(1).X(),
+                PenColors = dr.GetSqlString(2).X(),
+                DefaultPen = dr.GetSqlString(3).X(),
+                DefaultEraser = dr.GetSqlString(4).X(),
+                CurrTool = dr.GetSqlString(5).X(),
+                Settings = dr.GetSqlString(6).X()
             };
         }
     }

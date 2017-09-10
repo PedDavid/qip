@@ -26,6 +26,10 @@ namespace API.Services {
                 throw new ArgumentNullException("Argument line can not be null");
             }
 
+            if(line.Points.Count() == 0) {
+                throw new InvalidFieldsException("A line can not have 0 points");
+            }
+
             if(!await _boardService.ExistsAsync(line.BoardId)) {
                 throw new NotFoundException($"The Board with id {line.BoardId} not exists");
             }
@@ -62,6 +66,10 @@ namespace API.Services {
         public Task UpdateAsync(Line line) {
             if(line == null) {
                 throw new ArgumentNullException("Argument line can not be null");
+            }
+
+            if(line.Points.Count() == 0) {
+                throw new InvalidFieldsException("A line can not have 0 points");
             }
 
             return _lineRepository.UpdateAsync(line);
