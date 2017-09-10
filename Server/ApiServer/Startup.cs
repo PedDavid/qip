@@ -17,6 +17,7 @@ using Newtonsoft.Json.Converters;
 using Microsoft.Extensions.Primitives;
 using System.Linq;
 using API.Domain;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace ApiServer {
     public class Startup {
@@ -89,6 +90,12 @@ namespace ApiServer {
             //Add StringWebSockets Session Manager
             services.AddSingleton<StringWebSocketsSessionManager>();
 
+            // Register the Swagger generator, defining one or more Swagger documents
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "QIP API", Version = "v1" });
+            });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -123,6 +130,15 @@ namespace ApiServer {
                 ReceiveBufferSize = 4 * 1024
             };
             app.UseWebSockets(webSocketOptions);
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "QIP API V1");
+            });
 
             app.UseMvc();
         }
