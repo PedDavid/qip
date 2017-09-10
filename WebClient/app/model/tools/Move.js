@@ -94,9 +94,10 @@ export default class Move implements Tool {
   }
 
   onOut (event, persist) {
+    const moveType = this.currentFigureMoving instanceof Figure ? 'figure' : 'image'
     if (this.movingLine != null && this.movingLine.start !== this.movingLine.end) {
       const offsetPoint = new SimplePoint(this.movingLine.end.x - this.movingLine.start.x, this.movingLine.end.y - this.movingLine.start.y)
-      persist.sendMoveAction(this.currentFigureMoving, offsetPoint)
+      persist.sendMoveAction(this.currentFigureMoving, offsetPoint, this.scaling, moveType)
     }
 
     this.movingLine = null

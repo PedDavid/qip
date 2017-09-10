@@ -15,9 +15,9 @@ export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null) {
     auxImg.src = src
     auxImg.onload = (e) => {
       // scale image
-      const scale = auxImg.width / 300 // 200 is de default width
-      width === undefined && (width = auxImg.width === 0 ? 200 : auxImg.width / scale)
-      height === undefined && (height = auxImg.height === 0 ? 200 : auxImg.height / scale)
+      const scale = auxImg.width / 300 // 200 is the default width
+      if (width === undefined || width === 0) { width = auxImg.width === 0 ? 200 : auxImg.width / scale }
+      if (height === undefined || height === 0) { height = auxImg.height === 0 ? 200 : auxImg.height / scale }
       img = auxImg
     }
   }
@@ -46,6 +46,13 @@ export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null) {
 
   this.getHeight = function () {
     return height
+  }
+  this.setWidth = function (w) {
+    width = w
+  }
+
+  this.setHeight = function (h) {
+    height = h
   }
 
   this.getSrc = function () {
@@ -126,15 +133,13 @@ export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null) {
     width = width + offsetPoint.x
   }
 
-  this.exportWS = function (extraFunc) {
+  this.exportWS = function (type, extraFunc) {
     const imageToExport = this.export()
-    imageToExport.tempId = imageToExport.id
-    delete imageToExport.id
 
     extraFunc != null && extraFunc(imageToExport)
 
     const objToSend = {
-      type: 'CREATE_IMAGE',
+      type,
       payload: imageToExport
     }
 
@@ -149,16 +154,23 @@ export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null) {
   this.export = function () {
     const currentFigureTwin = Object.assign({}, this) // Object.assign() method only copies enumerable and own properties from a source object to a target object
     currentFigureTwin.type = 'image'
-    currentFigureTwin.srcPoint = srcPoint
-    currentFigureTwin.src = src
-    currentFigureTwin.width = width
-    currentFigureTwin.height = height
+    currentFigureTwin.Origin = srcPoint
+    currentFigureTwin.Src = src
+    currentFigureTwin.Width = width
+    currentFigureTwin.Height = height
     return currentFigureTwin
   }
 
   this.persist = function (persist, grid) {
     if (persist.connected) {
-      persist.socket.send(this.exportWS())
+      persist.socket.send(
+        this.exportWS(
+          'CREATE_IMAGE',
+          (img) => {
+            img.tempId = img.id
+            delete img.id
+          }
+        ))
     } else {
       // add to localstorage
       const dataFigure = JSON.parse(window.localStorage.getItem('figures'))

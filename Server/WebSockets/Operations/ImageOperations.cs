@@ -85,7 +85,8 @@ namespace WebSockets.Operations {
             }
 
             long id = payload["id"].Value<long>();
-
+            string isScaling = payload["isScaling"].Value<string>();
+ 
             InImage inImage = payload.ToObject<InImage>();
 
             Task store = StoreUpdateImage(id, boardId, inImage);
@@ -94,6 +95,7 @@ namespace WebSockets.Operations {
             string jsonBroadcast = JsonConvert.SerializeObject(
                 new {
                     type = Models.Action.ALTER_IMAGE.ToString(),
+                    isScaling = isScaling,
                     payload = new { figure = inImage } // Usado o InImage porque os WebSockets estão a servir de espelho ao enviado pelo cliente
                 }
             );

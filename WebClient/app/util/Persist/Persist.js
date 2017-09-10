@@ -111,7 +111,14 @@ export class Persist {
 
   sendPenAction (figure, currentFigureId) {
     if (this.connected) {
-      this.socket.send(figure.exportWS())
+      this.socket.send(
+        figure.exportWS(
+          'CREATE_LINE',
+          (fig) => {
+            fig.tempId = fig.id
+            delete fig.id
+          }
+        ))
     } else {
       PersistLS._sendPenActionLS(figure, currentFigureId)
     }
@@ -141,11 +148,15 @@ export class Persist {
     }
   }
 
-  sendMoveAction (figure, offsetPoint) {
+  sendMoveAction (figure, offsetPoint, isScaling, type) {
     if (this.connected) {
       this.socket.send(
         figure.exportWS(
-          fig => { fig.offsetPoint = offsetPoint }
+          type === 'figure' ? 'ALTER_LINE' : 'ALTER_IMAGE',
+          fig => {
+            fig.offsetPoint = {X: offsetPoint.x, Y: offsetPoint.y}
+            fig.isScaling = isScaling
+          }
         ))
     } else {
       PersistLS._sendMoveActionLS(figure)

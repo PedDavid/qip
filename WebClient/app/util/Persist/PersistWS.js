@@ -1,4 +1,5 @@
 import {Figure, FigureStyle} from './../../model/Figure'
+import {Image} from './../../model/Image'
 import {PointStyle} from './../../model/Point'
 import {SimplePoint} from './../../model/SimplePoint'
 import fetch from 'isomorphic-fetch'
@@ -49,12 +50,41 @@ export default class PersistLS {
           break
         case 'ALTER_LINE':
           // todo: por estes comentários em vez de apagar e criar a figura quando o servidor estiver a enviar o offsetPoint
-          // const figureToMove = grid.getFigure(payload.id)
-          // grid.moveFigure(figureToMove, payload.offsetPoint, canvasContext, 1)
-          const figureToMove = grid.getFigure(payload.id)
-          grid.removeFigure(figureToMove, canvasContext, 1)
-          figureToMove.points = payload.points
-          grid.addFigure(figureToMove)
+          const figureToMove = grid.getFigure(payload.figure.Id)
+          const isScaling = payload.isScaling
+          if (isScaling != 'False') {
+            const offsetPoint = {x: payload.offsetPoint.X, y: payload.offsetPoint.Y} // translate from server model
+            figureToMove.scale(isScaling, offsetPoint, grid, canvasContext)
+            grid.draw(canvasContext, 1)
+          } else {
+            grid.moveLine(figureToMove, point => {
+              return grid.getOrCreatePoint(point.x + payload.offsetPoint.X, point.y + payload.offsetPoint.Y)
+            }, canvasContext, 1)
+          }
+          break
+        case 'CREATE_IMAGE':
+          if (payload.tempId != null) {
+            const prevFigure = grid.getFigure(payload.tempId)
+            grid.updateHistoryFigureId(prevFigure.id, payload.id)
+            prevFigure.id = payload.id
+            grid.updateMapFigure(payload.tempId, prevFigure)
+            console.log('updated image with id ' + payload.tempId + ' to id ' + payload.id)
+            grid.draw(canvasContext, 1)
+            return
+          }
+          const newImage = new Image({x: payload.figure.Origin.X, y: payload.figure.Origin.Y}, payload.figure.Src, payload.figure.Width, payload.figure.Height, payload.figure.Id)
+          grid.addImage(newImage)
+          grid.draw(canvasContext, 1)
+          break
+        case 'DELETE_IMAGE':
+          grid.removeImage(payload.id, canvasContext, 1)
+          break
+        case 'ALTER_IMAGE':
+          console.log(payload)
+          const prevFigure = grid.getFigure(payload.figure.Id)
+          prevFigure.setSrcPoint(new SimplePoint(payload.figure.Origin.X, payload.figure.Origin.Y))
+          prevFigure.setWidth(payload.figure.Width)
+          prevFigure.setHeight(payload.figure.Height)
           grid.draw(canvasContext, 1)
           break
       }
@@ -111,7 +141,11 @@ export default class PersistLS {
         return imgRes.json()
       })
     ]).then(allFigs => {
-      const figures = allFigs[0].concat(allFigs[1])
+      const images = allFigs[1].map(img => { // sync with server model
+        img.srcPoint = img.origin
+        return img
+      })
+      const figures = allFigs[0].concat(images)
       let maxId = -1
       console.log('figures fetched from initial board:')
       console.log(figures)

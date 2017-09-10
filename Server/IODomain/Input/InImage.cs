@@ -9,7 +9,7 @@ namespace IODomain.Input {
         public long? BoardId { get; set; }
         public string Src { get; set; }
         public InPoint Origin { get; set; }
-        public int? Width { get; set; }
-        public int? Height { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
     }
 }

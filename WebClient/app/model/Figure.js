@@ -144,17 +144,15 @@ export function Figure (figureStyle, id = null) {
     return id + 1 / Math.pow(2, this.subFigureLevel)
   }
 
-  this.exportWS = function (extraFunc) {
+  this.exportWS = function (type, extraFunc) {
     const toExportFig = this._export()
-    toExportFig.tempId = toExportFig.id
-    delete toExportFig.id
 
     if (extraFunc != null) {
       extraFunc(toExportFig)
     }
 
     const objToSend = {
-      type: 'CREATE_LINE',
+      type,
       payload: toExportFig
     }
 

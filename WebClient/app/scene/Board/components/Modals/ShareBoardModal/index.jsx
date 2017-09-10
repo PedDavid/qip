@@ -39,6 +39,7 @@ export default class ShareBoardModal extends React.Component {
           error: false
         })
         this.props.history.push('/board/' + insertedBoard.id)
+        this.props.getInitialBoard(insertedBoard.id)
       }).catch(err => {
         console.log(err)
         this.setState({
