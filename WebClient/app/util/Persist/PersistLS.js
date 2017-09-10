@@ -1,4 +1,3 @@
-import Grid from './../../model/Grid'
 import Pen from './../../model/tools/Pen'
 import Eraser from './../../model/tools/Eraser'
 import Move from './../../model/tools/Move'
@@ -16,10 +15,9 @@ export default class PersistLS {
 
       const figures = JSON.parse(window.localStorage.getItem('figures'))
       const nextFigureId = JSON.parse(window.localStorage.getItem('currFigureId'))
-      const grid = new Grid(figures, nextFigureId)
       const canvasSize = JSON.parse(window.localStorage.getItem('canvasSize'))
       const initBoard = {
-        grid,
+        grid: {figures, maxId: nextFigureId},
         canvasSize
       }
 
@@ -88,20 +86,51 @@ export default class PersistLS {
       case ('pen'):
         return new Pen(grid, rawTool.color, rawTool.width)
       case ('eraser'):
-        return new Eraser(grid, rawTool.width)
+        return new Eraser(grid, rawTool.width, rawTool.eraserType)
       case ('move'):
         return new Move(grid)
     }
   }
 
+  static _sendPenActionLS = function (figure, currentFigureId) {
+    // add to localstorage
+    const dataFigure = JSON.parse(window.localStorage.getItem('figures'))
+    dataFigure.push(figure.exportLS()) // it can be push instead of dataFigure[id] because it will not have crashes with external id's because it's only used when there is no connection
+    window.localStorage.setItem('figures', JSON.stringify(dataFigure))
+    window.localStorage.setItem('currFigureId', JSON.stringify(currentFigureId))
+  }
+
+  static _sendEraserActionLS = function (figureId) {
+    // remove from localstorage
+    const dataFigure = JSON.parse(window.localStorage.getItem('figures'))
+    const figIdx = dataFigure.findIndex(fig => fig.id === figureId)
+    dataFigure.splice(figIdx, 1) // use splice (not delete) beacause this way the array updated and reindexed
+    window.localStorage.setItem('figures', JSON.stringify(dataFigure))
+  }
+
+  static _sendMoveActionLS = function (figure) {
+    // move from localstorage
+    const dataFigure = JSON.parse(window.localStorage.getItem('figures'))
+    const toPersist = figure.exportLS()
+    let figIdx = dataFigure.findIndex(f => f.id === toPersist.id)
+    dataFigure[figIdx] = toPersist
+    window.localStorage.setItem('figures', JSON.stringify(dataFigure))
+  }
+
+  static _addClipboardLS = function (figure) {
+    window.localStorage.setItem('clipboard', JSON.stringify(figure))
+  }
+
+  static _getClipboardLS = function () {
+    return JSON.parse(window.localStorage.getItem('clipboard'))
+  }
   static _resetLocalStorage = function () {
-    const tempGrid = new Grid([], -1)
-    window.localStorage.setItem('figures', JSON.stringify(tempGrid.getFiguresArray()))
-    window.localStorage.setItem('currFigureId', JSON.stringify(tempGrid.getCurrentFigureId()))
-    window.localStorage.setItem('defaultPen', JSON.stringify(new Pen(tempGrid, 'black', 5)))
-    window.localStorage.setItem('defaultEraser', JSON.stringify(new Eraser(tempGrid, 20)))
+    window.localStorage.setItem('figures', '[]')
+    window.localStorage.setItem('currFigureId', JSON.stringify(-1))
+    window.localStorage.setItem('defaultPen', JSON.stringify(new Pen(null, 'black', 5)))
+    window.localStorage.setItem('defaultEraser', JSON.stringify(new Eraser(null, 20)))
     window.localStorage.setItem('favorites', '[]')
-    window.localStorage.setItem('currTool', JSON.stringify(new Pen(tempGrid, 'black', 5)))
+    window.localStorage.setItem('currTool', JSON.stringify(new Pen(null, 'black', 5)))
     window.localStorage.setItem('canvasSize', JSON.stringify({width: 0, height: 0}))
     window.localStorage.setItem('settings', JSON.stringify([false, false]))
   }

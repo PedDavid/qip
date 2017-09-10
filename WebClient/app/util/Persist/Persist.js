@@ -16,7 +16,8 @@ export class Persist {
     // TODO(peddavid): Configuration of endpoints
     const scheme = document.location.protocol === 'https:' ? 'wss' : 'ws'
     const port = document.location.port ? (57059) : ''
-    const connectionUrl = `${scheme}://localhost:${port}/ws/${boardId}?access_token=${accessToken}`
+    const authorization = accessToken != null ? `?access_token=${accessToken}` : ''
+    const connectionUrl = `${scheme}://localhost:${port}/ws/${boardId}${authorization}`
     this.boardId = boardId // this should be here because even if ws connection goes wrong, there is a url to share
     console.log('making web socket connection to: ' + connectionUrl)
     this.socket = new WebSocket(connectionUrl)
@@ -33,6 +34,11 @@ export class Persist {
     this.socket.onerror = (event) => {
       console.error('an error occurred on web socket connection to: ' + connectionUrl)
       this.connected = false
+    }
+
+    this.socket.onclose = (event) => {
+      console.error('WebSocket connection is closing without being handled!! Restarting WebSocket connection ...')
+      this.connectWS(boardId, accessToken)
     }
   }
 
@@ -57,6 +63,10 @@ export class Persist {
     )
   }
 
+  getBoardUsers (boardId, accessToken) {
+    return PersistWS._getBoardUsers(boardId, accessToken)
+  }
+
   cleanCanvas () {
     return this.callWSLSFunc(
       () => PersistWS._cleanCanvasWS(this.grid, this.socket),
@@ -64,11 +74,12 @@ export class Persist {
     )
   }
 
-  updateUserPreferences (updatedPreferences, profile, accessToken) {
-    return this.callWSLSFunc(
-      () => PersistWS._updateUserPreferencesWS(updatedPreferences, profile, accessToken),
-      () => PersistLS._updateUserPreferencesLS(updatedPreferences)
-    )
+  updateUserPreferences (isAuthenticated, updatedPreferences, profile, accessToken) {
+    if (isAuthenticated && this.persistType === PersistType().WebSockets) {
+      PersistWS._updateUserPreferencesWS(updatedPreferences, profile, accessToken)
+    } else {
+      PersistLS._updateUserPreferencesLS(updatedPreferences)
+    }
   }
 
   updateCanvasSize (canvasSize) {
@@ -80,6 +91,84 @@ export class Persist {
 
   addUserBoard (boardName, user, accessToken) {
     return PersistWS._addUserBoardWS(boardName, user, accessToken)
+  }
+
+  updateBoardBasePermission (boardId, boardName, basePermission, accessToken) {
+    return PersistWS._updateBoardBasePermissionWS(boardId, boardName, basePermission, accessToken)
+  }
+
+  createUsersPermission (users, boardId, usersPermission, accessToken) {
+    return PersistWS._createUsersPermissionWS(users, boardId, usersPermission, accessToken)
+  }
+
+  updateUserPermission (userId, boardId, userPermission, accessToken) {
+    return PersistWS._updateUserPermissionWS(userId, boardId, userPermission, accessToken)
+  }
+
+  getUsersAsync (accessToken) {
+    return PersistWS._getUsersWS(accessToken)
+  }
+
+  sendPenAction (figure, currentFigureId) {
+    if (this.connected) {
+      this.socket.send(
+        figure.exportWS(
+          'CREATE_LINE',
+          (fig) => {
+            fig.tempId = fig.id
+            delete fig.id
+          }
+        ))
+    } else {
+      PersistLS._sendPenActionLS(figure, currentFigureId)
+    }
+  }
+
+  sendEraserAction (figureId) {
+    if (this.connected) {
+      const objToSend = {
+        type: 'DELETE_LINE',
+        payload: {'id': figureId}
+      }
+      this.socket.send(JSON.stringify(objToSend))
+    } else {
+      PersistLS._sendEraserActionLS(figureId)
+    }
+  }
+
+  removeImage (imageId) {
+    if (this.connected) {
+      const objToSend = {
+        type: 'DELETE_IMAGE',
+        payload: {'id': imageId}
+      }
+      this.socket.send(JSON.stringify(objToSend))
+    } else {
+      PersistLS._sendEraserActionLS(imageId)
+    }
+  }
+
+  sendMoveAction (figure, offsetPoint, isScaling, type) {
+    if (this.connected) {
+      this.socket.send(
+        figure.exportWS(
+          type === 'figure' ? 'ALTER_LINE' : 'ALTER_IMAGE',
+          fig => {
+            fig.offsetPoint = {X: offsetPoint.x, Y: offsetPoint.y}
+            fig.isScaling = isScaling
+          }
+        ))
+    } else {
+      PersistLS._sendMoveActionLS(figure)
+    }
+  }
+
+  addClipboard (figure) {
+    PersistLS._addClipboardLS(figure)
+  }
+
+  getClipboard () {
+    return PersistLS._getClipboardLS()
   }
 
   callWSLSFunc (WSFunc, LSFunc) {

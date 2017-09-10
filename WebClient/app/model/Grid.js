@@ -7,6 +7,7 @@ import { Image } from './Image'
 export default function Grid (initialFigures, currIdx) {
   let figures = new Map()
   let currFigureId = currIdx
+  let history = []
 
   // return the new figure idx. If there is already the next idx, return the idx plus 0.1. This is because the concurrency
   // Estão a ser usados id's negativos pois se este id for maior que o id retornado pelo servidor vai gerar colisões com outras figuras
@@ -19,14 +20,17 @@ export default function Grid (initialFigures, currIdx) {
     return toRet
   }
 
+  this.updateHistoryFigureId = function (prevId, newId) {
+    const toUpdate = history.find(fig => fig.figureId === prevId)
+    toUpdate != null && (toUpdate.figureId = newId)
+  }
+
   this.getCurrentFigureId = function () {
     return currFigureId
   }
 
-  this.updateCurrentFigIdIfGreater = function (newMaxId) {
-    if (currFigureId < newMaxId) {
-      currFigureId = newMaxId
-    }
+  this.setCurrentFigId = function (newMaxId) {
+    currFigureId = newMaxId
   }
 
   const GridNode = function (val, height) {
@@ -35,7 +39,7 @@ export default function Grid (initialFigures, currIdx) {
   }
 
   let maxLinePart = 0
-  const maxLinePartThreshold = 20
+  const maxLinePartThreshold = 10
 
   let grid = [] // dynamic width
 
@@ -146,7 +150,9 @@ export default function Grid (initialFigures, currIdx) {
       figure.id = this.getNewFigureIdx()
     }
 
-    figure.undoable = undoable // tells grid if this figure can be undone
+    if (undoable) {
+      history.push({figureId: figure.id, action: 'add'})
+    }
 
     let prev = null
     const auxPoints = figure.points
@@ -163,9 +169,10 @@ export default function Grid (initialFigures, currIdx) {
     })
     figures.set(figure.id, figure)
     console.log('inserted new figure with id ' + figure.id)
+    return figure
   }
 
-  this.addImage = function (image) {
+  this.addImage = function (image, undoable) {
     if (image.id === null) {
       image.id = this.getNewFigureIdx()
     }
@@ -177,10 +184,20 @@ export default function Grid (initialFigures, currIdx) {
     figures.delete(figureId)
   }
 
-  this.removeFigure = function (figure, context, currScale) {
+  this.removeFigure = function (figure, context, currScale, undoable) {
+    if (undoable) {
+      const figureCopy = new Figure(figure.figureStyle)
+      figureCopy.points = figure.getSimplePoints()
+      history.push({figureId: figure.id, action: 'remove', figure: figureCopy})
+    }
     // remove figure from all points
     figure.points.forEach(point => point.removeFigure(figure.id))
     this.removeFigureFromGrid(figure.id)
+    this.draw(context, currScale)
+  }
+
+  this.removeImage = function (imageId, context, currScale) {
+    this.removeFigureFromGrid(imageId)
     this.draw(context, currScale)
   }
 
@@ -228,26 +245,18 @@ export default function Grid (initialFigures, currIdx) {
   }
 
   this.undo = function (context, persist) {
-    const undoableFigures = Array.from(figures.values())
-      .filter(fig => fig.undoable === true)
-      .sort((fig1, fig2) => fig2.id - fig1.id)
-    const undoableFigure = undoableFigures[undoableFigures.length - 1]
+    if (history.length <= 0) {
+      return
+    }
+    const undoableAction = history.pop()
     // get this out of here
-    if (undoableFigure != null) {
-      this.removeFigure(undoableFigure, context, 1)
-      if (persist.connected) {
-        const objToSend = {
-          type: 'DELETE_LINE',
-          payload: {'id': undoableFigure.id}
-        }
-        persist.socket.send(JSON.stringify(objToSend))
-      } else {
-        // remove from localstorage
-        const dataFigure = JSON.parse(window.localStorage.getItem('figures'))
-        const figIdx = dataFigure.findIndex(f => f.tempId === undoableFigure.id)
-        dataFigure.splice(figIdx, 1) // use splice (not delete) beacause this way the array updated and reindexed
-        window.localStorage.setItem('figures', JSON.stringify(dataFigure))
-      }
+    if (undoableAction.action === 'add') {
+      this.removeFigure(this.getFigure(undoableAction.figureId), context, 1)
+      persist.sendEraserAction(undoableAction.figureId)
+    } else if (undoableAction.action === 'remove') {
+      const addedFigure = this.addFigure(undoableAction.figure)
+      persist.sendPenAction(addedFigure, currFigureId)
+      this.draw(context, 1)
     }
   }
 
@@ -290,18 +299,22 @@ export default function Grid (initialFigures, currIdx) {
     return Array.from(figuresToRet.values()).map(figureId => figures.get(figureId))
   }
 
-  // map initial figures to Figure Objects and add them to figure array
-  initialFigures
-    .sort((fig1, fig2) => Math.abs(fig1.id) - Math.abs(fig2.id))
-    .forEach(initFig => {
-      if (initFig.type === 'figure') {
-        const figStyle = new FigureStyle(initFig.style.color, initFig.style.scale)
-        const newFigure = new Figure(figStyle, initFig.id)
-        newFigure.points = initFig.points
-        this.addFigure(newFigure)
-      } else if (initFig.type === 'image') {
-        const newImage = new Image(initFig.srcPoint, initFig.src, initFig.width, initFig.height, initFig.id)
-        this.addImage(newImage)
-      }
-    })
+  this.addInitialFigures = function (initialFigures) {
+    // map initial figures to Figure Objects and add them to figure array
+    initialFigures
+      .sort((fig1, fig2) => Math.abs(fig1.id) - Math.abs(fig2.id))
+      .forEach(initFig => {
+        if (initFig.type === 'figure') {
+          const figStyle = new FigureStyle(initFig.style.color, initFig.style.scale)
+          const newFigure = new Figure(figStyle, initFig.id)
+          newFigure.points = initFig.points
+          this.addFigure(newFigure)
+        } else if (initFig.type === 'image') {
+          const newImage = new Image(initFig.srcPoint, initFig.src, initFig.width, initFig.height, initFig.id)
+          this.addImage(newImage)
+        }
+      })
+  }
+
+  this.addInitialFigures(initialFigures)
 }
