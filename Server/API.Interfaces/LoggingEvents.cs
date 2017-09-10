@@ -149,42 +149,42 @@
 
         #region Events ImageOperations
         //public const int InsertWSImage = 84;
-        //public const int UpdateWSImage = 84;
-        //public const int DeleteWSImage = 84;
+        //public const int UpdateWSImage = 85;
+        //public const int DeleteWSImage = 86;
 
-        public const int InsertWSImageNotAuthorized = 84;
-        public const int UpdateWSImageNotAuthorized = 84;
-        public const int DeleteWSImageNotAuthorized = 84;
+        public const int InsertWSImageNotAuthorized = 87;
+        public const int UpdateWSImageNotAuthorized = 88;
+        public const int DeleteWSImageNotAuthorized = 89;
 
-        public const int InsertWSImageWrongBoardId = 84;
-        public const int UpdateWSImageWrongBoardId = 84;
+        public const int InsertWSImageWrongBoardId = 90;
+        public const int UpdateWSImageWrongBoardId = 91;
 
-        public const int InsertWSImageInvalidModel = 84;
-        public const int UpdateWSImageInvalidModel = 84;
-        public const int DeleteWSImageInvalidModel = 84;
+        public const int InsertWSImageInvalidModel = 92;
+        public const int UpdateWSImageInvalidModel = 93;
+        public const int DeleteWSImageInvalidModel = 94;
 
-        public const int UpdateWSImageNotFound = 84;
-        public const int DeleteWSImageNotFound = 84;
+        public const int UpdateWSImageNotFound = 95;
+        public const int DeleteWSImageNotFound = 96;
         #endregion
 
         #region Events LineOperations
-        //public const int InsertWSLine = 84;
-        //public const int UpdateWSLine = 84;
-        //public const int DeleteWSLine = 84;
+        //public const int InsertWSLine = 97;
+        //public const int UpdateWSLine = 98;
+        //public const int DeleteWSLine = 99;
 
-        public const int InsertWSLineNotAuthorized = 84;
-        public const int UpdateWSLineNotAuthorized = 84;
-        public const int DeleteWSLineNotAuthorized = 84;
+        public const int InsertWSLineNotAuthorized = 100;
+        public const int UpdateWSLineNotAuthorized = 101;
+        public const int DeleteWSLineNotAuthorized = 101;
 
-        public const int InsertWSLineWrongBoardId = 84;
-        public const int UpdateWSLineWrongBoardId = 84;
+        public const int InsertWSLineWrongBoardId = 102;
+        public const int UpdateWSLineWrongBoardId = 103;
 
-        public const int InsertWSLineInvalidModel = 84;
-        public const int UpdateWSLineInvalidModel = 84;
-        public const int DeleteWSLineInvalidModel = 84;
+        public const int InsertWSLineInvalidModel = 104;
+        public const int UpdateWSLineInvalidModel = 105;
+        public const int DeleteWSLineInvalidModel = 106;
 
-        public const int UpdateWSLineNotFound = 84;
-        public const int DeleteWSLineNotFound = 84;
+        public const int UpdateWSLineNotFound = 107;
+        public const int DeleteWSLineNotFound = 108;
         #endregion
     }
 }
