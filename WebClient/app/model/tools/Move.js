@@ -1,5 +1,5 @@
 import { SimplePoint } from './../SimplePoint'
-import { Figure } from './../Figure'
+import { Figure, FigureStyle } from './../Figure'
 import Line from './../Line'
 import { Image } from './../Image'
 import Selection from './../Selection'
@@ -104,30 +104,83 @@ export default class Move implements Tool {
     this.scaling = false
   }
 
-  onContextMenu (event, persist, addContextMenuFunc, closeContextMenu, canvasContext) {
-    event.preventDefault()
-    if (this.currentFigureMoving === null) {
-      return // todo: possible default contextMenu
-    }
+  onContextMenu (contextMenuEvent, persist, addContextMenuFunc, closeContextMenu, canvasContext) {
+    contextMenuEvent.preventDefault()
+    contextMenuEvent.persist() // must be persisted to not be reused. therefore, when onClick of menu items are triggered, this event is valid
+
     this.onCloseContextMenu = closeContextMenu
-    const contextMenuRaw = [{
+    let contextMenuRaw
+    const copyMenuItem = {
+      icon: 'copy',
+      text: 'Copy',
+      onClick: () => {
+        const toSave = this.currentFigureMoving.exportLS()
+        delete toSave.id
+        persist.addClipboard(toSave)
+        this.tryCloseContextMenu()
+      }}
+
+    const pasteMenuItem = {
+      icon: 'paste',
+      text: 'Paste',
+      onClick: (event) => {
+        const clipboardFig = persist.getClipboard()
+        this._pasteFigure(clipboardFig.type, clipboardFig, persist, canvasContext)
+        this.tryCloseContextMenu()
+      }}
+
+    this.currentFigureMoving instanceof Image && (contextMenuRaw = [{
       header: {icon: null, text: 'Edit'},
       menuItems: [{
         icon: 'trash',
-        text: 'remove',
+        text: 'Remove',
         onClick: () => {
           this.grid.removeImage(this.currentFigureMoving.id, canvasContext, 1)
           persist.removeImage(this.currentFigureMoving.id)
           this.tryCloseContextMenu()
-        }}]
-    }]
-    addContextMenuFunc(event.clientX, event.clientY, contextMenuRaw)
+        }},
+        copyMenuItem,pasteMenuItem]
+    }])
+
+    this.currentFigureMoving instanceof Figure && (contextMenuRaw = [{
+      header: {icon: null, text: 'Edit'},
+      menuItems: [copyMenuItem, pasteMenuItem]
+    }])
+
+    this.currentFigureMoving === null && (contextMenuRaw = [{
+      header: {icon: null, text: 'Edit'},
+      menuItems: [pasteMenuItem]
+    }])
+
+    addContextMenuFunc(contextMenuEvent.clientX, contextMenuEvent.clientY, contextMenuRaw)
   }
 
   tryCloseContextMenu () {
     if (this.onCloseContextMenu != null) {
       this.onCloseContextMenu()
     }
+  }
+
+  _pasteFigure(event, type, figure, persist, canvasContext) {
+    if (type === 'figure') {
+      const newFig = new Figure(new FigureStyle(figure.style.color, 1))
+      newFig.points = figure.points
+      const copiedFigure = this.grid.addFigure(newFig, true)
+      // move figure to the point user pressed
+      const offsetPoint = new SimplePoint(event.clientX - copiedFigure.points[0].x, event.clientY - copiedFigure.points[0].y)
+      this.grid.moveLine(copiedFigure, point => {
+        return this.grid.getOrCreatePoint(point.x + offsetPoint.x, point.y + offsetPoint.y)
+      }, canvasContext, 1)
+      const movedFigure = this.grid.getFigure(copiedFigure.id) // send figure after it was moved
+      persist.sendPenAction(movedFigure, this.grid.getCurrentFigureId())
+      this.tryCloseContextMenu()      
+    } else if (type === 'image') {
+      const newImage = new Image({x: event.clientX, y: event.clientY}, figure.Src, figure.Width, figure.Height)
+      // do not change this order. image must be added to grid first to set the new id
+      this.grid.addImage(newImage)
+      newImage.persist(persist, this.grid)
+    }
+    this.grid.draw(canvasContext, 1)
   }
 
   equals (move) {

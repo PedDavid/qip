@@ -163,6 +163,14 @@ export class Persist {
     }
   }
 
+  addClipboard (figure) {
+    PersistLS._addClipboardLS(figure)
+  }
+
+  getClipboard () {
+    return PersistLS._getClipboardLS()
+  }
+
   callWSLSFunc (WSFunc, LSFunc) {
     if (this.persistType === PersistType().WebSockets) {
       return WSFunc()

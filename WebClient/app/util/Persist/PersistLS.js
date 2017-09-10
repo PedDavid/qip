@@ -116,6 +116,14 @@ export default class PersistLS {
     dataFigure[figIdx] = toPersist
     window.localStorage.setItem('figures', JSON.stringify(dataFigure))
   }
+
+  static _addClipboardLS = function (figure) {
+    window.localStorage.setItem('clipboard', JSON.stringify(figure))    
+  }
+
+  static _getClipboardLS = function () {
+    return JSON.parse(window.localStorage.getItem('clipboard'))
+  }
   static _resetLocalStorage = function () {
     window.localStorage.setItem('figures', '[]')
     window.localStorage.setItem('currFigureId', JSON.stringify(-1))

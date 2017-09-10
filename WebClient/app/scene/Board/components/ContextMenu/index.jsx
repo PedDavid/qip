@@ -10,8 +10,15 @@ export default class ContextMenu extends React.Component {
     if (!this.props.visible) {
       return null
     }
+    const itemHeight = 35
+    let menuHeight = 0
+    this.props.contextMenuRaw.forEach(menuSection => {
+      menuHeight += itemHeight
+      menuSection.menuItems.forEach(menuItem => menuHeight += itemHeight)
+    })
+
     const dynamicPositionStyle = {
-      top: `${this.props.top}px`,
+      top: this.props.top > this.props.canvasSize.height - menuHeight ? `${this.props.top - menuHeight}px` : `${this.props.top}px`,
       left: this.props.left > this.props.canvasSize.width - 200 ? `${this.props.left - 200}px` : `${this.props.left}px`
     }
     return (
