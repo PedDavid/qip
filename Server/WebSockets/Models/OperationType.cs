@@ -5,6 +5,7 @@
         ALTER_IMAGE,
         CREATE_LINE,
         DELETE_LINE,
-        ALTER_LINE
+        ALTER_LINE,
+        POINT_TO
     }
 }

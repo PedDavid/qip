@@ -186,5 +186,9 @@
         public const int UpdateWSLineNotFound = 107;
         public const int DeleteWSLineNotFound = 108;
         #endregion
+
+        public const int PointToNotAuthorized = 109;
+        public const int PointTo = 110;
+
     }
 }
