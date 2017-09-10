@@ -6,16 +6,13 @@
 RETURNS TINYINT
 AS
 BEGIN
-	DECLARE @base TINYINT = 0
-	DECLARE @specific TINYINT = 0
+	DECLARE @permission TINYINT = 0
 
-	IF(@userId IS NOT NULL)
-		SELECT @specific=permission FROM dbo.User_Board WHERE userId=@userId and boardId=@boardId
+	SELECT @permission = IIF(ub.permission >= b.basePermission, ub.permission, b.basePermission)
+	FROM dbo.Board AS b
+	LEFT JOIN (SELECT * FROM dbo.User_Board WHERE userId=@userId) AS ub
+	ON(b.id = ub.boardId)
+	WHERE b.id = @boardId
 
-	SELECT @base=basePermission FROM dbo.Board WHERE id=@boardId
-
-	IF(@specific > @base)
-		RETURN @specific
-
-	RETURN @base
+	RETURN @permission
 END

@@ -1,10 +1,6 @@
-﻿using IODomain.Input;
-using IODomain.Output;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using API.Domain;
 
 namespace API.Interfaces.IServices {
-    public interface IImageService : IFigureService<InImage, OutImage> {
+    public interface IImageService : IFigureService<Image> {
     }
 }

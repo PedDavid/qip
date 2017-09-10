@@ -24,14 +24,14 @@ namespace API.Repositories {
             return _queryTemplate.QueryForScalarAsync<bool>(LINE_STYLE_EXISTS, parameters);
         }
 
-        public Task<long> AddAsync(LineStyle lineStyle) {
+        public async Task AddAsync(LineStyle lineStyle) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
                     .Add("@color", SqlDbType.VarChar)
                     .Value = lineStyle.Color;
 
-            return _queryTemplate.QueryForScalarAsync<long>(INSERT_LINE_STYLE, parameters);
+            lineStyle.Id = await _queryTemplate.QueryForScalarAsync<long>(INSERT_LINE_STYLE, parameters);
         }
 
         public Task<LineStyle> FindAsync(long id) {
@@ -88,7 +88,8 @@ namespace API.Repositories {
 
         //Extract Data From Data Reader
         private static LineStyle GetLineStyle(SqlDataReader dr) {
-            return new LineStyle(dr.GetInt64(0)) {
+            return new LineStyle() {
+                Id = dr.GetInt64(0),
                 Color = dr.GetString(1)
             };
         }

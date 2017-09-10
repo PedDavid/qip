@@ -1,14 +1,8 @@
 ﻿using API.Domain;
 using API.Interfaces.IRepositories;
 using API.Interfaces.IServices;
-using API.Interfaces.ServicesExceptions;
-using API.Services.Utils;
-using IODomain.Extensions;
-using IODomain.Input;
-using IODomain.Output;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace API.Services {
@@ -19,90 +13,46 @@ namespace API.Services {
             _boardRepository = boardRepository;
         }
 
-        public async Task<OutBoard> CreateAsync(InBoard inputBoard, string userId) {
-            if(inputBoard == null) {
-                throw new MissingInputException();
+        public Task CreateAsync(Board board, string userId) {
+            if(board == null) {
+                throw new ArgumentNullException("Argument board can not be null");
             }
-
-            Validator<InBoard>.Valid(inputBoard, GetCreateValidationConfigurations());
 
             if(userId == null) {//Caso seja criado por um user anónimo
-                inputBoard.BasePermission = InBoardPermission.Edit;//Forçar o quadro a ter permissões de escrita publicas
+                board.BasePermission = BoardPermission.Edit;//Forçar o quadro a ter permissões de escrita publicas
             }
 
-            Board board = new Board().In(inputBoard);
-            long id = await _boardRepository.AddAsync(board, userId);
-
-            return board.Out(id);
+            return _boardRepository.AddAsync(board, userId);
         }
 
-        private static ValidatorConfiguration<InBoard> GetCreateValidationConfigurations() {
-            return new ValidatorConfiguration<InBoard>()
-                .NotNull("Name", i => i.Name)
-                .NotNull("MaxDistPoints", i => i.MaxDistPoints);
+        public Task DeleteAsync(long id) {
+            return _boardRepository.RemoveAsync(id);
         }
 
-        public async Task DeleteAsync(long id) {
-            if(!await _boardRepository.ExistsAsync(id)) {
-                throw new NotFoundException($"The Board with id {id} not exists");
-            }
-
-            await _boardRepository.RemoveAsync(id);
+        public Task<bool> ExistsAsync(long id) {
+            return _boardRepository.ExistsAsync(id);
         }
 
-        public async Task<IEnumerable<OutBoard>> GetAllAsync(long index, long size, string search) {
-            if(search == null)
-                return await GetAllAsync(index, size);
-
-            IEnumerable<Board> boards = await _boardRepository.GetAllAsync(index, size, search);
-
-            return boards.Select((Func<Board, OutBoard>)BoardExtensions.Out);
+        public async Task<IEnumerable<Board>> GetAllAsync(long index, long size, string search) {
+            return search != null ? 
+                await _boardRepository.GetAllAsync(index, size) : 
+                await _boardRepository.GetAllAsync(index, size, search);
         }
 
-        public async Task<IEnumerable<OutBoard>> GetAllAsync(long index, long size) {
-            IEnumerable<Board> boards = await _boardRepository.GetAllAsync(index, size);
-
-            return boards.Select((Func<Board, OutBoard>)BoardExtensions.Out);
+        public Task<IEnumerable<Board>> GetAllAsync(long index, long size) {
+            return GetAllAsync(index, size, null);
         }
 
-        public async Task<OutBoard> GetAsync(long id) {
-            Board board = await _boardRepository.FindAsync(id);
+        public Task<Board> GetAsync(long id) {
+            return _boardRepository.FindAsync(id);
+        }
 
+        public Task UpdateAsync(Board board) {
             if(board == null) {
-                throw new NotFoundException($"The Board with id {id} not exists");
+                throw new ArgumentNullException("Argument board can not be null");
             }
 
-            return board.Out();
-        }
-
-        public async Task<OutBoard> UpdateAsync(long id, InBoard inputBoard) {
-            if(inputBoard == null) {
-                throw new MissingInputException();
-            }
-
-            Validator<InBoard>.Valid(inputBoard, GetUpdateValidationConfigurations());
-
-            if(inputBoard.Id != id) {
-                throw new InconsistentRequestException(
-                    $"The id present on update is different of the expected. {Environment.NewLine}Expected: {id}{Environment.NewLine}Current: {inputBoard.Id}"
-                );
-            }
-
-            Board board = await _boardRepository.FindAsync(id);
-            if(board == null) {
-                throw new NotFoundException($"The Board with id {id} not exists");
-            }
-
-            board.In(inputBoard);
-
-            await _boardRepository.UpdateAsync(board);
-
-            return board.Out();
-        }
-
-        private static ValidatorConfiguration<InBoard> GetUpdateValidationConfigurations() {
-            return GetCreateValidationConfigurations()
-                .NotNull("Id", i => i.Id);
+            return _boardRepository.UpdateAsync(board);
         }
     }
 }

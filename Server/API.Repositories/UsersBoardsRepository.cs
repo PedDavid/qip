@@ -35,7 +35,7 @@ namespace API.Repositories {
 
             parameters
                 .Add("@boardId", SqlDbType.BigInt)
-                .Value = userBoard.BoardId.Value;
+                .Value = userBoard.BoardId;
 
             parameters
                 .Add("@permission", SqlDbType.TinyInt)
@@ -161,7 +161,7 @@ namespace API.Repositories {
 
             parameters
                     .Add("@boardId", SqlDbType.BigInt)
-                .Value = userBoard.BoardId.Value;
+                .Value = userBoard.BoardId;
 
             parameters
                     .Add("@permission", SqlDbType.TinyInt)
@@ -171,7 +171,7 @@ namespace API.Repositories {
         }
 
         //SQL Commands
-        private static readonly string USER_BOARD_EXISTS = "SELECT CAST(count(id) as BIT) FROM dbo.User_Board WHERE userId = @userId and boardId = @boardId";
+        private static readonly string USER_BOARD_EXISTS = "SELECT CAST(count(*) as BIT) FROM dbo.User_Board WHERE userId = @userId and boardId = @boardId";
         private static readonly string SELECT_ALL_USERS = "SELECT permission, userId " +
                                                           "FROM dbo.Full_User_Board WHERE boardId=@boardId " +
                                                           "ORDER BY userId " +
@@ -213,7 +213,8 @@ namespace API.Repositories {
         private static UserBoard_Board GetBoard(SqlDataReader dr) {
             return new UserBoard_Board() {
                 Permission = (BoardPermission)dr.GetByte(0),
-                Board = new Board(dr.GetInt64(1)) {
+                Board = new Board {
+                    Id = dr.GetInt64(1),
                     Name = dr.GetString(2),
                     MaxDistPoints = dr.GetByte(3),
                     BasePermission = (BoardPermission)dr.GetByte(4) 

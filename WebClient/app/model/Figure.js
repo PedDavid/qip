@@ -71,6 +71,12 @@ export function Figure (figureStyle, id = null) {
     })
   }
 
+  this.getSimplePoints = function () {
+    return this.points.map((point, idx) => {
+      return new SimplePoint(point.x, point.y, point.getStyleOf(this.id), idx)
+    })
+  }
+
   this.removePoint = function (point) {
     const idxToRem = this.points.indexOf(point)
     const pts = this.points
@@ -138,17 +144,15 @@ export function Figure (figureStyle, id = null) {
     return id + 1 / Math.pow(2, this.subFigureLevel)
   }
 
-  this.exportWS = function (extraFunc) {
+  this.exportWS = function (type, extraFunc) {
     const toExportFig = this._export()
-    toExportFig.tempId = toExportFig.id
-    delete toExportFig.id
 
     if (extraFunc != null) {
       extraFunc(toExportFig)
     }
 
     const objToSend = {
-      type: 'CREATE_LINE',
+      type,
       payload: toExportFig
     }
 

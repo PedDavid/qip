@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace API.Interfaces.IServices {
-    public interface IFigureIdGenerator {//TODO Tem de existir??
+﻿namespace API.Interfaces.IServices {
+    public interface IFigureIdGenerator {
         long NewId();
     }
 }

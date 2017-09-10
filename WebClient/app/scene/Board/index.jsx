@@ -17,6 +17,7 @@ import ShareBoardModal from './components/Modals/ShareBoardModal'
 import ImportImageModal from './components/Modals/ImportImageModal'
 import SettingsModal from './components/Modals/SettingsModal'
 import UserAccountModal from './components/Modals/UserAccountModal'
+import UsersManagementModal from './components/Modals/UsersManagementModal'
 import styles from './styles.scss'
 
 import Pen from './../../model/tools/Pen'
@@ -30,18 +31,17 @@ import {Persist, PersistType} from './../../util/Persist/Persist'
 import Auth from './../../auth/Auth'
 import Callback from './../../auth/Callback/SignInCallback.js'
 import SettingsConfig from './../../util/SettingsConfig.js'
+import ContextMenu from './components/ContextMenu'
 
 import { uploadImage } from './../../services/imgur'
 
-const defaultGrid = new Grid([], 0)
-const defaultPen = new Pen(defaultGrid, 'black', 5)
 const maxCanvasSize = 3000
 
 export default class Board extends React.Component {
   // check if these default tools are necessary
-
+  grid = new Grid([], 0)
   auth = new Auth(() => this.getInitialBoard(null), this.props.history) // this lambda may not be the best solution
-  persist = {} // this is necessary because the first time render occurs, there is no this.persist object
+  persist = new Persist(null, null, null) // this is necessary because the first time render occurs, there is no this.persist object
 
   state = {
     showCleanModal: false,
@@ -51,14 +51,16 @@ export default class Board extends React.Component {
     showAddModal: false,
     showUserAccountModal: false,
     showSettingsModal: false,
-    currTool: defaultPen,
+    showUsersManagementModal: false,
+    currTool: null,
     canvasSize: {width: 0, height: 0},
     favorites: [],
     loading: true,
     currentBoard: new BoardData(), // this is necessary because currentBoard is only fetched after first render
     userBoards: [],
     settings: [false, false],
-    notification: null
+    notification: null,
+    contextMenuVisibility: false
   }
   toolsConfig = new ToolsConfig(defaultToolsConfig)
 
@@ -67,7 +69,8 @@ export default class Board extends React.Component {
     onDown: event => this.state.currTool.onPress(event, 1, (x, y) => this.updateCanvasSize(x, y), this.state.settings),
     onUp: event => this.state.currTool.onPressUp(event, this.persist),
     onMove: event => this.state.currTool.onSwipe(event, 1, (x, y) => this.updateCanvasSize(x, y), this.state.settings), // change the way canvas size is updated
-    onOut: event => this.state.currTool.onOut(event, this.persist)
+    onOut: event => this.state.currTool.onOut(event, this.persist),
+    onContextMenu: event => this.state.currTool.onContextMenu(event, this.persist, this.openContextMenu, this.closeContextMenu, this.canvasContext)
   }
 
   componentDidMount () {
@@ -78,8 +81,8 @@ export default class Board extends React.Component {
     window.addEventListener('resize', event => {
       this.setState(prevState => {
         const newCanvasSize = {
-          width: window.innerWidth > this.state.canvasSize.width ? window.innerWidth - 20 : this.state.canvasSize.width,
-          height: window.innerHeight > this.state.canvasSize.height ? window.innerHeight - 20 : this.state.canvasSize.height
+          width: window.innerWidth > this.state.canvasSize.width || !prevState.settings[SettingsConfig.dynamicPageSettingIdx] ? window.innerWidth - 20 : this.state.canvasSize.width,
+          height: window.innerHeight > this.state.canvasSize.height || !prevState.settings[SettingsConfig.dynamicPageSettingIdx] ? window.innerHeight - 20 : this.state.canvasSize.height
         }
         this.persist.updateCanvasSize(newCanvasSize)
         return {canvasSize: newCanvasSize}
@@ -125,8 +128,6 @@ export default class Board extends React.Component {
       persistType = PersistType().LocalStorage
     }
 
-    this.grid = defaultGrid
-
     this.persist = new Persist(persistType, this.canvasContext, this.grid)
 
     const userProfile = this.auth.isAuthenticated() ? this.auth.tryGetProfile() : null
@@ -142,9 +143,6 @@ export default class Board extends React.Component {
       getUserInfoPromise = this.persist.getUserInfoAsync(this.grid, userProfile, userAccessToken)
     }
 
-    // getUserInfo should be done at first place because this will possible tell what board is being used.
-    // However, some tools, like currTool or prevTools need this.grid, which will only be updated later.
-    // With this, this.grid of those tools should be updated when this.grid is setted
     getUserInfoPromise.then(userinfo => {
       // if there is no pen, eraser or currentBoard
       const defaultPen = new Pen(this.grid, 'black', 5)
@@ -182,14 +180,14 @@ export default class Board extends React.Component {
       })
       if (currBoard.userPermission === 1) {
         window.alert('All modifications to board you may do, will not be persisted as you only have view permissions to this board')
+      } else if (currBoard.userPermission === 0) {
+        window.alert('You do not have public access to this board!. Redirecting to home board ...')
       }
       return this.persist.getInitialBoardAsync(boardId == null ? currBoard.id : boardId, userAccessToken)
     }).then(initBoard => {
-      this.grid = initBoard.grid
-      this.persist.grid = this.grid
-      // as said before, prevTools and currTools must be updated here
-      this.toolsConfig['pen'].lastValue.grid = this.grid
-      this.toolsConfig['eraser'].lastValue.grid = this.grid
+      // update this.grid
+      this.grid.addInitialFigures(initBoard.grid.figures)
+      this.grid.setCurrentFigId(initBoard.grid.maxId)
 
       const canvasSize = initBoard.canvasSize
 
@@ -199,7 +197,6 @@ export default class Board extends React.Component {
       }
 
       this.setState(prevState => {
-        prevState.currTool.grid = this.grid
         return {
           loading: false,
           canvasSize: {
@@ -249,7 +246,7 @@ export default class Board extends React.Component {
       settings: this.state.settings
     }
     updatedPreferences[preferenceNameToUpdate] = updatedPreference
-    this.persist.updateUserPreferences(updatedPreferences, this.auth.tryGetProfile(), this.auth.getAccessToken())
+    this.persist.updateUserPreferences(this.auth.isAuthenticated(), updatedPreferences, this.auth.tryGetProfile(), this.auth.getAccessToken())
   }
   moveFavorite = (tool, movingUp) => {
     this.setState((prevState) => {
@@ -358,6 +355,10 @@ export default class Board extends React.Component {
     this.setState(prevState => { return { showSettingsModal: !prevState.showSettingsModal } })
   }
 
+  toggleUsersManagementModal = () => {
+    this.setState(prevState => { return { showUsersManagementModal: !prevState.showUsersManagementModal } })
+  }
+
   refCallback = (ref) => {
     this.canvas = ref.canvas
     this.canvasContext = ref.canvas.getContext('2d')
@@ -402,6 +403,17 @@ export default class Board extends React.Component {
     this.setState({notification: null})
   }
 
+  openContextMenu = (clientX, clientY, contextMenuRaw) => {
+    this.clientX = clientX
+    this.clientY = clientY
+    this.contextMenuRaw = contextMenuRaw
+    this.setState({contextMenuVisibility: true})
+  }
+
+  closeContextMenu = () => {
+    this.setState({contextMenuVisibility: false})
+  }
+
   render () {
     return (
       <div ref='maindiv' onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.boardStyle} style={{width: this.state.canvasSize.width, height: this.state.canvasSize.height}}>
@@ -411,7 +423,7 @@ export default class Board extends React.Component {
           onImageLoad={this.toggleImportImageModal} canvasSize={this.state.canvasSize} auth={this.auth} changeCurrentBoard={this.getInitialBoard}
           addBoard={this.toggleAddModal} currentBoard={this.state.currentBoard} userBoards={this.state.userBoards} persist={this.persist}
           openUserAccount={this.toggleUserAccountModal} moveFavorite={this.moveFavorite} openSettings={this.toggleSettingsModal}
-          undo={this.undo}>
+          undo={this.undo} toggleUsersManagementModal={this.toggleUsersManagementModal}>
           <Canvas ref={this.refCallback} width={this.state.canvasSize.width} height={this.state.canvasSize.height} {...this.listeners}>
             HTML5 Canvas not supported
           </Canvas>
@@ -425,7 +437,7 @@ export default class Board extends React.Component {
         <ImportImageModal onClose={this.toggleImportImageModal} open={this.state.showImportImageModal} onImageLoad={this.onImageLoad} />
         <ShareBoardModal location={this.props.location} history={this.props.history} persist={this.persist}
           visible={this.state.showShareModal} onClose={this.toggleShareModal} updateCurrentBoard={this.updateBoardId}
-          addBoardAsync={this.addBoardAsync} auth={this.auth} currentBoard={this.state.currentBoard} />
+          addBoardAsync={this.addBoardAsync} auth={this.auth} currentBoard={this.state.currentBoard} getInitialBoard={this.getInitialBoard} />
         <Loader active={this.state.loading} content='Fetching Data ...' />
         <Route exact path='/callback' render={props => {
           return <Callback auth={this.auth} {...props} />
@@ -434,6 +446,8 @@ export default class Board extends React.Component {
           addBoardAsync={this.addBoardAsync} />
         <UserAccountModal auth={this.auth} visible={this.state.showUserAccountModal} closeModal={this.toggleUserAccountModal} />
         <SettingsModal settings={this.state.settings} updateSettings={this.updateSettings} visible={this.state.showSettingsModal} closeModal={this.toggleSettingsModal} />
+        <UsersManagementModal visible={this.state.showUsersManagementModal} closeModal={this.toggleUsersManagementModal} persist={this.persist} auth={this.auth} />
+        <ContextMenu canvasSize={this.state.canvasSize} visible={this.state.contextMenuVisibility} top={this.clientY} left={this.clientX} contextMenuRaw={this.contextMenuRaw} />
       </div>
     )
   }

@@ -1,15 +1,10 @@
-﻿using Authorization.Requirements;
-using Authorization.Resources;
+﻿using API.Domain;
 using API.Interfaces.IServices;
-using IODomain.Output;
+using Authorization.Extensions;
+using Authorization.Requirements;
+using Authorization.Resources;
 using Microsoft.AspNetCore.Authorization;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
-using API.Interfaces.ServicesExceptions;
 
 namespace Authorization.Handlers {
     public class BoardPermissionHandler : AuthorizationHandler<BoardPermissionRequirement, BoardRequest> {
@@ -24,10 +19,9 @@ namespace Authorization.Handlers {
                 return;
             }
 
-            Claim nameIdentifierClaim = context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-            string userId = nameIdentifierClaim?.Value;
+            string userId = context.User.GetNameIdentifier();
 
-            OutBoardPermission permission = await _usersBoardsService.GetPermissionAsync(userId, resource.BoardId);
+            BoardPermission permission = await _usersBoardsService.GetPermissionAsync(userId, resource.BoardId);
 
             if(permission >= requirement.Permission) {
                 context.Succeed(requirement);
