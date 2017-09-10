@@ -94,12 +94,12 @@ namespace API.Repositories {
         private static Preferences GetPreferences(SqlDataReader dr) {
             return new Preferences() {
                 UserId = dr.GetString(0),
-                Favorites = dr.GetSqlString(1).X(),
-                PenColors = dr.GetSqlString(2).X(),
-                DefaultPen = dr.GetSqlString(3).X(),
-                DefaultEraser = dr.GetSqlString(4).X(),
-                CurrTool = dr.GetSqlString(5).X(),
-                Settings = dr.GetSqlString(6).X()
+                Favorites = dr.GetSqlString(1).ToNullableString(),
+                PenColors = dr.GetSqlString(2).ToNullableString(),
+                DefaultPen = dr.GetSqlString(3).ToNullableString(),
+                DefaultEraser = dr.GetSqlString(4).ToNullableString(),
+                CurrTool = dr.GetSqlString(5).ToNullableString(),
+                Settings = dr.GetSqlString(6).ToNullableString()
             };
         }
     }

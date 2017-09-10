@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlTypes;
-using System.Text;
+﻿using System.Data.SqlTypes;
 
-namespace API.Repositories.Extensions
-{
-    public static class SqlStringExtensions
-    {
-        public static string X(this SqlString sqlString) {//TODO CHANGE NAME
+namespace API.Repositories.Extensions {
+    public static class SqlStringExtensions {
+        //Converte o SqlString em String, sendo o SqlString.Null equivalente a null
+        public static string ToNullableString(this SqlString sqlString) {
             return sqlString.IsNull ? null : sqlString.Value;
         }
     }
