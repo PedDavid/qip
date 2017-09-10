@@ -1,8 +1,8 @@
 import {Figure, FigureStyle} from './../../model/Figure'
+import {Image} from './../../model/Image'
 import {PointStyle} from './../../model/Point'
 import {SimplePoint} from './../../model/SimplePoint'
 import fetch from 'isomorphic-fetch'
-import Grid from './../../model/Grid'
 import Pen from './../../model/tools/Pen'
 import Eraser from './../../model/tools/Eraser'
 import Move from './../../model/tools/Move'
@@ -23,7 +23,8 @@ export default class PersistLS {
               point.removeFigure(payload.tempId)
               point.addFigure(payload.id, pointStyle)
             })
-            // update figure id
+            // update figure id and history
+            grid.updateHistoryFigureId(prevFigure.id, payload.id)
             prevFigure.id = payload.id
 
             // update grid map of figures
@@ -49,12 +50,41 @@ export default class PersistLS {
           break
         case 'ALTER_LINE':
           // todo: por estes comentários em vez de apagar e criar a figura quando o servidor estiver a enviar o offsetPoint
-          // const figureToMove = grid.getFigure(payload.id)
-          // grid.moveFigure(figureToMove, payload.offsetPoint, canvasContext, 1)
-          const figureToMove = grid.getFigure(payload.id)
-          grid.removeFigure(figureToMove, canvasContext, 1)
-          figureToMove.points = payload.points
-          grid.addFigure(figureToMove)
+          const figureToMove = grid.getFigure(payload.figure.Id)
+          const isScaling = payload.isScaling
+          if (isScaling !== 'False') {
+            const offsetPoint = {x: payload.offsetPoint.X, y: payload.offsetPoint.Y} // translate from server model
+            figureToMove.scale(isScaling, offsetPoint, grid, canvasContext)
+            grid.draw(canvasContext, 1)
+          } else {
+            grid.moveLine(figureToMove, point => {
+              return grid.getOrCreatePoint(point.x + payload.offsetPoint.X, point.y + payload.offsetPoint.Y)
+            }, canvasContext, 1)
+          }
+          break
+        case 'CREATE_IMAGE':
+          if (payload.tempId != null) {
+            const prevFigure = grid.getFigure(payload.tempId)
+            grid.updateHistoryFigureId(prevFigure.id, payload.id)
+            prevFigure.id = payload.id
+            grid.updateMapFigure(payload.tempId, prevFigure)
+            console.log('updated image with id ' + payload.tempId + ' to id ' + payload.id)
+            grid.draw(canvasContext, 1)
+            return
+          }
+          const newImage = new Image({x: payload.figure.Origin.X, y: payload.figure.Origin.Y}, payload.figure.Src, payload.figure.Width, payload.figure.Height, payload.figure.Id)
+          grid.addImage(newImage)
+          grid.draw(canvasContext, 1)
+          break
+        case 'DELETE_IMAGE':
+          grid.removeImage(payload.id, canvasContext, 1)
+          break
+        case 'ALTER_IMAGE':
+          console.log(payload)
+          const prevFigure = grid.getFigure(payload.figure.Id)
+          prevFigure.setSrcPoint(new SimplePoint(payload.figure.Origin.X, payload.figure.Origin.Y))
+          prevFigure.setWidth(payload.figure.Width)
+          prevFigure.setHeight(payload.figure.Height)
           grid.draw(canvasContext, 1)
           break
       }
@@ -111,15 +141,17 @@ export default class PersistLS {
         return imgRes.json()
       })
     ]).then(allFigs => {
-      const figures = allFigs[0].concat(allFigs[1])
+      const images = allFigs[1].map(img => { // sync with server model
+        img.srcPoint = img.origin
+        return img
+      })
+      const figures = allFigs[0].concat(images)
       let maxId = -1
       console.log('figures fetched from initial board:')
       console.log(figures)
-      // todo: make possible to get images too
-      const grid = new Grid(figures, maxId)
 
       const initBoard = {
-        grid,
+        grid: {figures, maxId},
         canvasSize: { // todo: get from server
           width: 0,
           height: 0
@@ -168,9 +200,7 @@ export default class PersistLS {
       if (updatedPreferencesRes.status >= 400) {
         throw new Error('Bad response from server. Check if Board Id is correct')
       }
-      return updatedPreferencesRes.json()
-    }).then(updatedPreferences => {
-      console.log(updatedPreferences)
+      return updatedPreferencesRes
     })
   }
 
@@ -215,6 +245,15 @@ export default class PersistLS {
         if (preferencesRes.status >= 400) {
           throw new Error('Bad response from server. Check if User Sub is correct')
         }
+        if (preferencesRes.status === 204) { // .json cannot handle response without content and server has not a default preferences response
+          return {
+            favorites: '[]',
+            currTool: 'null',
+            settings: '[]',
+            defaultEraser: 'null',
+            defaultPen: 'null'
+          }
+        }
         return preferencesRes.json()
       }),
       fetch(`http://localhost:57059/api/users/${profile.sub}/boards`, {
@@ -246,13 +285,15 @@ export default class PersistLS {
   }
 
   static _getToolFromWS = function (grid, rawTool) {
-    switch (rawTool.type) {
-      case ('pen'):
-        return new Pen(grid, rawTool.color, rawTool.width)
-      case ('eraser'):
-        return new Eraser(grid, rawTool.width)
-      case ('move'):
-        return new Move(grid)
+    if (rawTool != null) {
+      switch (rawTool.type) {
+        case ('pen'):
+          return new Pen(grid, rawTool.color, rawTool.width)
+        case ('eraser'):
+          return new Eraser(grid, rawTool.width, rawTool.eraserType)
+        case ('move'):
+          return new Move(grid)
+      }
     }
   }
 
@@ -296,8 +337,112 @@ export default class PersistLS {
     return Promise.all(promises)
       .then(allRes => {
         const boardInfo = allRes[0]
-        const userBoardInfo = allRes.length === 1 ? boardInfo.basePermission : allRes[1] // if user is not authenticated, board permissions is 0
+        const userBoardInfo = allRes.length === 1 ? {permission: boardInfo.basePermission} : allRes[1] // if user is not authenticated, board permissions is 0
         return new BoardData(boardInfo.id, boardInfo.name, boardInfo.basePermission, userBoardInfo.permission)
       })
+  }
+
+  static _getBoardUsers = function (boardId, accessToken) {
+    return fetch(`http://localhost:57059/api/boards/${boardId}/usersboards`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      method: 'GET'
+    }).then(boardUsersRes => {
+      if (boardUsersRes.status >= 400) {
+        throw new Error('Bad response from server.')
+      }
+      return boardUsersRes.json()
+    }).then(boardUsers => {
+      return boardUsers
+    })
+  }
+
+  static _updateBoardBasePermissionWS = function (boardId, boardName, basePermission, accessToken) {
+    return fetch(`http://localhost:57059/api/boards/${boardId}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      method: 'PUT',
+      body: JSON.stringify({
+        id: boardId,
+        name: boardName,
+        basePermission: basePermission,
+        maxDistPoints: 0
+      })
+    }).then(usersRes => {
+      if (usersRes.status >= 400) {
+        throw new Error('Bad response from server.')
+      }
+      return usersRes
+    })
+  }
+
+  static _createUsersPermissionWS = function (users, boardId, usersPermission, accessToken) {
+    const promises = []
+    users.forEach(userId => {
+      promises.push(
+        fetch(`http://localhost:57059/api/boards/${boardId}/usersboards`, {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          },
+          method: 'POST',
+          body: JSON.stringify({
+            userId: userId,
+            boardId,
+            permission: usersPermission
+          })
+        }).then(updatedPermissionRes => {
+          if (updatedPermissionRes.status >= 400) {
+            throw new Error('Bad response from server.')
+          }
+          return updatedPermissionRes.json()
+        })
+      )
+    })
+    return Promise.all(promises)
+  }
+
+  static _updateUserPermissionWS = function (userId, boardId, userPermission, accessToken) {
+    return fetch(`http://localhost:57059/api/boards/${boardId}/usersboards/${userId}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      method: 'PUT',
+      body: JSON.stringify({
+        userId: userId,
+        boardId,
+        permission: userPermission
+      })
+    }).then(updatedPermissionRes => {
+      if (updatedPermissionRes.status >= 400) {
+        throw new Error('Bad response from server.')
+      }
+      return updatedPermissionRes
+    })
+  }
+
+  static _getUsersWS = function (accessToken) {
+    return fetch(`http://localhost:57059/api/users/`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      method: 'GET'
+    }).then(usersRes => {
+      if (usersRes.status >= 400) {
+        throw new Error('Bad response from server. Check if Board Id is correct')
+      }
+      return usersRes.json()
+    })
   }
 }

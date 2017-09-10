@@ -39,7 +39,7 @@ export default class Favorite extends React.Component {
         <Button circular className={styles.fav} style={style} onClick={() => this.props.changeCurrentTool(fav)}>
           {/* it could be color:red instead of style:{color:'red'}} but the first one does not support rgba */}
           <Icon className={styles.iconStyle + ' large'} name={iconName} style={{color: color}} />
-          <font className={styles.fontStyle} size='1'> {fav.width} </font>
+          <font className={styles.fontStyle} size='1'> {fav.fontText} </font>
         </Button>
         <Button onClick={() => this.props.removeFavorite(fav)}
           icon={{name: 'trash', style: {color: 'red'}}} content='Remove'

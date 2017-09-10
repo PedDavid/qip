@@ -1,6 +1,5 @@
 import React from 'react'
 import { Modal, Button, Icon, Input, Message, Divider, Dropdown, Popup } from 'semantic-ui-react'
-import fetch from 'isomorphic-fetch'
 
 const baseUrl = 'http://localhost:8080/board/'
 
@@ -40,6 +39,7 @@ export default class ShareBoardModal extends React.Component {
           error: false
         })
         this.props.history.push('/board/' + insertedBoard.id)
+        this.props.getInitialBoard(insertedBoard.id)
       }).catch(err => {
         console.log(err)
         this.setState({
@@ -59,51 +59,31 @@ export default class ShareBoardModal extends React.Component {
       publicVisibilityLoading: true
     })
     const btn = props[0]
-    let updatedPublicVisibilityEdit
-    let updatedPublicVisibilityView
+    let updatedPublicVisibilityEdit = false
+    let updatedPublicVisibilityView = false
     let updatedPermission
     if (btn === 'edit') {
-      if (this.state.publicVisibilityView) {
-        updatedPublicVisibilityView = false
-      }
       updatedPublicVisibilityEdit = !this.state.publicVisibilityEdit
       updatedPermission = updatedPublicVisibilityEdit ? 2 : 0
     } else if (btn === 'view') {
-      if (this.state.publicVisibilityEdit) {
-        updatedPublicVisibilityEdit = false
-      }
       updatedPublicVisibilityView = !this.state.publicVisibilityView
       updatedPermission = updatedPublicVisibilityView ? 1 : 0
     }
 
-    return fetch(`http://localhost:57059/api/boards/${this.props.currentBoard.id}`, {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.props.auth.getAccessToken()}`
-      },
-      method: 'PUT',
-      body: JSON.stringify({
-        id: this.props.currentBoard.id,
-        name: this.props.currentBoard.name,
-        basePermission: updatedPermission,
-        maxDistPoints: 0
+    this.props.persist
+      .updateBoardBasePermission(this.props.currentBoard.id, this.props.currentBoard.name, updatedPermission, this.props.auth.getAccessToken())
+      .then(users => {
+        this.setState({
+          publicVisibilityEdit: updatedPublicVisibilityEdit,
+          publicVisibilityView: updatedPublicVisibilityView,
+          publicVisibilityLoading: false
+        })
+      }).catch(err => {
+        this.setState({
+          publicVisibilityLoading: false
+        })
+        console.error(err)
       })
-    }).then(usersRes => {
-      if (usersRes.status >= 400) {
-        throw new Error('Bad response from server. Check if Board Id is correct')
-      }
-      this.setState({
-        publicVisibilityEdit: updatedPublicVisibilityEdit,
-        publicVisibilityView: updatedPublicVisibilityView,
-        publicVisibilityLoading: false
-      })
-    }).catch(err => {
-      this.setState({
-        publicVisibilityLoading: false
-      })
-      console.error(err)
-    })
   }
 
   onChangeUser = (e, { value }) => this.setState({ selectedUsers: value })
@@ -122,26 +102,7 @@ export default class ShareBoardModal extends React.Component {
   }
 
   shareWithUsers = () => {
-    const promises = []
-    console.log(this.state.selectedUsers)
-    this.state.selectedUsers.forEach(userId => {
-      promises.push(
-        fetch(`http://localhost:57059/api/boards/${this.props.currentBoard.id}/usersboards`, {
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.props.auth.getAccessToken()}`
-          },
-          method: 'POST',
-          body: JSON.stringify({
-            userId: userId,
-            boardId: this.props.currentBoard.id,
-            permission: this.usersPermission
-          })
-        })
-      )
-    })
-    Promise.all(promises)
+    this.props.persist.createUsersPermission(this.state.selectedUsers, this.props.currentBoard.id, this.usersPermission, this.props.auth.getAccessToken())
       .then(allRes => {
         this.setState({
           userVisibilityLoading: false,
@@ -154,6 +115,7 @@ export default class ShareBoardModal extends React.Component {
         })
         console.error(err)
       })
+
     this.setState({
       userVisibilityLoading: true
     })
@@ -183,22 +145,11 @@ export default class ShareBoardModal extends React.Component {
     if (!this.props.auth.isAuthenticated()) {
       return
     }
-    return fetch(`http://localhost:57059/api/users/`, {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.props.auth.getAccessToken()}`
-      },
-      method: 'GET'
-    }).then(usersRes => {
-      if (usersRes.status >= 400) {
-        throw new Error('Bad response from server. Check if Board Id is correct')
-      }
-      return usersRes.json()
-    }).then(users => {
-      const profile = this.props.auth.tryGetProfile()
-      profile !== null && (this.users = users.filter(user => user.id !== profile.sub))
-    })
+    this.props.persist.getUsersAsync(this.props.auth.getAccessToken())
+      .then(users => {
+        const profile = this.props.auth.tryGetProfile()
+        profile !== null && (this.users = users.filter(user => user.id !== profile.sub))
+      })
   }
 
   render () {

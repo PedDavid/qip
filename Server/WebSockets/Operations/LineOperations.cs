@@ -88,7 +88,9 @@ namespace WebSockets.Operations {
 
             long id = payload["id"].Value<long>();
 
-            int offsetPoint = payload["offsetPoint"].Value<int>();
+            string isScaling = payload["isScaling"].Value<string>();
+
+            InPoint offsetPoint = payload["offsetPoint"].ToObject<InPoint>();
 
             InLine inLine = payload.ToObject<InLine>();
 
@@ -100,6 +102,7 @@ namespace WebSockets.Operations {
                     type = Models.Action.ALTER_LINE.ToString(),
                     payload = new {
                         offsetPoint = offsetPoint,
+                        isScaling = isScaling,
                         figure = inLine // Usado o InLine porque os WebSockets estão a servir de espelho ao enviado pelo cliente
                     }
                 }
