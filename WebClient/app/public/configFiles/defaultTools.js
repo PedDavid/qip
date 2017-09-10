@@ -1,6 +1,7 @@
 import Pen from './../../model/tools/Pen'
 import Eraser from './../../model/tools/Eraser'
 import Move from './../../model/tools/Move'
+import Presentation from './../../model/tools/Presentation'
 
 module.exports = [
   {type: 'pen',
@@ -41,5 +42,10 @@ module.exports = [
     icon: 'move',
     content: [],
     toolType: Move
+  },
+  {type: 'presentation',
+    icon: 'tencent weibo',
+    content: [],
+    toolType: Presentation
   }
 ]

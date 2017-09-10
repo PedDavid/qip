@@ -101,6 +101,10 @@ export default class Board extends React.Component {
     })
   }
 
+  componentWillUnmount () {
+    this.persist.closeConnection()
+  }
+
   getInitialBoard = (boardId) => {
     /*
       There is the following possibilities for this initial procedure:

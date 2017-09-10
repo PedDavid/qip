@@ -78,7 +78,7 @@ export default class Tools extends React.Component {
           {this.props.toolsConfig.defaultTools.map((tool, idx) => (
             <Grid.Row key={'tool' + idx} columns={1} className={styles.toolRow} style={{padding: '0px'}}>
               <Grid.Column style={{padding: '0px'}}>
-                <Tool toolsConfig={this.props.toolsConfig} visibility={visibility} currTool={this.props.currTool} grid={this.props.grid} tool={tool} changeCurrentTool={this.props.changeCurrentTool} />
+                <Tool toolsConfig={this.props.toolsConfig} visibility={visibility} currTool={this.props.currTool} grid={this.props.grid} tool={tool} changeCurrentTool={this.props.changeCurrentTool} persist={this.props.persist} />
               </Grid.Column>
             </Grid.Row>
           ))}
