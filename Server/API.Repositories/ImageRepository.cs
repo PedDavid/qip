@@ -26,14 +26,12 @@ namespace API.Repositories {
             return _queryTemplate.QueryForScalarAsync<bool>(IMAGE_EXISTS, parameters);
         }
 
-        public async Task<long> AddAsync(Image image) {
-            long imageId = image.Id;
-
+        public async Task AddAsync(Image image) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
                     .Add("@figureId", SqlDbType.BigInt)
-                    .Value = imageId;
+                    .Value = image.Id;
 
             parameters
                 .Add("@boardId", SqlDbType.BigInt)
@@ -60,8 +58,6 @@ namespace API.Repositories {
                 .Value = image.Src;
 
             await _queryTemplate.StoredProcedureAsync(INSERT_IMAGE, parameters);
-
-            return imageId;
         }
 
         public Task<Image> FindAsync(long id, long boardId) {
@@ -142,7 +138,9 @@ namespace API.Repositories {
 
         //Extract Data From Data Reader
         private static Image GetImage(SqlDataReader dr) {
-            return new Image(dr.GetInt64(1), dr.GetInt64(0)) {
+            return new Image() {
+                Id = dr.GetInt64(0),
+                BoardId = dr.GetInt64(1),
                 Origin = new Point() {
                     X = dr.GetInt32(2),
                     Y = dr.GetInt32(3)

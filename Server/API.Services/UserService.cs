@@ -19,16 +19,28 @@ namespace API.Services {
             _memoryCache = memoryCache;
         }
 
-        public async Task<IEnumerable<OutUser>> GetAllAsync(long index, long size, string search) {
+        public async Task<bool> ExistsAsync(string userId) {
             AccessToken accessToken = await _memoryCache.GetAccessToken(_auth0ManagementRepository);
 
-            IEnumerable<User> users = await _auth0ManagementRepository.GetUsersAsync(accessToken.Access_token, index, size, search);
-
-            return users.Select(UserExtensions.Out);
+            return await _auth0ManagementRepository.UserExistsAsync(userId, accessToken.Access_token);
         }
 
-        public Task<IEnumerable<OutUser>> GetAllAsync(long index, long size) {
+        public async Task<IEnumerable<User>> GetAllAsync(long index, long size, string search) {
+            AccessToken accessToken = await _memoryCache.GetAccessToken(_auth0ManagementRepository);
+
+            return search == null ?
+                 await _auth0ManagementRepository.GetUsersAsync(accessToken.Access_token, index, size) :
+                 await _auth0ManagementRepository.GetUsersAsync(accessToken.Access_token, index, size, search);
+        }
+
+        public Task<IEnumerable<User>> GetAllAsync(long index, long size) {
             return GetAllAsync(index, size, null);
+        }
+
+        public async Task<User> GetAsync(string userId) {
+            AccessToken accessToken = await _memoryCache.GetAccessToken(_auth0ManagementRepository);
+
+            return await _auth0ManagementRepository.GetUserAsync(userId, accessToken.Access_token);
         }
     }
 }

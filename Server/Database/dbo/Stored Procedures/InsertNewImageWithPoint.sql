@@ -1,7 +1,6 @@
 ﻿create proc dbo.InsertNewImageWithPoint @figureId bigint, @boardId bigint, @pointId bigint, @src nvarchar(max), @width int, @height int 
 as
 	begin try
-		set transaction isolation level serializable
 		begin tran
 
 			insert into dbo.Figure (id, figureType, boardId) values(@figureId, 'image', @boardId)

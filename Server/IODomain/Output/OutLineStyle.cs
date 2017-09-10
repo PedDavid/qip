@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Newtonsoft.Json;
 
 namespace IODomain.Output {
     public class OutLineStyle {
-        public long Id { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public long? Id { get; set; }
         public string Color { get; set; }
     }
 }

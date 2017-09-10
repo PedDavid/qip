@@ -1,21 +1,20 @@
-﻿using IODomain.Input;
-using IODomain.Output;
-using System;
+﻿using API.Domain;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace API.Interfaces.IServices {
     public interface IBoardService {
-        Task<IEnumerable<OutBoard>> GetAllAsync(long index, long size);
+        Task<bool> ExistsAsync(long id);
 
-        Task<IEnumerable<OutBoard>> GetAllAsync(long index, long size, string search);
+        Task<IEnumerable<Board>> GetAllAsync(long index, long size);
 
-        Task<OutBoard> GetAsync(long id);
+        Task<IEnumerable<Board>> GetAllAsync(long index, long size, string search = null);
 
-        Task<OutBoard> CreateAsync(InBoard inBoard, string userId);
+        Task<Board> GetAsync(long id);
 
-        Task<OutBoard> UpdateAsync(long id, InBoard inBoard);
+        Task CreateAsync(Board board, string userId);
+
+        Task UpdateAsync(Board board);
 
         Task DeleteAsync(long id);
     }

@@ -12,7 +12,7 @@ namespace API.Services.Extensions {
             return cache.GetOrCreateAsync(CreateKeyWithRegion(key, region), factory);
         }
 
-        private static string CreateKeyWithRegion(string key, string region) {//TODO ALTERAR
+        private static string CreateKeyWithRegion(string key, string region) {
             return "region:" + (region ?? "null_region") + ";key=" + key;
         }
     }

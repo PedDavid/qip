@@ -1,12 +1,9 @@
 ﻿using API.Domain;
 using API.Interfaces.IRepositories;
-using API.Repositories;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace API.Repositories {
@@ -17,7 +14,7 @@ namespace API.Repositories {
             _queryTemplate = queryTemplate;
         }
 
-        public async Task<long> AddAsync(Board board, string userId) {
+        public async Task AddAsync(Board board, string userId) {
             List<SqlParameter> parameters = new List<SqlParameter>();
 
             parameters
@@ -26,7 +23,7 @@ namespace API.Repositories {
 
             parameters
                     .Add("@maxDistPoints", SqlDbType.TinyInt)
-                    .Value = board.MaxDistPoints.Value;
+                    .Value = board.MaxDistPoints;
 
             parameters
                     .Add("@basePermission", SqlDbType.TinyInt)
@@ -34,14 +31,14 @@ namespace API.Repositories {
 
             parameters
                     .Add("@userId", SqlDbType.VarChar)
-                    .Value = userId??SqlString.Null;
+                    .Value = userId ?? SqlString.Null;
 
             SqlParameter boardId = parameters.Add("@boardId", SqlDbType.BigInt);
             boardId.Direction = ParameterDirection.Output;
 
             await _queryTemplate.StoredProcedureAsync(INSERT_BOARD, parameters);
 
-            return (long)boardId.Value;
+            board.Id = (long)boardId.Value;
         }
 
         public Task<Board> FindAsync(long id) {
@@ -98,7 +95,7 @@ namespace API.Repositories {
 
             parameters
                     .Add("@id", SqlDbType.BigInt)
-                    .Value = board.Id.Value;
+                    .Value = board.Id;
 
             parameters
                  .Add("@name", SqlDbType.VarChar)
@@ -106,7 +103,7 @@ namespace API.Repositories {
 
             parameters
                 .Add("@maxDistPoints", SqlDbType.TinyInt)
-                .Value = board.MaxDistPoints.Value;
+                .Value = board.MaxDistPoints;
 
             parameters
                 .Add("@basePermission", SqlDbType.TinyInt)
@@ -117,7 +114,7 @@ namespace API.Repositories {
 
         //SQL Commands
         private static readonly string BOARD_EXISTS = "SELECT CAST(count(id) as BIT) FROM dbo.Board WHERE id = @id";
-        private static readonly string SELECT_ALL = "SELECT id, [name], maxDistPoints, basePermission" +
+        private static readonly string SELECT_ALL = "SELECT id, [name], maxDistPoints, basePermission " +
                                                     "FROM dbo.Board " +
                                                     "ORDER BY id " +
                                                     "OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
@@ -140,11 +137,12 @@ namespace API.Repositories {
 
         //Extract Data From Data Reader
         private static Board GetBoard(SqlDataReader dr) {
-            return new Board(dr.GetInt64(0)) {
+            return new Board {
+                Id = dr.GetInt64(0),
                 Name = dr.GetString(1),
                 MaxDistPoints = dr.GetByte(2),
                 BasePermission = (BoardPermission)dr.GetByte(3)
-        };
+            };
         }
     }
 }

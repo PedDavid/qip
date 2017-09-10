@@ -4,7 +4,6 @@ using Authorization.Extensions.DependencyInjection;
 using API.Repositories.Options;
 using API.Repositories.Extensions.DependencyInjection;
 using API.Services.Extensions.DependencyInjection;
-using IODomain.Output;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -17,6 +16,7 @@ using WebSockets.StringWebSockets;
 using Newtonsoft.Json.Converters;
 using Microsoft.Extensions.Primitives;
 using System.Linq;
+using API.Domain;
 
 namespace ApiServer {
     public class Startup {
@@ -51,9 +51,9 @@ namespace ApiServer {
             services.AddAuthorization(options => {
                 options.AddPolicy("Administrator", policy => policy.Requirements.Add(new AdminRequirement()));
                 options.AddPolicy(Policies.UserIsOwnPolicy, policy => policy.Requirements.Add(new UserIsOwnRequirement()));
-                options.AddPolicy(Policies.BoardIsOwnPolicy, policy => policy.Requirements.Add(new BoardPermissionRequirement(OutBoardPermission.Owner)));
-                options.AddPolicy(Policies.ReadBoardPolicy, policy => policy.Requirements.Add(new BoardPermissionRequirement(OutBoardPermission.View)));
-                options.AddPolicy(Policies.WriteBoadPolicy, policy => policy.Requirements.Add(new BoardPermissionRequirement(OutBoardPermission.Edit)));
+                options.AddPolicy(Policies.BoardIsOwnPolicy, policy => policy.Requirements.Add(new BoardPermissionRequirement(BoardPermission.Owner)));
+                options.AddPolicy(Policies.ReadBoardPolicy, policy => policy.Requirements.Add(new BoardPermissionRequirement(BoardPermission.View)));
+                options.AddPolicy(Policies.WriteBoadPolicy, policy => policy.Requirements.Add(new BoardPermissionRequirement(BoardPermission.Edit)));
             });
 
             //Add Api Authorization Handlers

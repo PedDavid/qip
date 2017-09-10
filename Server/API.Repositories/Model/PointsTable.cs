@@ -57,9 +57,9 @@ namespace API.Repositories.Model {
         public void Add(LinePoint point) {
             var row = new SqlDataRecord(metaData);
 
-            row.SetInt32(0, point.X.Value);
-            row.SetInt32(1, point.Y.Value);
-            row.SetInt32(2, point.Idx.Value);
+            row.SetInt32(0, point.X);
+            row.SetInt32(1, point.Y);
+            row.SetInt32(2, point.Idx);
             row.SetString(3, JsonConvert.SerializeObject(point.Style));
 
             rows.Add(row);
