@@ -144,12 +144,14 @@ export function Figure (figureStyle, id = null) {
     return id + 1 / Math.pow(2, this.subFigureLevel)
   }
 
-  this.exportWS = function (type, extraFunc) {
+  this.exportWS = function (type, boardId, extraFunc) {
     const toExportFig = this._export()
 
     if (extraFunc != null) {
       extraFunc(toExportFig)
     }
+
+    toExportFig.BoardId = boardId
 
     const objToSend = {
       type,
