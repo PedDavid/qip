@@ -47,7 +47,7 @@ export default class Presentation implements Tool {
   onOut (event, socket) {
     const canvasContext = event.target.getContext('2d')
     this.grid.draw(canvasContext, 1) // this is necessary to reset all other points
-    this.persist.sendPointer(new SimplePoint(-1, -1)) // clean last pointer in other apps    
+    this.persist.sendPointer(new SimplePoint(-1, -1)) // clean last pointer in other apps
   }
 
   static _drawPointer (canvasContext, x, y) {
