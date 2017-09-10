@@ -20,6 +20,7 @@ namespace WebSockets.Controllers {
         private readonly StringWebSocketsSessionManager _sessionManager;
         private readonly LineOperations _lineOperations;
         private readonly ImageOperations _imageOperations;
+        private readonly PointerOperation _pointerOperations;
         private readonly IAuthorizationService _authorizationService;
         private readonly ILogger<WebSocketsController> _logger;
 
@@ -39,6 +40,7 @@ namespace WebSockets.Controllers {
             _authorizationService = authorizationService;
             _imageOperations = new ImageOperations(imageService, figureIdService, authorizationService, new Logger<ImageOperations>(logger));
             _lineOperations = new LineOperations(lineService, figureIdService, authorizationService, new Logger<LineOperations>(logger));
+            _pointerOperations = new PointerOperation(authorizationService, new Logger<PointerOperation>(logger));
             _logger = new Logger<WebSocketsController>(logger);
 
             _operations = new Dictionary<Models.OperationType, Operation>() {
@@ -47,7 +49,8 @@ namespace WebSockets.Controllers {
                 { Models.OperationType.ALTER_IMAGE, _imageOperations.UpdateImage },
                 { Models.OperationType.CREATE_LINE, _lineOperations.CreateLine },
                 { Models.OperationType.DELETE_LINE, _lineOperations.DeleteLine },
-                { Models.OperationType.ALTER_LINE, _lineOperations.UpdateLine }
+                { Models.OperationType.ALTER_LINE, _lineOperations.UpdateLine },
+                { Models.OperationType.POINT_TO, _pointerOperations.PointTo }
             };
         }
 

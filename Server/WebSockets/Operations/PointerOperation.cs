@@ -52,7 +52,7 @@ namespace WebSockets.Operations {
             await session.BroadcastAsync(
                new {
                    type = OperationType.POINT_TO,
-                   payload = new { figure = point.Out() }
+                   payload = new { point = point.Out() }
                },
                serializerSettings
             );
