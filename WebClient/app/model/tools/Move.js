@@ -125,7 +125,7 @@ export default class Move implements Tool {
       text: 'Paste',
       onClick: (event) => {
         const clipboardFig = persist.getClipboard()
-        this._pasteFigure(clipboardFig.type, clipboardFig, persist, canvasContext)
+        this._pasteFigure(contextMenuEvent, clipboardFig.type, clipboardFig, persist, canvasContext)
         this.tryCloseContextMenu()
       }}
 
