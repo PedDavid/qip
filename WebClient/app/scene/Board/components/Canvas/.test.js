@@ -23,7 +23,6 @@ describe('Component: Canvas', () => {
   })
   // Otherwise browsers throw warnings because prop is unknown to <canvas>
   it('Does not pass listeners to <canvas>', () => {
-    const props = { width: 1, height: 1 }
     const listeners = { onDown: evt => {} }
     const wrapper = shallow(<Canvas {...props} {...listeners} />)
     expect(wrapper.instance().props).toHaveProperty('onDown')
@@ -36,15 +35,15 @@ describe('Component: Canvas', () => {
       onMove: evt => {},
       onOut: evt => {}
     }
-    const wrapper = shallow(<Canvas {...listeners} />)
+    const wrapper = shallow(<Canvas {...props} {...listeners} />)
     expect(wrapper).not.toBeNull()
   })
   it('Mounts', () => {
-    const wrapper = mount(<Canvas />)
+    const wrapper = mount(<Canvas {...props} />)
     expect(wrapper).not.toBeNull()
   })
   it('Updates and does not change state', () => {
-    const wrapper = mount(<Canvas />)
+    const wrapper = mount(<Canvas {...props} />)
     const updated = wrapper.update()
     expect(updated).toMatchObject(wrapper)
   })
@@ -56,7 +55,7 @@ describe('Component: Canvas', () => {
       onMove: evt => {},
       onOut: evt => {}
     }
-    const wrapper = mount(<Canvas {...listeners} />)
+    const wrapper = mount(<Canvas {...props} {...listeners} />)
     expect(wrapper).not.toBeNull()
     //TODO(peddavid): Simulate pointer events
   })

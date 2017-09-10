@@ -70,10 +70,16 @@ namespace WebSockets.Operations {
             Task store = _lineService.CreateAsync(line, autoGenerateId: false);
             OperationUtils.ResolveTaskContinuation(store);
 
+            dynamic sendPayload;
+            if(inLine.PersistLocalBoard)
+                sendPayload = new { figure = line.Out() };
+            else
+                sendPayload = new { id = id, tempId = inLine.TempId };
+
             Task response = stringWebSocket.SendAsync(
                 new {
                     type = OperationType.CREATE_LINE,
-                    payload = new { id = id, tempId = inLine.TempId }
+                    payload = sendPayload
                 },
                 serializerSettings
             );
@@ -127,6 +133,7 @@ namespace WebSockets.Operations {
                     type = OperationType.ALTER_LINE,
                     payload = new {
                         offsetPoint = inLine.OffsetPoint,
+                        isScaling = inLine.IsScaling,
                         figure = line.Out()
                     }
                 },

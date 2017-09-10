@@ -4,41 +4,80 @@ import styles from './styles.scss'
 
 import { Grid, Button } from 'semantic-ui-react'
 
-export default function FavoriteTools (props) {
+const favNodes = []
+// note: (simao) due to lack of time, i didn't search for a better algorithm without the use of ref. therefore, it mustn't be a statless function
+export default class FavoriteTools extends React.Component {
   // TODO(peddavid): Avoid ref usage and auxiliar array, maybe there is an alternative with props
-  const favNodes = []
-  const addFavorite = () => {
-    const currTool = props.currTool
-    const favorites = props.favorites
+  addFavorite = () => {
+    const currTool = this.props.currTool
+    const favorites = this.props.favorites
     let idx = -1
     if ((idx = favorites.findIndex(fav => fav.equals(currTool))) > -1) {
       favNodes[idx].animate()
     } else {
-      props.addFavorite(props.currTool)
+      this.props.addFavorite(this.props.currTool)
     }
   }
-  return (
-    <div className={styles.quickBtnsContainer}>
-      <Grid divided textAlign='center'>
-        <Grid.Row columns='1' className={styles.rows} style={{padding: '4px'}}> {/* todo: (simaovii) I don't understand why padding in className is not working... */}
-          <Grid.Column>
-            <Button circular className={styles.btn} icon='list layout' onClick={props.toggleSideBar} />
-          </Grid.Column>
-        </Grid.Row>
-        {props.favorites.map((favorite, idx) => (
-          <Grid.Row key={'favorite' + idx} columns='1' className={styles.rows} style={{padding: '4px'}}>
+
+  onMouseDownFav = (args) => {
+    const favIdx = args[0]
+    this.div = this.refs['div' + favIdx]
+    this.favorite = args[1]
+  }
+  onMoveFav = (event) => {
+    // if event was trigger by hovering, ignore move
+    if (event.buttons <= 0 || this.favorite == null) {
+      return
+    }
+    const parentOffsetTop = this.div.offsetTop
+    const parentOffsetBottom = parentOffsetTop + this.div.offsetHeight
+    const moveY = event.clientY
+    // check if move is enough to change favorite position
+    if (moveY > parentOffsetBottom) {
+      // it's not possible to use "this.props.currTool" because if the second favorite is selected and
+      // the user is trying to move the first one, it will throw an error
+      // therefore, favorite must be received by parameter
+      this.props.moveFavorite(this.favorite, false)
+      this.onMouseUp()
+    } else if (moveY < parentOffsetTop) {
+      this.props.moveFavorite(this.favorite, true)
+      this.onMouseUp()
+    }
+  }
+  onMouseUp = (event) => {
+    this.favorite = null
+    this.div = null
+  }
+
+  render () {
+    return (
+      <div className={styles.quickBtnsContainer}>
+        <Grid divided textAlign='center'>
+          <Grid.Row columns='1' className={styles.rows} >
             <Grid.Column>
-              <Favorite ref={favNode => { favNodes[idx] = favNode }} toolsConfig={props.toolsConfig} currTool={props.currTool} changeCurrentTool={props.changeCurrentTool} removeFavorite={props.removeFavorite} fav={favorite} />
+              <Button circular className={styles.btn} icon='list layout' onClick={this.props.toggleSideBar} />
             </Grid.Column>
           </Grid.Row>
-        ))}
-        {/* Add Favorite Button */}
-        <Grid.Row columns='1' className={styles.rows} style={{padding: '4px'}}>
-          <Grid.Column>
-            <Button className={styles.btn} circular icon='plus' onClick={addFavorite} />
-          </Grid.Column>
-        </Grid.Row>
-      </Grid>
-    </div>
-  )
+          {this.props.favorites.map((favorite, idx) => (
+            <div ref={'div' + idx} key={'div' + idx}> {/* this div allows onMove function to know offset positions of element */}
+              <Grid.Row key={'div' + idx} columns='1' className={styles.rows} style={{padding: '4px'}}
+                onMouseUp={this.onMouseUp} onMouseMove={this.onMoveFav} onMouseDown={this.onMouseDownFav.bind(this, [idx, favorite])}>
+                <Grid.Column>
+                  <Favorite ref={favNode => { favNodes[idx] = favNode }} toolsConfig={this.props.toolsConfig} currTool={this.props.currTool}
+                    changeCurrentTool={this.props.changeCurrentTool} removeFavorite={this.props.removeFavorite} fav={favorite}
+                    moveFavorite={this.props.moveFavorite} />
+                </Grid.Column>
+              </Grid.Row>
+            </div>
+          ))}
+          {/* Add Favorite Button */}
+          <Grid.Row columns='1' className={styles.rows} style={{padding: '4px'}}>
+            <Grid.Column>
+              <Button className={styles.btn} circular icon='plus' onClick={this.addFavorite} />
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
+      </div>
+    )
+  }
 }

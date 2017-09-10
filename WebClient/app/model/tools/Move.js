@@ -1,5 +1,5 @@
 import { SimplePoint } from './../SimplePoint'
-import { Figure } from './../Figure'
+import { Figure, FigureStyle } from './../Figure'
 import Line from './../Line'
 import { Image } from './../Image'
 import Selection from './../Selection'
@@ -8,6 +8,7 @@ import Tool from './Tool'
 
 export default class Move implements Tool {
   constructor (grid) {
+    this.type = 'move'
     this.grid = grid
     this.movingLine = null
     this.currentFigureMoving = null
@@ -18,6 +19,8 @@ export default class Move implements Tool {
   onPress (event, scale) { // current
     const x = event.offsetX
     const y = event.offsetY
+
+    this.tryCloseContextMenu()
 
     // get line figures
     if (this.currentFigureMoving === null) {
@@ -32,13 +35,13 @@ export default class Move implements Tool {
       if (this.currentFigureMoving != null) {
         const canvasContext = event.target.getContext('2d')
         this.selection = new Selection(this.currentFigureMoving.getTopLeftPoint(), this.currentFigureMoving.getBottomRightPoint(), canvasContext)
-        this.selection.select()
+        this.selection.select(event.pointerType === 'touch')
       }
     }
 
     // check if user tap in the scaling circles
     if (this.currentFigureMoving != null) {
-      this.scaling = this.selection.isScaling(new SimplePoint(x, y))
+      this.scaling = this.selection.isScaling(new SimplePoint(x, y), event.pointerType === 'touch')
     }
 
     if (this.selection != null && this.selection.containsPoint(new SimplePoint(x, y))) {
@@ -82,7 +85,7 @@ export default class Move implements Tool {
 
     if (this.currentFigureMoving != null) {
       this.selection.move(this.currentFigureMoving.getTopLeftPoint(), this.currentFigureMoving.getBottomRightPoint())
-      this.selection.select()
+      this.selection.select(event.pointerType === 'touch')
     }
   }
 
@@ -91,26 +94,93 @@ export default class Move implements Tool {
   }
 
   onOut (event, persist) {
+    const moveType = this.currentFigureMoving instanceof Figure ? 'figure' : 'image'
     if (this.movingLine != null && this.movingLine.start !== this.movingLine.end) {
-      if (persist.connected) {
-        const offsetPoint = new SimplePoint(this.movingLine.end.x - this.movingLine.start.x, this.movingLine.end.y - this.movingLine.start.y)
-        const toSend = this.currentFigure.exportWS(
-          persist.boardId,
-          fig => { fig.offsetPoint = offsetPoint }
-        )
-        persist.socket.send(toSend)
-      } else {
-        // move from localstorage
-        const dataFigure = JSON.parse(window.localStorage.getItem('figures'))
-        const toPersist = this.currentFigureMoving.exportLS()
-        let figIdx = dataFigure.findIndex(f => f.id === toPersist.id)
-        dataFigure[figIdx] = toPersist
-        window.localStorage.setItem('figures', JSON.stringify(dataFigure))
-      }
+      const offsetPoint = new SimplePoint(this.movingLine.end.x - this.movingLine.start.x, this.movingLine.end.y - this.movingLine.start.y)
+      persist.sendMoveAction(this.currentFigureMoving, offsetPoint, this.scaling, moveType)
     }
 
     this.movingLine = null
     this.scaling = false
+  }
+
+  onContextMenu (contextMenuEvent, persist, addContextMenuFunc, closeContextMenu, canvasContext) {
+    contextMenuEvent.preventDefault()
+    contextMenuEvent.persist() // must be persisted to not be reused. therefore, when onClick of menu items are triggered, this event is valid
+
+    this.onCloseContextMenu = closeContextMenu
+    let contextMenuRaw
+    const copyMenuItem = {
+      icon: 'copy',
+      text: 'Copy',
+      onClick: () => {
+        const toSave = this.currentFigureMoving.exportLS()
+        delete toSave.id
+        persist.addClipboard(toSave)
+        this.tryCloseContextMenu()
+      }}
+
+    const pasteMenuItem = {
+      icon: 'paste',
+      text: 'Paste',
+      onClick: (event) => {
+        const clipboardFig = persist.getClipboard()
+        this._pasteFigure(contextMenuEvent, clipboardFig.type, clipboardFig, persist, canvasContext)
+        this.tryCloseContextMenu()
+      }}
+
+    this.currentFigureMoving instanceof Image && (contextMenuRaw = [{
+      header: {icon: null, text: 'Edit'},
+      menuItems: [{
+        icon: 'trash',
+        text: 'Remove',
+        onClick: () => {
+          this.grid.removeImage(this.currentFigureMoving.id, canvasContext, 1)
+          persist.removeImage(this.currentFigureMoving.id)
+          this.tryCloseContextMenu()
+        }},
+        copyMenuItem, pasteMenuItem]
+    }])
+
+    this.currentFigureMoving instanceof Figure && (contextMenuRaw = [{
+      header: {icon: null, text: 'Edit'},
+      menuItems: [copyMenuItem, pasteMenuItem]
+    }])
+
+    this.currentFigureMoving === null && (contextMenuRaw = [{
+      header: {icon: null, text: 'Edit'},
+      menuItems: [pasteMenuItem]
+    }])
+
+    addContextMenuFunc(contextMenuEvent.clientX, contextMenuEvent.clientY, contextMenuRaw)
+  }
+
+  tryCloseContextMenu () {
+    if (this.onCloseContextMenu != null) {
+      this.onCloseContextMenu()
+    }
+  }
+
+  _pasteFigure (event, type, figure, persist, canvasContext) {
+    if (type === 'figure') {
+      const newFig = new Figure(new FigureStyle(figure.style.color, 1))
+      newFig.points = figure.points
+      const copiedFigure = this.grid.addFigure(newFig, true)
+      // move figure to the point user pressed
+      const offsetPoint = new SimplePoint(event.clientX - copiedFigure.points[0].x, event.clientY - copiedFigure.points[0].y)
+      this.grid.moveLine(copiedFigure, point => {
+        return this.grid.getOrCreatePoint(point.x + offsetPoint.x, point.y + offsetPoint.y)
+      }, canvasContext, 1)
+      const movedFigure = this.grid.getFigure(copiedFigure.id) // send figure after it was moved
+      persist.sendPenAction(movedFigure, this.grid.getCurrentFigureId())
+      this.tryCloseContextMenu()
+    } else if (type === 'image') {
+      const newImage = new Image({x: event.clientX, y: event.clientY}, figure.Src, figure.Width, figure.Height)
+      // do not change this order. image must be added to grid first to set the new id
+      this.grid.addImage(newImage)
+      newImage.persist(persist, this.grid)
+    }
+    this.grid.draw(canvasContext, 1)
   }
 
   equals (move) {

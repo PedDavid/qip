@@ -1,4 +1,4 @@
-import Tool from './tools/Tool'
+// @Flow
 import Pen from './tools/Pen'
 import Eraser from './tools/Eraser'
 
@@ -15,11 +15,11 @@ export default class ToolsConfig {
   }
 
   // !!! at the moment, this is not working
-  getDefaultToolOf = function (toolType: Tool) {
+  getDefaultToolOf = function (toolType) {
     const idx = this.defaultTools
       .findIndex(defTool => {
-        if (defTool.toolType !== undefined) {
-          return defTool.toolType.name === toolType
+        if (defTool.type !== undefined) {
+          return defTool.type === toolType
         }
         return false
       })
@@ -30,7 +30,7 @@ export default class ToolsConfig {
   // to do calls like: ToolsConfig[pen] ...
   _mapTools = function (defaultTools) {
     defaultTools.forEach(defTool => {
-      this[defTool.type] = new DefaultTool(defTool.type, defTool.icon, defTool.content, defTool.lastValue, defTool.toolType)
+      this[defTool.type] = new DefaultTool(defTool.type, defTool.icon, defTool.content, defTool.lastValue)
     })
   }
 
@@ -49,11 +49,10 @@ export default class ToolsConfig {
 // this class represents a DefaultTool.
 // With this class, when writting code, it will be simplier to get tools' properties
 class DefaultTool {
-  constructor (type, icon, content, lastValue, toolType: Tool) {
+  constructor (type, icon, content, lastValue) {
     this.type = type
     this.icon = icon
     this.content = content
     this.lastValue = lastValue
-    this.toolType = toolType
   }
 }

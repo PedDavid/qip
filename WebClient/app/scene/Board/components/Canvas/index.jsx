@@ -15,6 +15,9 @@ export default class Canvas extends React.Component {
     if (this.props.onOut != null) {
       this.canvas.addEventListener('pointerout', this.props.onOut, false)
     }
+    if (this.props.onContextMenu != null) {
+      this.canvas.addEventListener('oncontextmenu', this.props.onContextMenu, false)
+    }
   }
 
   shouldComponentUpdate (nexProps) {

@@ -2,18 +2,24 @@ import { Figure, FigureStyle } from './../Figure'
 import {SimplePoint} from './../SimplePoint'
 import {PointStyle} from './../Point'
 import Tool from './Tool'
+import SettingsConfig from './../../util/SettingsConfig.js'
 
 export default class Pen implements Tool {
   constructor (grid, color, width) {
+    this.type = 'pen'
     this.color = color
     this.width = width
+    this.fontText = width
 
     this.grid = grid
     this.currentFigure = null
   }
 
   // passar para aqui as funções getMousePos
-  onPress (event, scale) {
+  onPress (event, scale, updateCanvasSizeFunc, settings) {
+    if (settings[SettingsConfig.fingerMoveSettingIdx] && event.pointerType === 'touch') {
+      return
+    }
     const x = event.offsetX
     const y = event.offsetY
 
@@ -33,10 +39,12 @@ export default class Pen implements Tool {
     canvasContext.lineWidth = press / 2
     canvasContext.strokeStyle = this.color
     canvasContext.stroke()
+
+    updateCanvasSizeFunc(x, y)
   }
 
-  onSwipe (event, scale) {
-    if (event.buttons > 0) {
+  onSwipe (event, scale, updateCanvasSizeFunc, settings) {
+    if (event.buttons > 0 && !(settings[SettingsConfig.fingerMoveSettingIdx] && event.pointerType === 'touch')) {
       const x = event.offsetX
       const y = event.offsetY
 
@@ -63,22 +71,19 @@ export default class Pen implements Tool {
       canvasContext.lineWidth = press
       canvasContext.lineJoin = canvasContext.lineCap = 'round'
       canvasContext.stroke()
+
+      updateCanvasSizeFunc(x, y)
     }
   }
 
   onPressUp (event, persist) {
-    // todo: passar persistencia para o onOut
-    this.grid.addFigure(this.currentFigure)
-
-    if (persist.connected) {
-      persist.socket.send(this.currentFigure.exportWS(persist.boardId))
-    } else {
-      // add to localstorage
-      const dataFigure = JSON.parse(window.localStorage.getItem('figures'))
-      dataFigure.push(this.currentFigure.exportLS()) // it can be push instead of dataFigure[id] because it will not have crashes with external id's because it's only used when there is no connection
-      window.localStorage.setItem('figures', JSON.stringify(dataFigure))
-      window.localStorage.setItem('currFigureId', JSON.stringify(this.grid.getCurrentFigureId()))
+    if (this.currentFigure === null) { // it is necessary to avoid some minor bugs
+      return
     }
+    // todo: passar persistencia para o onOut
+    this.grid.addFigure(this.currentFigure, true)
+
+    persist.sendPenAction(this.currentFigure, this.grid.getCurrentFigureId())
 
     // reset current figure
     this.currentFigure = null
@@ -89,13 +94,15 @@ export default class Pen implements Tool {
     if (this.currentFigure === null) {
       return
     }
-    grid.addFigure(this.currentFigure)
+    grid.addFigure(this.currentFigure, true)
 
     // fazer reset à figura para que não continue a desenhar se o utilizador sair da área do canvas
     // Desta forma, se o utilizador voltar à área do canvas com o ponteiro premido, irá desenhar uma nova figura
     const figStyle = new FigureStyle(this.color)
     this.currentFigure = new Figure(figStyle)
   }
+
+  onContextMenu (event) {}
 
   equals (pen) {
     return pen instanceof Pen && this.width === pen.width && this.color === pen.color

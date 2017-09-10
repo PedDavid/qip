@@ -71,10 +71,16 @@ namespace WebSockets.Operations {
             Task store = _imageService.CreateAsync(image, autoGenerateId: false);
             OperationUtils.ResolveTaskContinuation(store);
 
+            dynamic sendPayload;
+            if(inImage.PersistLocalBoard)
+                sendPayload = new { figure = image.Out() };
+            else
+                sendPayload = new { id = id, tempId = inImage.TempId };
+
             Task response = stringWebSocket.SendAsync(
                 new {
                     type = OperationType.CREATE_IMAGE,
-                    payload = new { id = id, tempId = inImage.TempId }
+                    payload = sendPayload
                 },
                serializerSettings
             );
@@ -99,7 +105,7 @@ namespace WebSockets.Operations {
                 return;
             }
 
-            InUpdateImage inImage = jPayload.ToObject<InUpdateImage>();
+            InUpdateWSImage inImage = jPayload.ToObject<InUpdateWSImage>();
 
             if(inImage.BoardId != boardId) {
                 _logger.LogDebug(LoggingEvents.UpdateWSImageWrongBoardId, "UpdateImage (Board {boardId}) WRONG BOARD ID {otherBoardId}", boardId, inImage.BoardId);
@@ -126,6 +132,7 @@ namespace WebSockets.Operations {
             await session.BroadcastAsync(
                 new {
                     type = OperationType.ALTER_IMAGE,
+                    isScaling = inImage.IsScaling,
                     payload = new { figure = image.Out() }
                 },
                 serializerSettings
