@@ -4,6 +4,7 @@ import {PointStyle} from './../../model/Point'
 import {SimplePoint} from './../../model/SimplePoint'
 import fetch from 'isomorphic-fetch'
 import Pen from './../../model/tools/Pen'
+import Presentation from './../../model/tools/Presentation'
 import Eraser from './../../model/tools/Eraser'
 import Move from './../../model/tools/Move'
 import BoardData from './../../model/BoardData'
@@ -12,6 +13,7 @@ export default class PersistLS {
   static _configureWSProtocol = function (socket, grid, canvasContext) {
     socket.onmessage = (event) => {
       const {type, payload} = JSON.parse(event.data)
+      console.log('received ws message of type ' + type)
       switch (type) {
         case 'CREATE_LINE':
           if (payload.tempId != null) {
@@ -87,6 +89,11 @@ export default class PersistLS {
           prevFigure.setHeight(payload.figure.Height)
           grid.draw(canvasContext, 1)
           break
+        case 'POINT_TO':
+          grid.draw(canvasContext, 1)
+          if (payload.point.X > 0 && payload.point.Y > 0) {
+            Presentation._drawPointer(canvasContext, payload.point.X, payload.point.Y)
+          }
       }
     }
   }

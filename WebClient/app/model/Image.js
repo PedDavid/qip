@@ -131,11 +131,12 @@ export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null) {
     width = width + offsetPoint.x
   }
 
-  this.exportWS = function (type, extraFunc) {
+  this.exportWS = function (type, boardId, extraFunc) {
     const imageToExport = this.export()
 
     extraFunc != null && extraFunc(imageToExport)
 
+    imageToExport.BoardId = boardId
     const objToSend = {
       type,
       payload: imageToExport
@@ -164,6 +165,7 @@ export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null) {
       persist.socket.send(
         this.exportWS(
           'CREATE_IMAGE',
+          persist.boardId,
           (img) => {
             img.tempId = img.id
             delete img.id

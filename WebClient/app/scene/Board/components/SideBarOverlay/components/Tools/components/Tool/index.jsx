@@ -1,6 +1,7 @@
 import React from 'react'
 import ToolsSideMenu from './components/ToolsSideMenu'
 import Move from './../../../../../../../../model/tools/Move'
+import Presentation from './../../../../../../../../model/tools/Presentation'
 
 import {
   Icon
@@ -12,8 +13,10 @@ export default class Tool extends React.Component {
   toggleSideMenu = () => {
     // TODO(peddavid): This is because Move Tool doesn't have "subtools",
     //  That said, this logic should not be here at all, or at least generified
-    if (this.props.tool.type === 'move') {
-      const tool = new Move(this.props.grid)
+    if (this.props.tool.content.length <= 0) {
+      let tool
+      this.props.tool.type === 'move' && (tool = new Move(this.props.grid))
+      this.props.tool.type === 'presentation' && (tool = new Presentation(this.props.grid, this.props.persist))
       this.props.changeCurrentTool(tool)
     } else {
       this.setState(lastState => ({sideMenuOpened: !lastState.sideMenuOpened}))
