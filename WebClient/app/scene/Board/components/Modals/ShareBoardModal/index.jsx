@@ -20,10 +20,6 @@ export default class ShareBoardModal extends React.Component {
     userVisibilityLoading: false,
     selectedUsers: []
   }
-  onClose = () => {
-    this.props.closeModal()
-  }
-
   getBoard = () => {
     if (this.state.boardUrl !== '' && !this.state.error) {
       return
@@ -160,7 +156,7 @@ export default class ShareBoardModal extends React.Component {
     const isNotAuthenticated = !this.props.auth.isAuthenticated()
 
     return (
-      <Modal size='small' open={this.props.visible} onClose={this.onClose}>
+      <Modal size='small' open={this.props.open} onClose={this.props.onClose} closeIcon>
         <Modal.Header>
           <Icon name='share' size='small' />
           Share Your Board

@@ -5,7 +5,8 @@ import {
 } from 'react-router-dom'
 
 import {
-  Loader
+  Loader,
+  Message
 } from 'semantic-ui-react'
 
 import SideBarOverlay from './components/SideBarOverlay'
@@ -13,10 +14,12 @@ import Canvas from './components/Canvas'
 import CleanBoardModal from './components/Modals/CleanBoardModal'
 import AddBoardModal from './components/Modals/AddBoardModal'
 import ShareBoardModal from './components/Modals/ShareBoardModal'
+import ImportImageModal from './components/Modals/ImportImageModal'
 import SettingsModal from './components/Modals/SettingsModal'
 import UserAccountModal from './components/Modals/UserAccountModal'
 import UsersManagementModal from './components/Modals/UsersManagementModal'
 import styles from './styles.scss'
+
 import Pen from './../../model/tools/Pen'
 import Eraser from './../../model/tools/Eraser'
 import Grid from './../../model/Grid'
@@ -30,6 +33,8 @@ import Callback from './../../auth/Callback/SignInCallback.js'
 import SettingsConfig from './../../util/SettingsConfig.js'
 import ContextMenu from './components/ContextMenu'
 
+import { uploadImage } from './../../services/imgur'
+
 const maxCanvasSize = 3000
 
 export default class Board extends React.Component {
@@ -42,6 +47,7 @@ export default class Board extends React.Component {
     showCleanModal: false,
     showUserModal: false,
     showShareModal: false,
+    showImportImageModal: false,
     showAddModal: false,
     showUserAccountModal: false,
     showSettingsModal: false,
@@ -53,6 +59,7 @@ export default class Board extends React.Component {
     currentBoard: new BoardData(), // this is necessary because currentBoard is only fetched after first render
     userBoards: [],
     settings: [false, false],
+    notification: null,
     contextMenuVisibility: false
   }
   toolsConfig = new ToolsConfig(defaultToolsConfig)
@@ -79,14 +86,10 @@ export default class Board extends React.Component {
         }
         this.persist.updateCanvasSize(newCanvasSize)
         return {canvasSize: newCanvasSize}
-      })
-      // TODO(peddavid): This is probably required to be done after state is changed, setState callback or Update
-      this.grid.draw(this.canvasContext, 1)
+      }, () => this.grid.draw(this.canvasContext, 1))
     })
 
-    // var canvasHammer = new Hammer(this.canvas)
-
-    var canvasHammer = new Hammer.Manager(this.canvas, {
+    const canvasHammer = new Hammer.Manager(this.canvas, {
       inputClass: Hammer.TouchInput, // only touch triggers hammer js
       recognizers: [
         // RecognizerClass, [options], [recognizeWith, ...], [requireFailure, ...]
@@ -269,14 +272,6 @@ export default class Board extends React.Component {
       this.updateUserPreferences('favorites', prevState.favorites)
     })
   }
-  drawImage = (imageSrc) => {
-    const newImage = new Image({x: 80, y: 80}, imageSrc)
-    // do not change this order. image must be added to grid first to set the new id
-    this.grid.addImage(newImage)
-    newImage.persist(this.persist, this.grid)
-    this.grid.draw(this.canvasContext, 1)
-  }
-
   changeCurrentTool = (tool) => {
     this.toolsConfig.updatePrevTool(this.state.currTool)
     this.updateUserPreferences('currTool', tool)
@@ -323,6 +318,25 @@ export default class Board extends React.Component {
   }
   toggleCleanModal = () => {
     this.setState(prevState => ({showCleanModal: !prevState.showCleanModal}))
+  }
+
+  onImageLoad = (imageSrc) => {
+    const newImage = new Image({x: 80, y: 80}, imageSrc)
+    uploadImage(imageSrc)
+      .then(res => {
+        console.info(`Image uploaded to ${res.data.link}`)
+        this.notifySuccess(`Image uploaded to imgur`)
+        newImage.setImageSrc(res.data.link)
+        newImage.persist(this.persist, this.grid)
+      })
+      .catch(() => {
+        this.notifyError('Error uploading image to imgur')
+      })
+    this.grid.addImage(newImage)
+    this.grid.draw(this.canvasContext, 1)
+  }
+  toggleImportImageModal = () => {
+    this.setState(prevState => ({showImportImageModal: !prevState.showImportImageModal}))
   }
 
   toggleShareModal = () => {
@@ -378,6 +392,17 @@ export default class Board extends React.Component {
     this.grid.undo(this.canvasContext, this.persist)
   }
 
+  notifyError = (message) => {
+    this.setState({notification: {props: {error: true}, message}}, () => setTimeout(this.dismissNotification, 3000))
+  }
+  notifySuccess = (message) => {
+    this.setState({notification: {props: {success: true}, message}}, () => setTimeout(this.dismissNotification, 2000))
+  }
+
+  dismissNotification = () => {
+    this.setState({notification: null})
+  }
+
   openContextMenu = (clientX, clientY, contextMenuRaw) => {
     this.clientX = clientX
     this.clientY = clientY
@@ -391,21 +416,27 @@ export default class Board extends React.Component {
 
   render () {
     return (
-      <div ref='maindiv' onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.boardStyle} style={{width: this.state.canvasSize.width, height: this.state.canvasSize.height}}>
+      <div className={styles.boardStyle} style={{width: this.state.canvasSize.width, height: this.state.canvasSize.height}}>
         <SideBarOverlay grid={this.grid} changeCurrentTool={this.changeCurrentTool} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
           currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite}
           removeFavorite={this.removeFavorite} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}
-          drawImage={this.drawImage} canvasSize={this.state.canvasSize} auth={this.auth} changeCurrentBoard={this.getInitialBoard}
+          onImageLoad={this.toggleImportImageModal} canvasSize={this.state.canvasSize} auth={this.auth} changeCurrentBoard={this.getInitialBoard}
           addBoard={this.toggleAddModal} currentBoard={this.state.currentBoard} userBoards={this.state.userBoards} persist={this.persist}
           openUserAccount={this.toggleUserAccountModal} moveFavorite={this.moveFavorite} openSettings={this.toggleSettingsModal}
           undo={this.undo} toggleUsersManagementModal={this.toggleUsersManagementModal}>
           <Canvas ref={this.refCallback} width={this.state.canvasSize.width} height={this.state.canvasSize.height} {...this.listeners}>
             HTML5 Canvas not supported
           </Canvas>
+          {this.state.notification !== null &&
+            <Message style={{position: 'fixed', textAlign: 'center', bottom: '0'}} onDismiss={this.dismissNotification} {...this.state.notification.props}>
+              {this.state.notification.message}
+            </Message>
+          }
         </SideBarOverlay>
-        <CleanBoardModal cleanCanvas={this.cleanCanvas} closeModal={this.toggleCleanModal} visible={this.state.showCleanModal} />
+        <CleanBoardModal cleanCanvas={this.cleanCanvas} onClose={this.toggleCleanModal} open={this.state.showCleanModal} />
+        <ImportImageModal onClose={this.toggleImportImageModal} open={this.state.showImportImageModal} onImageLoad={this.onImageLoad} />
         <ShareBoardModal location={this.props.location} history={this.props.history} persist={this.persist}
-          visible={this.state.showShareModal} closeModal={this.toggleShareModal} updateCurrentBoard={this.updateBoardId}
+          visible={this.state.showShareModal} onClose={this.toggleShareModal} updateCurrentBoard={this.updateBoardId}
           addBoardAsync={this.addBoardAsync} auth={this.auth} currentBoard={this.state.currentBoard} getInitialBoard={this.getInitialBoard} />
         <Loader active={this.state.loading} content='Fetching Data ...' />
         <Route exact path='/callback' render={props => {
