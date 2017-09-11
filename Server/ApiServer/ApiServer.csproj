@@ -5,7 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\" />
+    <Compile Remove="wwwroot\swagger\**" />
+    <Content Remove="wwwroot\swagger\**" />
+    <EmbeddedResource Remove="wwwroot\swagger\**" />
+    <None Remove="wwwroot\swagger\**" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.1.1" />
@@ -29,6 +32,9 @@
     <ProjectReference Include="..\API\API.csproj" />
     <ProjectReference Include="..\Authorization\Authorization.csproj" />
     <ProjectReference Include="..\WebSockets\WebSockets.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
   </ItemGroup>
 
 </Project>

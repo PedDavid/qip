@@ -18,6 +18,8 @@ using Microsoft.Extensions.Primitives;
 using System.Linq;
 using API.Domain;
 using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.Extensions.PlatformAbstractions;
+using System.IO;
 
 namespace ApiServer {
     public class Startup {
@@ -93,7 +95,12 @@ namespace ApiServer {
             // Register the Swagger generator, defining one or more Swagger documents
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info { Title = "QIP API", Version = "v1" });
+                c.SwaggerDoc("v1", new Info { Title = "QIP API", Version = "V1" });
+
+                // Set the comments path for the Swagger JSON and UI.
+                var basePath = PlatformServices.Default.Application.ApplicationBasePath;
+                var xmlPath = Path.Combine(basePath, "Api.xml");//TODO CHANGE
+                c.IncludeXmlComments(xmlPath);
             });
 
         }
@@ -137,6 +144,7 @@ namespace ApiServer {
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
+                c.ShowJsonEditor();
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "QIP API V1");
             });
 
