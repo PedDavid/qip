@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace IODomain.Output {
     public class OutLinePoint : OutPoint {
+        [Required]
         public int Idx { get; set; }
+
+        [Required]
         public OutPointStyle Style { get; set; }
     }
 }
