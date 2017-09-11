@@ -86,14 +86,10 @@ export default class Board extends React.Component {
         }
         this.persist.updateCanvasSize(newCanvasSize)
         return {canvasSize: newCanvasSize}
-      })
-      // TODO(peddavid): This is probably required to be done after state is changed, setState callback or Update
-      this.grid.draw(this.canvasContext, 1)
+      }, () => this.grid.draw(this.canvasContext, 1))
     })
 
-    // var canvasHammer = new Hammer(this.canvas)
-
-    var canvasHammer = new Hammer.Manager(this.canvas, {
+    const canvasHammer = new Hammer.Manager(this.canvas, {
       inputClass: Hammer.TouchInput, // only touch triggers hammer js
       recognizers: [
         // RecognizerClass, [options], [recognizeWith, ...], [requireFailure, ...]
@@ -416,7 +412,7 @@ export default class Board extends React.Component {
 
   render () {
     return (
-      <div ref='maindiv' onPaste={this.onPaste} onKeyDown={this.onKeyDown} className={styles.boardStyle} style={{width: this.state.canvasSize.width, height: this.state.canvasSize.height}}>
+      <div className={styles.boardStyle} style={{width: this.state.canvasSize.width, height: this.state.canvasSize.height}}>
         <SideBarOverlay grid={this.grid} changeCurrentTool={this.changeCurrentTool} favorites={this.state.favorites} toolsConfig={this.toolsConfig}
           currTool={this.state.currTool} cleanCanvas={this.toggleCleanModal} addFavorite={this.addFavorite}
           removeFavorite={this.removeFavorite} toggleUserModal={this.toggleUserModal} toggleShareModal={this.toggleShareModal}
