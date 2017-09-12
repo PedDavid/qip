@@ -99,8 +99,10 @@ namespace ApiServer {
 
                 // Set the comments path for the Swagger JSON and UI.
                 var basePath = PlatformServices.Default.Application.ApplicationBasePath;
-                var xmlPath = Path.Combine(basePath, "Api.xml");//TODO CHANGE
-                c.IncludeXmlComments(xmlPath);
+                var xmlApiPath = Path.Combine(basePath, "Api.xml");
+                var xmlWebSocketsPath = Path.Combine(basePath, "WebSockets.xml");
+                c.IncludeXmlComments(xmlApiPath);
+                c.IncludeXmlComments(xmlWebSocketsPath);
             });
 
         }

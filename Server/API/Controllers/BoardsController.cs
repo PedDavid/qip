@@ -39,9 +39,13 @@ namespace API.Controllers {
         /// <param name="size">Number of Boards for page</param>
         /// <returns>Required List of Users</returns>
         /// <response code="200">Returns the required list of Boards</response>
+        /// <response code="401">If the user is not authenticated</response>
+        /// <response code="403">If the user does not have authorization</response>
         [HttpGet]
         [Authorize("Administrator")]
         [ProducesResponseType(typeof(IEnumerable<OutBoard>), 200)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
         public async Task<IEnumerable<OutBoard>> GetAllAsync(string search, long index = 0, long size = 10) {
             _logger.LogInformation(LoggingEvents.ListBoards, "Listing page {index} of Boards with size {size}", index, size);
             IEnumerable<Board> boards = await _boardService.GetAllAsync(index, size, search);
@@ -91,6 +95,7 @@ namespace API.Controllers {
         /// Sample request:
         ///
         ///     POST /api/Board
+        ///     Content-Type: application/json
         ///     Authorization: Bearer {ACCESS_TOKEN}
         /// 
         ///     {
@@ -100,7 +105,7 @@ namespace API.Controllers {
         ///     }
         ///
         /// </remarks>
-        /// <param name="inputBoard">Board's information</param>
+        /// <param name="inputBoard">Information of the Board to create</param>
         /// <returns>A newly-created Board</returns>
         /// <response code="201">Returns the newly-created Board</response>
         /// <response code="400">If the inputBoard is null</response> 
@@ -123,12 +128,13 @@ namespace API.Controllers {
         }
 
         /// <summary>
-        /// Updates a specific Board.
+        /// Updates a specific Board
         /// </summary>
         /// <remarks>
         /// Sample request:
         ///
         ///     PUT /api/Board/0
+        ///     Content-Type: application/json
         ///     Authorization: Bearer {ACCESS_TOKEN}
         /// 
         ///     {
@@ -143,10 +149,14 @@ namespace API.Controllers {
         /// <param name="inputBoard">Information of the Board to update</param>
         /// <response code="204">Board update succeeds</response>
         /// <response code="400">If there is inconsistent information or the inputBoard is null</response>
+        /// <response code="401">If the user is not authenticated</response>
+        /// <response code="403">If the user does not have authorization</response>
         /// <response code="404">If the Board not exists</response>
         [HttpPut("{id}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
         [ProducesResponseType(404)]
         public async Task<IActionResult> Update(long id, [FromBody] InUpdateBoard inputBoard) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(id), Policies.BoardIsOwnPolicy)) {
@@ -181,13 +191,17 @@ namespace API.Controllers {
         }
 
         /// <summary>
-        /// Deletes a specific Board.
+        /// Deletes a specific Board
         /// </summary>
         /// <param name="id">Id of the Board to delete</param>
         /// <response code="204">Board deletion succeeds</response>
+        /// <response code="401">If the user is not authenticated</response>
+        /// <response code="403">If the user does not have authorization</response>
         /// <response code="404">If the Board not exists</response>
         [HttpDelete("{id}")]
         [ProducesResponseType(204)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
         [ProducesResponseType(404)]
         public async Task<IActionResult> Delete(long id) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(id), Policies.BoardIsOwnPolicy)) {
