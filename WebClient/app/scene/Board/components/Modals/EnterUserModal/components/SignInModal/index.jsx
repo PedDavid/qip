@@ -25,7 +25,7 @@ export default class SignInModal extends React.Component {
 
   render () {
     return (
-      <Modal onClose={this.props.toggleUserModal} className={this.state.classes} size='small' open={this.props.visible}>
+      <Modal onClose={this.props.toggleUserModal} className={this.state.classes} size='small' open={this.props.open} closeIcon>
         <Modal.Header>
           <Icon name='user' />
           Login

@@ -24,8 +24,8 @@ export default class EnterUserModal extends React.Component {
     const signInModal = this.state.SignInModalToggle
     return (
       <div className={this.state.classes}>
-        <SignInModal toggleUserModal={this.onClose} register={this.flip} visible={signInModal} />
-        <SignUpModal toggleUserModal={this.onClose} login={this.flip} visible={!signInModal} />
+        <SignInModal toggleUserModal={this.onClose} register={this.flip} open={signInModal} />
+        <SignUpModal toggleUserModal={this.onClose} login={this.flip} open={!signInModal} />
       </div>
     )
   }
