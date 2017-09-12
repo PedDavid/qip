@@ -1,14 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace IODomain.Output {
     public class OutBoard {
+        [Required]
         public long Id { get; set; }
 
+        [Required]
         public string Name { get; set; }
+
+        [Required]
         public byte MaxDistPoints { get; set; }
+
+        [Required]
         public OutBoardPermission BasePermission { get; set; }
     }
 }

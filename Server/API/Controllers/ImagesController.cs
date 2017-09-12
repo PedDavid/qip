@@ -7,6 +7,7 @@ using Authorization.Extensions;
 using Authorization.Resources;
 using IODomain.Extensions;
 using IODomain.Input;
+using IODomain.Output;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -17,6 +18,7 @@ using System.Threading.Tasks;
 namespace API.Controllers {
     [ValidateModel]
     [ServicesExceptionFilter]
+    [Produces("application/json")]
     [Route("api/boards/{boardId}/figures/[controller]")]
     public class ImagesController : Controller {
         private readonly IImageService _imageService;
@@ -29,8 +31,19 @@ namespace API.Controllers {
             _logger = logger;
         }
 
+        /// <summary>
+        /// Returns a List of Images
+        /// </summary>
+        /// <param name="boardId">Id of the Board to which the Images belong</param>
+        /// <returns>Required List of Images</returns>
+        /// <response code="200">Returns the required list of Images</response>
+        /// <response code="401">If the user needs authentication</response>
+        /// <response code="403">If the user does not have authorization</response>
         [HttpGet]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(IEnumerable<OutImage>), 200)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
         public async Task<IActionResult> GetAll(long boardId) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.ReadBoardPolicy)) {
                 _logger.LogWarning(LoggingEvents.ListImagesNotAuthorized, "GetAll({boardId}) NOT AUTHORIZED {user_id}", boardId, User.GetNameIdentifier());
@@ -43,8 +56,22 @@ namespace API.Controllers {
             return Ok(images.Select(ImageExtensions.Out));
         }
 
+        /// <summary>
+        /// Returns a specific Image
+        /// </summary>
+        /// <param name="id">Id of the Image to return</param>
+        /// <param name="boardId">Id of the Board to which the Image belong</param>
+        /// <returns>Required Image</returns>
+        /// <response code="200">Returns the required Image</response>
+        /// <response code="401">If the user needs authentication</response>
+        /// <response code="403">If the user does not have authorization</response>
+        /// <response code="404">if the Image does not exist in the Board</response>
         [HttpGet("{id}", Name = "GetImage")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(OutImage), 200)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> GetById(long id, long boardId) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.ReadBoardPolicy)) {
                 _logger.LogWarning(LoggingEvents.GetImageNotAuthorized, "GetById({id}, {boardId}) NOT AUTHORIZED {user_id}", id, boardId, User.GetNameIdentifier());
@@ -63,8 +90,43 @@ namespace API.Controllers {
             return Ok(image.Out());
         }
 
+        /// <summary>
+        /// Creates a Image in the specific Board
+        /// </summary>
+        /// <remarks>
+        /// The Authorization header is optional in some cases
+        /// 
+        /// Sample request:
+        ///
+        ///     POST /api/board/0/figures/images
+        ///     Content-Type: application/json
+        ///     Authorization: Bearer {ACCESS_TOKEN}
+        /// 
+        ///     {
+        ///         "boardId": 0,
+        ///         "origin": {
+        ///             "x":0,
+        ///             "y":0
+        ///         },
+        ///         "src": "https://www.example.com/image.png",
+        ///         "width": 200,
+        ///         "height": 300
+        ///     }
+        ///
+        /// </remarks>
+        /// <param name="boardId">Id of the board to which the Image should belong</param>
+        /// <param name="inImage">Information of the Image to create</param>
+        /// <returns>A newly-created Image</returns>
+        /// <response code="201">Returns the newly-created Image</response>
+        /// <response code="400">If there is inconsistent information or the inImage is null</response> 
+        /// <response code="401">If the user needs authentication</response>
+        /// <response code="403">If the user does not have authorization</response>
         [HttpPost]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(OutImage), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
         public async Task<IActionResult> Create(long boardId, [FromBody] InCreateImage inImage) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
                 _logger.LogWarning(LoggingEvents.InsertImageNotAuthorized, "Create({boardId}) NOT AUTHORIZED {user_id}", boardId, User.GetNameIdentifier());
@@ -90,9 +152,46 @@ namespace API.Controllers {
             return CreatedAtRoute("GetImage", new { id = image.Id, boardId = boardId }, image.Out());
         }
 
-
+        /// <summary>
+        /// Updates a specific Image
+        /// </summary>
+        /// <remarks>
+        /// The Authorization header is optional in some cases
+        /// 
+        /// Sample request:
+        ///
+        ///     PUT /api/board/0/figures/images/0
+        ///     Content-Type: application/json
+        ///     Authorization: Bearer {ACCESS_TOKEN}
+        /// 
+        ///     {
+        ///         "id": 0, 
+        ///         "boardId": 0,
+        ///         "origin": {
+        ///             "x":0,
+        ///             "y":0
+        ///         },
+        ///         "src": "https://www.example.com/image.png",
+        ///         "width": 200,
+        ///         "height": 300
+        ///     }
+        ///
+        /// </remarks>
+        /// <param name="id">Id of the Image to update</param>
+        /// <param name="boardId">Id of the Board to which the Image belong</param>
+        /// <param name="inImage">Information of the Image to update</param>
+        /// <response code="204">Image update succeeds</response>
+        /// <response code="400">If there is inconsistent information or the inImage is null</response>
+        /// <response code="401">If the user needs authentication</response>
+        /// <response code="403">If the user does not have authorization</response>
+        /// <response code="404">if the Image does not exist in the Board</response>
         [HttpPut("{id}")]
         [AllowAnonymous]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> Update(long id, long boardId, [FromBody] InUpdateImage inImage) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
                 _logger.LogWarning(LoggingEvents.UpdateImageNotAuthorized, "Update({id}, {boardId}) NOT AUTHORIZED {user_id}", id, boardId, User.GetNameIdentifier());
@@ -131,8 +230,21 @@ namespace API.Controllers {
             return NoContent();
         }
 
+        /// <summary>
+        /// Deletes a specific Image
+        /// </summary>
+        /// <param name="id">Id of the Image to delete</param>
+        /// <param name="boardId">Id of the Board to which the Image belong</param>
+        /// <response code="204">Image deletion succeeds</response>
+        /// <response code="401">If the user needs authentication</response>
+        /// <response code="403">If the user does not have authorization</response>
+        /// <response code="404">if the Image does not exist in the Board</response>
         [HttpDelete("{id}")]
         [AllowAnonymous]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> Delete(long id, long boardId) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
                 _logger.LogWarning(LoggingEvents.DeleteImageNotAuthorized, "Delete({id}, {boardId}) NOT AUTHORIZED {user_id}", id, boardId, User.GetNameIdentifier());

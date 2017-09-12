@@ -54,8 +54,22 @@ namespace WebSockets.Controllers {
             };
         }
 
+        /// <summary>
+        /// Creates a WebSockets connection 
+        /// </summary>
+        /// <param name="roomId">Id of the room, equivalent to the id of the associated Board</param>
+        /// <response code="101">WebSockets connection succeeds</response>
+        /// <response code="400">If the wrong protocol was used</response>
+        /// <response code="401">If the user needs authentication</response>
+        /// <response code="403">If the user does not have authorization</response>
+        /// <response code="404">If the Board associated with the room does not exist</response>
         [HttpGet("{roomId}")]
         [AllowAnonymous]
+        [ProducesResponseType(101)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(404)]
         public async Task Connect(long roomId) {
             if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(roomId), Policies.ReadBoardPolicy)) {
                 _logger.LogWarning(LoggingEvents.ConnectWebSocketNotAuthorized, "Connect({roomId}) NOT AUTHORIZED {user_id}", roomId, User.GetNameIdentifier());
