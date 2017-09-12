@@ -51,7 +51,7 @@ namespace WebSockets.StringWebSockets {
                 }
             }
 
-            public async Task BroadcastAsync(string message, Func<StringWebSocket, bool> filter) {
+            public Task BroadcastAsync(string message, Func<StringWebSocket, bool> filter) {
                 _rwlock.EnterReadLock();
                 try {
                     var sending = _wsl
@@ -59,7 +59,8 @@ namespace WebSockets.StringWebSockets {
                         .Where(filter)
                         .Select(ws => ws.SendAsync(message))
                         .ToList();
-                    await Task.WhenAll(sending);
+
+                    return Task.WhenAll(sending);
                 }
                 finally {
                     _rwlock.ExitReadLock();

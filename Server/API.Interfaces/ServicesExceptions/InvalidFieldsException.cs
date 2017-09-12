@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace API.Interfaces.ServicesExceptions {
-    public class InvalidFieldsException : Exception {
+    public class InvalidFieldsException : ServiceException {
         public InvalidFieldsException() : base() {
         }
 

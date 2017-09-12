@@ -5,12 +5,13 @@ using Authorization;
 using Authorization.Extensions;
 using Authorization.Resources;
 using IODomain.Extensions;
-using IODomain.Input;
+using IODomain.Output;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
@@ -64,18 +65,32 @@ namespace WebSockets.Operations {
             }
 
             IFigureIdGenerator idGen = await _figureIdService.GetOrCreateFigureIdGeneratorAsync(boardId);
-            long id = idGen.NewId();
-
-            Image image = new Image { Id = id }.In(inImage);
+            Image image = new Image { Id = idGen.NewId() }.In(inImage);
 
             Task store = _imageService.CreateAsync(image, autoGenerateId: false);
-            OperationUtils.ResolveTaskContinuation(store);
+            if(store.IsFaulted) {
+                _logger.LogError(LoggingEvents.InsertWSImageUnexpectedServiceError, store.GetServiceFault(), "CreateImage (Board {boardId}) UNEXPECTED SERVICE ERROR");
+                return;
+            }
 
+            Task messages = SendInsertMessages(stringWebSocket, session, image.Out(), inImage.TempId, inImage.PersistLocalBoard);
+            try {
+                await store;
+                _logger.LogInformation(LoggingEvents.InsertWSImage, "Image {id} of Board {boardId} Created", image.Id, boardId);
+
+                await messages;
+            }
+            catch(Exception e) {
+                _logger.LogError(LoggingEvents.InsertWSImageUnexpectedError, e, "CreateImage (Board {boardId}) UNEXPECTED ERROR");
+            }
+        }
+
+        private static Task SendInsertMessages(StringWebSocket stringWebSocket, IStringWebSocketSession session, OutImage image, long tempId, bool persistLocalBoard) {
             dynamic sendPayload;
-            if(inImage.PersistLocalBoard)
-                sendPayload = new { figure = image.Out() };
+            if(persistLocalBoard)
+                sendPayload = new { figure = image };
             else
-                sendPayload = new { id = id, tempId = inImage.TempId };
+                sendPayload = new { id = image.Id, tempId = tempId };
 
             Task response = stringWebSocket.SendAsync(
                 new {
@@ -88,12 +103,12 @@ namespace WebSockets.Operations {
             Task broadcast = session.BroadcastAsync(
                new {
                    type = OperationType.CREATE_IMAGE,
-                   payload = new { figure = image.Out() }
+                   payload = new { figure = image }
                },
                serializerSettings
             );
 
-            await Task.WhenAll(response, broadcast);
+            return Task.WhenAll(response, broadcast);
         }
 
         public async Task UpdateImage(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject jPayload) {
@@ -106,7 +121,6 @@ namespace WebSockets.Operations {
             }
 
             InUpdateWSImage inImage = jPayload.ToObject<InUpdateWSImage>();
-
             if(inImage.BoardId != boardId) {
                 _logger.LogDebug(LoggingEvents.UpdateWSImageWrongBoardId, "UpdateImage (Board {boardId}) WRONG BOARD ID {otherBoardId}", boardId, inImage.BoardId);
                 return;
@@ -124,16 +138,30 @@ namespace WebSockets.Operations {
                 return;
             }
 
-            image.In(inImage);
+            Task store = _imageService.UpdateAsync(image.In(inImage));
+            if(store.IsFaulted) {
+                _logger.LogError(LoggingEvents.UpdateWSImageUnexpectedServiceError, store.GetServiceFault(), "UpdateImage {id} (Board {boardId}) UNEXPECTED SERVICE ERROR", image.Id, boardId);
+                return;
+            }
 
-            Task store = _imageService.UpdateAsync(image);
-            OperationUtils.ResolveTaskContinuation(store);
+            Task messages = SendUpdateMessages(session, image.Out(), inImage.IsScaling);
+            try {
+                await store;
+                _logger.LogInformation(LoggingEvents.InsertWSImage, "Image {id} of Board {boardId} Updated", image.Id, boardId);
 
-            await session.BroadcastAsync(
+                await messages;
+            }
+            catch(Exception e) {
+                _logger.LogError(LoggingEvents.InsertWSImageUnexpectedError, e, "UpdateImage {id} (Board {boardId}) UNEXPECTED ERROR", image.Id, boardId);
+            }
+        }
+
+        private static Task SendUpdateMessages(IStringWebSocketSession session, OutImage image, string isScaling) {
+            return session.BroadcastAsync(
                 new {
                     type = OperationType.ALTER_IMAGE,
-                    isScaling = inImage.IsScaling,
-                    payload = new { figure = image.Out() }
+                    isScaling = isScaling,
+                    payload = new { figure = image }
                 },
                 serializerSettings
             );
@@ -161,9 +189,25 @@ namespace WebSockets.Operations {
             }
 
             Task store = _imageService.DeleteAsync(id, boardId);
-            OperationUtils.ResolveTaskContinuation(store);
+            if(store.IsFaulted) {
+                _logger.LogError(LoggingEvents.DeleteWSImageUnexpectedServiceError, store.GetServiceFault(), "DeleteImage {id} (Board {boardId}) UNEXPECTED SERVICE ERROR", image.Id, boardId);
+                return;
+            }
 
-            await session.BroadcastAsync(
+            Task messages = SendDeleteMessages(session, id);
+            try {
+                await store;
+                _logger.LogInformation(LoggingEvents.InsertWSImage, "Image {id} of Board {boardId} Deleted", image.Id, boardId);
+
+                await messages;
+            }
+            catch(Exception e) {
+                _logger.LogError(LoggingEvents.InsertWSImageUnexpectedError, e, "DeleteImage {id} (Board {boardId}) UNEXPECTED ERROR", image.Id, boardId);
+            }
+        }
+
+        private static Task SendDeleteMessages(IStringWebSocketSession session, long id) {
+            return session.BroadcastAsync(
                 new {
                     type = OperationType.DELETE_IMAGE,
                     payload = new { id = id }
