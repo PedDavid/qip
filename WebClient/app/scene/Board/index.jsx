@@ -42,6 +42,7 @@ export default class Board extends React.Component {
   grid = new Grid([], 0)
   auth = new Auth(() => this.getInitialBoard(null), this.props.history) // this lambda may not be the best solution
   persist = new Persist(null, null, null) // this is necessary because the first time render occurs, there is no this.persist object
+  maxErrorCount = 3
 
   state = {
     showCleanModal: false,
@@ -211,6 +212,11 @@ export default class Board extends React.Component {
     }).catch(err => {
       console.error(err)
       console.log(err.message)
+      if (this.maxErrorCount <= 0) {
+        this.auth.logout()
+        return
+      }
+      this.maxErrorCount --
       // this must be done because when an error occurs and history is set, initialBoard
       // is not set anymore
       this.getInitialBoard(null) // get initial board from Local Storage
