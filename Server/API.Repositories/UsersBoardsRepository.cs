@@ -85,20 +85,11 @@ namespace API.Repositories {
         }
 
         public Task<IEnumerable<UserBoard_Board>> GetAllBoardsAsync(string userId, long index, long size) {
-            List<SqlParameter> parameters = new List<SqlParameter>();
-
-            parameters.Add("@userId", SqlDbType.VarChar).Value = userId;
-
-            parameters.Add("@take", SqlDbType.BigInt).Value = size;
-
-            parameters.Add("@skip", SqlDbType.BigInt).Value = index * size;
-
-            return _queryTemplate.QueryAsync(SELECT_ALL_BOARDS, parameters, GetBoard);
+            return GetAllBoardsAsync(userId, index, size, null);
         }
 
         public Task<IEnumerable<UserBoard_Board>> GetAllBoardsAsync(string userId, long index, long size, string search) {
-            if(search == null)
-                return GetAllBoardsAsync(userId, index, size);
+            string selectBoards = SELECT_ALL_BOARDS;
 
             List<SqlParameter> parameters = new List<SqlParameter>();
 
@@ -108,26 +99,20 @@ namespace API.Repositories {
 
             parameters.Add("@skip", SqlDbType.BigInt).Value = index * size;
 
-            parameters.Add("@search", SqlDbType.NVarChar).Value = search;
+            if(search != null) {
+                parameters.Add("@search", SqlDbType.NVarChar).Value = search;
+                selectBoards = SELECT_SEARCH_BOARDS;
+            }
 
-            return _queryTemplate.QueryAsync(SELECT_SEARCH_BOARDS, parameters, GetBoard);
+            return _queryTemplate.QueryAsync(selectBoards, parameters, GetBoard);
         }
 
         public Task<IEnumerable<UserBoard_User>> GetAllUsersAsync(long boardId, long index, long size) {
-            List<SqlParameter> parameters = new List<SqlParameter>();
-
-            parameters.Add("@boardId", SqlDbType.BigInt).Value = boardId;
-
-            parameters.Add("@take", SqlDbType.BigInt).Value = size;
-
-            parameters.Add("@skip", SqlDbType.BigInt).Value = index * size;
-
-            return _queryTemplate.QueryAsync(SELECT_ALL_USERS, parameters, GetUser);
+            return GetAllUsersAsync(boardId, index, size, null);
         }
 
         public Task<IEnumerable<UserBoard_User>> GetAllUsersAsync(long boardId, long index, long size, string search) {
-            if(search == null)
-                return GetAllUsersAsync(boardId, index, size);
+            string selectUsers = SELECT_ALL_USERS;
 
             List<SqlParameter> parameters = new List<SqlParameter>();
 
@@ -137,9 +122,12 @@ namespace API.Repositories {
 
             parameters.Add("@skip", SqlDbType.BigInt).Value = index * size;
 
-            parameters.Add("@search", SqlDbType.NVarChar).Value = search;
+            if(search != null) {
+                parameters.Add("@search", SqlDbType.NVarChar).Value = search;
+                selectUsers = SELECT_SEARCH_USERS;
+            }
 
-            return _queryTemplate.QueryAsync(SELECT_SEARCH_USERS, parameters, GetUser);
+            return _queryTemplate.QueryAsync(selectUsers, parameters, GetUser);
         }
 
         public Task RemoveAsync(long boardId, string userId) {
