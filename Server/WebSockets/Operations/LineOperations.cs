@@ -1,6 +1,7 @@
 ﻿using API.Domain;
 using API.Interfaces;
 using API.Interfaces.IServices;
+using API.Interfaces.ServicesExceptions;
 using Authorization;
 using Authorization.Extensions;
 using Authorization.Resources;
@@ -13,7 +14,9 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using WebSockets.Extensions;
@@ -53,14 +56,14 @@ namespace WebSockets.Operations {
 
             InCreateWSLine inLine = jPayload.ToObject<InCreateWSLine>();
 
-            if(inLine.BoardId != boardId) {
-                _logger.LogDebug(LoggingEvents.InsertWSLineWrongBoardId, "CreateLine (Board {boardId}) WRONG BOARD ID {otherBoardId}", boardId, inLine.BoardId);
-                return;
-            }
-
             var validationResults = new List<ValidationResult>();
             if(!Validator.TryValidateObject(inLine, new ValidationContext(inLine), validationResults, true)) {
                 _logger.LogDebug(LoggingEvents.InsertWSLineInvalidModel, "CreateLine (Board {boardId}) INVALID MODEL", boardId);
+                return;
+            }
+
+            if(inLine.BoardId != boardId) {
+                _logger.LogDebug(LoggingEvents.InsertWSLineWrongBoardId, "CreateLine (Board {boardId}) WRONG BOARD ID {otherBoardId}", boardId, inLine.BoardId);
                 return;
             }
 
@@ -70,7 +73,14 @@ namespace WebSockets.Operations {
 
             Task store = _lineService.CreateAsync(line, autoGenerateId: false);
             if(store.IsFaulted) {
-                _logger.LogError(LoggingEvents.InsertWSLineUnexpectedServiceError, store.GetServiceFault(), "CreateLine (Board {boardId}) UNEXPECTED SERVICE ERROR");
+                ReadOnlyCollection<Exception> exceptions = store.Exception.InnerExceptions;
+                Exception serviceException = exceptions.First();
+                if(exceptions.Count == 1 && serviceException.GetType() == typeof(ServiceException)) {
+                    _logger.LogError(LoggingEvents.InsertWSLineUnexpectedServiceError, serviceException, "CreateLine (Board {boardId}) UNEXPECTED SERVICE ERROR", boardId);
+                }
+                else {
+                    _logger.LogError(LoggingEvents.InsertWSLineUnexpectedError, store.Exception, "CreateLine (Board {boardId}) UNEXPECTED ERROR", boardId);
+                }
                 return;
             }
 
@@ -82,7 +92,7 @@ namespace WebSockets.Operations {
                 await messages;
             }
             catch(Exception e) {
-                _logger.LogError(LoggingEvents.InsertWSLineUnexpectedError, e, "CreateLine (Board {boardId}) UNEXPECTED ERROR");
+                _logger.LogError(LoggingEvents.InsertWSLineUnexpectedError, e, "CreateLine (Board {boardId}) UNEXPECTED ERROR", boardId);
             }
         }
 
@@ -123,17 +133,17 @@ namespace WebSockets.Operations {
 
             InUpdateWSLine inLine = jPayload.ToObject<InUpdateWSLine>();
 
-            if(inLine.BoardId != boardId) {
-                _logger.LogDebug(LoggingEvents.UpdateWSLineWrongBoardId, "UpdateLine (Board {boardId}) WRONG BOARD ID {otherBoardId}", boardId, inLine.BoardId);
-                return;
-            }
-
             var validationResults = new List<ValidationResult>();
             if(!Validator.TryValidateObject(inLine, new ValidationContext(inLine), validationResults, true)) {
                 _logger.LogDebug(LoggingEvents.UpdateWSLineInvalidModel, "UpdateLine (Board {boardId}) INVALID MODEL", boardId);
                 return;
             }
 
+            if(inLine.BoardId != boardId) {
+                _logger.LogDebug(LoggingEvents.UpdateWSLineWrongBoardId, "UpdateLine (Board {boardId}) WRONG BOARD ID {otherBoardId}", boardId, inLine.BoardId);
+                return;
+            }
+      
             Line line = await _lineService.GetAsync(inLine.Id.Value, boardId);
             if(line == null) {
                 _logger.LogWarning(LoggingEvents.UpdateWSLineNotFound, "UpdateLine {id} (Board {boardId}) NOT FOUND", line.Id, boardId);
@@ -144,19 +154,26 @@ namespace WebSockets.Operations {
 
             Task store = _lineService.UpdateAsync(line);
             if(store.IsFaulted) {
-                _logger.LogError(LoggingEvents.UpdateWSLineUnexpectedServiceError, store.GetServiceFault(), "UpdateLine {id} (Board {boardId}) UNEXPECTED SERVICE ERROR", line.Id, boardId);
+                ReadOnlyCollection<Exception> exceptions = store.Exception.InnerExceptions;
+                Exception serviceException = exceptions.First();
+                if(exceptions.Count == 1 && serviceException.GetType() == typeof(ServiceException)) {
+                    _logger.LogError(LoggingEvents.UpdateWSLineUnexpectedServiceError, serviceException, "UpdateLine {id} (Board {boardId}) UNEXPECTED SERVICE ERROR", line.Id, boardId);
+                }
+                else {
+                    _logger.LogError(LoggingEvents.UpdateWSLineUnexpectedError, store.Exception, "UpdateLine {id} (Board {boardId}) UNEXPECTED ERROR", line.Id, boardId);
+                }
                 return;
             }
  
             Task messages = SendUpdateMessages(session, line.Out(), inLine.OffsetPoint, inLine.IsScaling);
             try {
                 await store;
-                _logger.LogInformation(LoggingEvents.InsertWSLine, "Line {id} of Board {boardId} Updated", line.Id, boardId);
+                _logger.LogInformation(LoggingEvents.UpdateWSLine, "Line {id} of Board {boardId} Updated", line.Id, boardId);
 
                 await messages;
             }
             catch(Exception e) {
-                _logger.LogError(LoggingEvents.InsertWSLineUnexpectedError, e, "UpdateLine {id} (Board {boardId}) UNEXPECTED ERROR", line.Id, boardId);
+                _logger.LogError(LoggingEvents.UpdateWSLineUnexpectedError, e, "UpdateLine {id} (Board {boardId}) UNEXPECTED ERROR", line.Id, boardId);
             }
         }
         private static Task SendUpdateMessages(IStringWebSocketSession session, OutLine line, Offset offsetPoint, string isScaling) {
@@ -196,7 +213,14 @@ namespace WebSockets.Operations {
 
             Task store = _lineService.DeleteAsync(id, boardId);
             if(store.IsFaulted) {
-                _logger.LogError(LoggingEvents.DeleteWSLineUnexpectedServiceError, store.GetServiceFault(), "DeleteLine {id} (Board {boardId}) UNEXPECTED SERVICE ERROR", line.Id, boardId);
+                ReadOnlyCollection<Exception> exceptions = store.Exception.InnerExceptions;
+                Exception serviceException = exceptions.First();
+                if(exceptions.Count == 1 && serviceException.GetType() == typeof(ServiceException)) {
+                    _logger.LogError(LoggingEvents.DeleteWSLineUnexpectedServiceError, serviceException, "DeleteLine {id} (Board {boardId}) UNEXPECTED SERVICE ERROR", line.Id, boardId);
+                }
+                else {
+                    _logger.LogError(LoggingEvents.DeleteWSLineUnexpectedError, store.Exception, "DeleteLine {id} (Board {boardId}) UNEXPECTED ERROR", line.Id, boardId);
+                }
                 return;
             }
 

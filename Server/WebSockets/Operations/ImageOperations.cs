@@ -1,6 +1,7 @@
 ﻿using API.Domain;
 using API.Interfaces;
 using API.Interfaces.IServices;
+using API.Interfaces.ServicesExceptions;
 using Authorization;
 using Authorization.Extensions;
 using Authorization.Resources;
@@ -13,7 +14,9 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using WebSockets.Extensions;
@@ -53,14 +56,14 @@ namespace WebSockets.Operations {
 
             InCreateWSImage inImage = payload.ToObject<InCreateWSImage>();
 
-            if(inImage.BoardId != boardId) {
-                _logger.LogDebug(LoggingEvents.InsertWSImageWrongBoardId, "CreateImage (Board {boardId}) WRONG BOARD ID {otherBoardId}", boardId, inImage.BoardId);
-                return;
-            }
-
             var validationResults = new List<ValidationResult>();
             if(!Validator.TryValidateObject(inImage, new ValidationContext(inImage), validationResults, true)) {
                 _logger.LogDebug(LoggingEvents.InsertWSImageInvalidModel, "CreateImage (Board {boardId}) INVALID MODEL", boardId);
+                return;
+            }
+
+            if(inImage.BoardId != boardId) {
+                _logger.LogDebug(LoggingEvents.InsertWSImageWrongBoardId, "CreateImage (Board {boardId}) WRONG BOARD ID {otherBoardId}", boardId, inImage.BoardId);
                 return;
             }
 
@@ -69,7 +72,14 @@ namespace WebSockets.Operations {
 
             Task store = _imageService.CreateAsync(image, autoGenerateId: false);
             if(store.IsFaulted) {
-                _logger.LogError(LoggingEvents.InsertWSImageUnexpectedServiceError, store.GetServiceFault(), "CreateImage (Board {boardId}) UNEXPECTED SERVICE ERROR");
+                ReadOnlyCollection<Exception> exceptions = store.Exception.InnerExceptions;
+                Exception serviceException = exceptions.First();
+                if(exceptions.Count == 1 && serviceException.GetType() == typeof(ServiceException)) {
+                    _logger.LogError(LoggingEvents.InsertWSImageUnexpectedServiceError, serviceException, "CreateImage (Board {boardId}) UNEXPECTED SERVICE ERROR", boardId);
+                }
+                else {
+                    _logger.LogError(LoggingEvents.InsertWSImageUnexpectedError, store.Exception, "CreateImage (Board {boardId}) UNEXPECTED ERROR", boardId);
+                }
                 return;
             }
 
@@ -81,7 +91,7 @@ namespace WebSockets.Operations {
                 await messages;
             }
             catch(Exception e) {
-                _logger.LogError(LoggingEvents.InsertWSImageUnexpectedError, e, "CreateImage (Board {boardId}) UNEXPECTED ERROR");
+                _logger.LogError(LoggingEvents.InsertWSImageUnexpectedError, e, "CreateImage (Board {boardId}) UNEXPECTED ERROR", boardId);
             }
         }
 
@@ -121,14 +131,15 @@ namespace WebSockets.Operations {
             }
 
             InUpdateWSImage inImage = jPayload.ToObject<InUpdateWSImage>();
-            if(inImage.BoardId != boardId) {
-                _logger.LogDebug(LoggingEvents.UpdateWSImageWrongBoardId, "UpdateImage (Board {boardId}) WRONG BOARD ID {otherBoardId}", boardId, inImage.BoardId);
-                return;
-            }
 
             var validationResults = new List<ValidationResult>();
             if(!Validator.TryValidateObject(inImage, new ValidationContext(inImage), validationResults, true)) {
                 _logger.LogDebug(LoggingEvents.UpdateWSImageInvalidModel, "UpdateImage (Board {boardId}) INVALID MODEL", boardId);
+                return;
+            }
+
+            if(inImage.BoardId != boardId) {
+                _logger.LogDebug(LoggingEvents.UpdateWSImageWrongBoardId, "UpdateImage (Board {boardId}) WRONG BOARD ID {otherBoardId}", boardId, inImage.BoardId);
                 return;
             }
 
@@ -140,7 +151,14 @@ namespace WebSockets.Operations {
 
             Task store = _imageService.UpdateAsync(image.In(inImage));
             if(store.IsFaulted) {
-                _logger.LogError(LoggingEvents.UpdateWSImageUnexpectedServiceError, store.GetServiceFault(), "UpdateImage {id} (Board {boardId}) UNEXPECTED SERVICE ERROR", image.Id, boardId);
+                ReadOnlyCollection<Exception> exceptions = store.Exception.InnerExceptions;
+                Exception serviceException = exceptions.First();
+                if(exceptions.Count == 1 && serviceException.GetType() == typeof(ServiceException)) {
+                    _logger.LogError(LoggingEvents.UpdateWSImageUnexpectedServiceError, serviceException, "UpdateImage {id} (Board {boardId}) UNEXPECTED SERVICE ERROR", image.Id, boardId);
+                }
+                else {
+                    _logger.LogError(LoggingEvents.UpdateWSImageUnexpectedError, store.Exception, "UpdateImage {id} (Board {boardId}) UNEXPECTED ERROR", image.Id, boardId);
+                }
                 return;
             }
 
@@ -176,7 +194,7 @@ namespace WebSockets.Operations {
                 return;
             }
 
-            if(!(jPayload.TryGetValue("id", System.StringComparison.OrdinalIgnoreCase, out JToken payload_id) && payload_id.Type == JTokenType.Integer)) {
+            if(!(jPayload.TryGetValue("id", StringComparison.OrdinalIgnoreCase, out JToken payload_id) && payload_id.Type == JTokenType.Integer)) {
                 _logger.LogDebug(LoggingEvents.DeleteWSImageInvalidModel, "DeleteImage (Board {boardId}) INVALID MODEL", boardId);
                 return;
             }
@@ -190,19 +208,26 @@ namespace WebSockets.Operations {
 
             Task store = _imageService.DeleteAsync(id, boardId);
             if(store.IsFaulted) {
-                _logger.LogError(LoggingEvents.DeleteWSImageUnexpectedServiceError, store.GetServiceFault(), "DeleteImage {id} (Board {boardId}) UNEXPECTED SERVICE ERROR", image.Id, boardId);
+                ReadOnlyCollection<Exception> exceptions = store.Exception.InnerExceptions;
+                Exception serviceException = exceptions.First();
+                if(exceptions.Count == 1 && serviceException.GetType() == typeof(ServiceException)) {
+                    _logger.LogError(LoggingEvents.DeleteWSImageUnexpectedServiceError, serviceException, "DeleteImage {id} (Board {boardId}) UNEXPECTED SERVICE ERROR", image.Id, boardId);
+                }
+                else {
+                    _logger.LogError(LoggingEvents.DeleteWSImageUnexpectedError, store.Exception, "DeleteImage {id} (Board {boardId}) UNEXPECTED ERROR", image.Id, boardId);
+                }
                 return;
             }
 
             Task messages = SendDeleteMessages(session, id);
             try {
                 await store;
-                _logger.LogInformation(LoggingEvents.InsertWSImage, "Image {id} of Board {boardId} Deleted", image.Id, boardId);
+                _logger.LogInformation(LoggingEvents.DeleteWSImage, "Image {id} of Board {boardId} Deleted", image.Id, boardId);
 
                 await messages;
             }
             catch(Exception e) {
-                _logger.LogError(LoggingEvents.InsertWSImageUnexpectedError, e, "DeleteImage {id} (Board {boardId}) UNEXPECTED ERROR", image.Id, boardId);
+                _logger.LogError(LoggingEvents.DeleteWSImageUnexpectedError, e, "DeleteImage {id} (Board {boardId}) UNEXPECTED ERROR", image.Id, boardId);
             }
         }
 
