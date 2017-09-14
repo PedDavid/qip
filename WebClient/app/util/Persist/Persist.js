@@ -27,10 +27,9 @@ export class Persist {
       PersistWS._configureWSProtocol(this.socket, this.grid, this.canvasContext)
       this.connected = true
       this.persistType = PersistType().WebSockets
+      PersistWS._persistBoardByWS(this.socket)
       PersistLS._resetLocalStorage()
     }
-
-    PersistWS._persistBoardByWS(this.socket)
 
     this.socket.onerror = (event) => {
       console.error('an error occurred on web socket connection to: ' + connectionUrl)
