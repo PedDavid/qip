@@ -9,6 +9,14 @@ import Eraser from './../../model/tools/Eraser'
 import Move from './../../model/tools/Move'
 import BoardData from './../../model/BoardData'
 
+const protocol = 'http'
+const domain = 'localhost'
+const port = '57059'
+
+function apiFetch (resource, options) {
+  return fetch(`${protocol}://${domain}:${port}/api/${resource}`, options)
+}
+
 export default class PersistLS {
   static _configureWSProtocol = function (socket, grid, canvasContext) {
     socket.onmessage = (event) => {
@@ -121,7 +129,7 @@ export default class PersistLS {
     console.info('getting board data from server by web sockets')
     // fetch data of current board
     return Promise.all([
-      fetch(`http://localhost:57059/api/boards/${boardId}/figures/lines`, {
+      apiFetch(`boards/${boardId}/figures/lines`, {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
@@ -134,7 +142,7 @@ export default class PersistLS {
         }
         return figRes.json()
       }),
-      fetch(`http://localhost:57059/api/boards/${boardId}/figures/images`, {
+      apiFetch(`boards/${boardId}/figures/images`, {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
@@ -187,7 +195,7 @@ export default class PersistLS {
     // favorites | pen colors | defaultPen
     // DefaultEraser | CurrTool | Settings
 
-    return fetch(`http://localhost:57059/api/users/${profile.sub}/preferences`, {
+    return apiFetch(`users/${profile.sub}/preferences`, {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -219,7 +227,7 @@ export default class PersistLS {
     }
     accessToken != null && (headers.Authorization = `Bearer ${accessToken}`)
     // this fetch will create a board and associate it to current user. Current user will be admin
-    return fetch(`http://localhost:57059/api/boards/`, {
+    return apiFetch(`boards/`, {
       headers: headers,
       method: 'POST',
       body: JSON.stringify({
@@ -241,7 +249,7 @@ export default class PersistLS {
     console.info('getting user info from server by web sockets')
     // fetch data of current board
     return Promise.all([
-      fetch(`http://localhost:57059/api/users/${profile.sub}/preferences`, {
+      apiFetch(`users/${profile.sub}/preferences`, {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
@@ -263,7 +271,7 @@ export default class PersistLS {
         }
         return preferencesRes.json()
       }),
-      fetch(`http://localhost:57059/api/users/${profile.sub}/boards`, {
+      apiFetch(`users/${profile.sub}/boards`, {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
@@ -309,7 +317,7 @@ export default class PersistLS {
     console.info('getting board info from server by web sockets')
     // if user is not authenticated, user permission is public permission so there is no need to do second fetch
     const promises = [
-      fetch(`http://localhost:57059/api/boards/${boardId}`, {
+      apiFetch(`boards/${boardId}`, {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
@@ -325,7 +333,7 @@ export default class PersistLS {
 
     if (profile != null) {
       promises.push(
-        fetch(`http://localhost:57059/api/users/${profile.sub}/boards/${boardId}`, {
+        apiFetch(`users/${profile.sub}/boards/${boardId}`, {
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -350,7 +358,7 @@ export default class PersistLS {
   }
 
   static _getBoardUsers = function (boardId, accessToken) {
-    return fetch(`http://localhost:57059/api/boards/${boardId}/usersboards`, {
+    return apiFetch(`boards/${boardId}/usersboards`, {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -368,7 +376,7 @@ export default class PersistLS {
   }
 
   static _updateBoardBasePermissionWS = function (boardId, boardName, basePermission, accessToken) {
-    return fetch(`http://localhost:57059/api/boards/${boardId}`, {
+    return apiFetch(`boards/${boardId}`, {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -393,7 +401,7 @@ export default class PersistLS {
     const promises = []
     users.forEach(userId => {
       promises.push(
-        fetch(`http://localhost:57059/api/boards/${boardId}/usersboards`, {
+        apiFetch(`boards/${boardId}/usersboards`, {
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -417,7 +425,7 @@ export default class PersistLS {
   }
 
   static _updateUserPermissionWS = function (userId, boardId, userPermission, accessToken) {
-    return fetch(`http://localhost:57059/api/boards/${boardId}/usersboards/${userId}`, {
+    return apiFetch(`boards/${boardId}/usersboards/${userId}`, {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -438,7 +446,7 @@ export default class PersistLS {
   }
 
   static _getUsersWS = function (accessToken) {
-    return fetch(`http://localhost:57059/api/users/`, {
+    return apiFetch(`users/`, {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
