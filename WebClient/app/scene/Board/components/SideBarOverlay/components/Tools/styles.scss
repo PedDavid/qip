@@ -1,18 +1,36 @@
-.plusMenu {
-  height: 40px;
-  width: 40px !important;
-  position: fixed;
-  padding: 0px !important;
-  margin: 0px;
+.plusDiv {
+  position: absolute;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
-.toolRow {
-  height: 40px;
-  max-width: 40px;
-  border: 1px solid #000000;
-  text-align: center;
-  cursor: pointer;
+.plusMenuBtn {
+  height: 40px !important;
+  width: 40px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+
+  @media screen and (max-width: 800px) {
+    width: 80px !important;
+    height: 80px !important;
+  }
 }
+
+.plusMenuBtnIcon {
+  font-size: small;
+  margin: 0 !important;
+
+  @media screen and (max-width: 800px) {
+    font-size: x-large;
+  }
+}
+
+.plusMenuGrid {
+  display: flex;
+  flex-direction: column;
+}
+
 .toolRow:hover {
   background-color: lightgrey;
 }

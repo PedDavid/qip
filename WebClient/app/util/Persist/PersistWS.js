@@ -74,7 +74,7 @@ export default class PersistLS {
             grid.draw(canvasContext, 1)
             return
           }
-          const newImage = new Image({x: payload.figure.Origin.X, y: payload.figure.Origin.Y}, payload.figure.Src, payload.figure.Width, payload.figure.Height, payload.figure.Id)
+          const newImage = new Image({x: payload.figure.Origin.X, y: payload.figure.Origin.Y}, payload.figure.Src, payload.figure.Width, payload.figure.Height, payload.figure.Id, () => grid.draw(canvasContext, 1))
           grid.addImage(newImage)
           grid.draw(canvasContext, 1)
           break
