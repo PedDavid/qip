@@ -53,13 +53,15 @@ export default class Pen implements Tool {
       }
 
       const press = event.pressure * this.width
+      const pointStyle = new PointStyle(press)
+      this.currentFigure.points.length === 0 &&
+        this.currentFigure.addPoint(new SimplePoint(x, y, pointStyle)) // this is necessary to avoid a bug when user draws out of the screen
       const last = this.currentFigure.points[this.currentFigure.points.length - 1]
       // Ignore if swiped to last coordinates
       if (last.x === x && last.y === y) {
         return
       }
 
-      const pointStyle = new PointStyle(press)
       this.currentFigure.addPoint(new SimplePoint(x, y, pointStyle))
 
       const canvasContext = event.target.getContext('2d')
@@ -89,12 +91,14 @@ export default class Pen implements Tool {
     this.currentFigure = null
   }
 
-  onOut (event, socket) {
+  onOut (event, persist) {
     const grid = this.grid
     if (this.currentFigure === null) {
       return
     }
     grid.addFigure(this.currentFigure, true)
+
+    persist.sendPenAction(this.currentFigure, this.grid.getCurrentFigureId())
 
     // fazer reset à figura para que não continue a desenhar se o utilizador sair da área do canvas
     // Desta forma, se o utilizador voltar à área do canvas com o ponteiro premido, irá desenhar uma nova figura

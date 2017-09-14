@@ -14,13 +14,17 @@ export default class Presentation implements Tool {
     if (event.buttons > 0) {
       const x = event.offsetX
       const y = event.offsetY
+      const margin = {x: 0, y: 0}
+      if (event.pointerType === 'touch') {
+        margin.y = -100 // sets the pointer higher so the user can see
+      }
       const canvasContext = event.target.getContext('2d')
       // reset all other points
       this.grid.draw(canvasContext, 1)
       // draw pointer
-      Presentation._drawPointer(canvasContext, x, y)
+      Presentation._drawPointer(canvasContext, x + margin.x, y + margin.y)
       // persist pointer
-      this.persist.sendPointer(new SimplePoint(x, y))
+      this.persist.sendPointer(new SimplePoint(x + margin.x, y + margin.y))
     }
   }
 
@@ -28,13 +32,17 @@ export default class Presentation implements Tool {
     if (event.buttons > 0) {
       const x = event.offsetX
       const y = event.offsetY
+      const margin = {x: 0, y: 0}
+      if (event.pointerType === 'touch') {
+        margin.y = -100 // sets the pointer higher so the user can see
+      }
       const canvasContext = event.target.getContext('2d')
       // reset all other points
       this.grid.draw(canvasContext, 1)
       // draw pointer
-      Presentation._drawPointer(canvasContext, x, y)
+      Presentation._drawPointer(canvasContext, x + margin.x, y + margin.y)
       // persist pointer
-      this.persist.sendPointer(new SimplePoint(x, y))
+      this.persist.sendPointer(new SimplePoint(x + margin.x, y + margin.y))
     }
   }
 

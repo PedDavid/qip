@@ -2,6 +2,7 @@ import React from 'react'
 import ToolsSideMenu from './components/ToolsSideMenu'
 import Move from './../../../../../../../../model/tools/Move'
 import Presentation from './../../../../../../../../model/tools/Presentation'
+import styles from './styles.scss'
 
 import {
   Icon
@@ -26,9 +27,14 @@ export default class Tool extends React.Component {
   render () {
     const tool = this.props.tool
     const opened = this.props.visibility === 'visible' && this.state.sideMenuOpened // if plus button is not opened, close all the sub menus
+    let currentColor = ''
+    if (this.props.currTool != null && tool.type === this.props.currTool.type) {
+      currentColor = 'lightgrey'
+    }
+
     return (
-      <div onClick={this.toggleSideMenu} style={{width: '38px', height: '38px'}}>
-        <Icon name={tool.icon} size='large' style={{paddingTop: '5px', width: '38px', height: '38px'}} />
+      <div onClick={this.toggleSideMenu} style={{backgroundColor: currentColor}} className={styles.tool}>
+        <Icon name={tool.icon} className={styles.toolIcon} />
         <ToolsSideMenu toolsConfig={this.props.toolsConfig} {...this.props} toggleSideMenu={this.toggleSideMenu} opened={opened} />
       </div>
     )
