@@ -92,7 +92,7 @@ export default class Pen implements Tool {
   }
 
   onOut (event, persist) {
-    if (this.currentFigure === null) {
+    if (this.currentFigure === null || this.currentFigure.points.length <= 0) {
       return
     }
     this.grid.addFigure(this.currentFigure, true)
