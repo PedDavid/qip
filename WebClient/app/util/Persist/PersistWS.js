@@ -109,15 +109,19 @@ export default class PersistLS {
   // todo: enviar também os favoritos, current tool e prev tools
   // this procedure sends to server all data stored in local storage.
   // it should be called when user authenticates but there was already some information in local storage
-  static _persistBoardByWS = function (socket) {
+  static _persistBoardByWS = function (socket, boardId) {
     const figures = JSON.parse(window.localStorage.getItem('figures'))
     figures.forEach(fig => {
-      fig.tempId = fig.id
-      delete fig.id
-      fig.persistLocalBoard = true
+      // Extract id from fig and spread all other properties to figure
+      const { id, ...figure } = fig
+      const payload = {
+        ...figure,
+        tempId: id,
+        boardId
+      }
       const objToSend = {
         type: fig.type === 'figure' ? 'CREATE_LINE' : 'CREATE_IMAGE',
-        payload: fig
+        payload
       }
       socket.send(JSON.stringify(objToSend))
     })

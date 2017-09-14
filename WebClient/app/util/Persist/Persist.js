@@ -27,7 +27,7 @@ export class Persist {
       PersistWS._configureWSProtocol(this.socket, this.grid, this.canvasContext)
       this.connected = true
       this.persistType = PersistType().WebSockets
-      PersistWS._persistBoardByWS(this.socket)
+      PersistWS._persistBoardByWS(this.socket, boardId)
       PersistLS._resetLocalStorage()
     }
 
