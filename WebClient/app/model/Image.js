@@ -1,7 +1,7 @@
 import {SimplePoint} from './SimplePoint'
 import {Rect} from './Rect'
 
-export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null) {
+export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null, onload) {
   this.id = id
   let srcPoint = imgSrcPoint
   let width = imgWidth
@@ -12,9 +12,12 @@ export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null) {
   {
     const auxImg = new window.Image()
     auxImg.onload = (e) => {
-      width = width || auxImg.width
-      height = height || auxImg.height
+      // scale image
+      const scale = auxImg.width / 300 // 200 is the default width
+      if (width === undefined || width === 0) { width = auxImg.width === 0 ? 200 : auxImg.width / scale }
+      if (height === undefined || height === 0) { height = auxImg.height === 0 ? 200 : auxImg.height / scale }
       img = auxImg
+      onload !== undefined && onload()
     }
     auxImg.src = src
   }

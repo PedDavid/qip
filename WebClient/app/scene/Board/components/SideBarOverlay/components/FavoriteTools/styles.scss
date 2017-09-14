@@ -1,22 +1,31 @@
-.quickBtnsContainer {
-    position: fixed;
-    width: 60px;
-    left: 0;
-    top: 0;
-    padding-top: 20px;
-    text-align: center;
-    cursor: pointer;
-    z-index: 100;
+.favoriteToolsDiv {
+  position: absolute;
+  top: 10px;
+  display: flex;
+  flex-direction: column;
 }
 
-.rows {
-    padding: 4px !important;
+.favorite {
+  height: 40px !important;
+  width: 40px !important;
+  border: 1px solid #000000;
+  text-align: center !important;
+  cursor: pointer;
+  padding: 0 !important;
+  margin: 0 !important;  
+  font-size: small;
+  
+  @media screen and (max-width: 800px) {
+    width: 80px !important;
+    height: 80px !important;
+    font-size: x-large !important;
+  }
+}
+.favoriteIcon {
+  line-height: 2 !important;
 }
 
-.btn {
-    margin: 0px !important;
-    height: 40px !important;
-    width: 40px !important;
-    padding: 0px !important;
-    display: inline-block;
+.favoriteDiv {
+  margin-bottom: 5px !important;
+  margin-top: 5px !important;
 }

@@ -2,7 +2,7 @@ import React from 'react'
 import Favorite from './components/Favorite'
 import styles from './styles.scss'
 
-import { Grid, Button } from 'semantic-ui-react'
+import { Button } from 'semantic-ui-react'
 
 const favNodes = []
 // note: (simao) due to lack of time, i didn't search for a better algorithm without the use of ref. therefore, it mustn't be a statless function
@@ -51,32 +51,17 @@ export default class FavoriteTools extends React.Component {
 
   render () {
     return (
-      <div className={styles.quickBtnsContainer}>
-        <Grid divided textAlign='center'>
-          <Grid.Row columns='1' className={styles.rows} >
-            <Grid.Column>
-              <Button circular className={styles.btn} icon='list layout' onClick={this.props.toggleSideBar} />
-            </Grid.Column>
-          </Grid.Row>
-          {this.props.favorites.map((favorite, idx) => (
-            <div ref={'div' + idx} key={'div' + idx}> {/* this div allows onMove function to know offset positions of element */}
-              <Grid.Row key={'div' + idx} columns='1' className={styles.rows} style={{padding: '4px'}}
-                onMouseUp={this.onMouseUp} onMouseMove={this.onMoveFav} onMouseDown={this.onMouseDownFav.bind(this, [idx, favorite])}>
-                <Grid.Column>
-                  <Favorite ref={favNode => { favNodes[idx] = favNode }} toolsConfig={this.props.toolsConfig} currTool={this.props.currTool}
-                    changeCurrentTool={this.props.changeCurrentTool} removeFavorite={this.props.removeFavorite} fav={favorite}
-                    moveFavorite={this.props.moveFavorite} />
-                </Grid.Column>
-              </Grid.Row>
-            </div>
-          ))}
-          {/* Add Favorite Button */}
-          <Grid.Row columns='1' className={styles.rows} style={{padding: '4px'}}>
-            <Grid.Column>
-              <Button className={styles.btn} circular icon='plus' onClick={this.addFavorite} />
-            </Grid.Column>
-          </Grid.Row>
-        </Grid>
+      <div className={styles.favoriteToolsDiv}>
+        <Button circular className={styles.favorite + ' ' + styles.favoriteDiv} icon='list layout' onClick={this.props.toggleSideBar} />
+        {this.props.favorites.map((favorite, idx) => (
+          <div ref={'div' + idx} key={'div' + idx} className={styles.favoriteDiv}> {/* this div allows onMove function to know offset positions of element */}
+            <Favorite ref={favNode => { favNodes[idx] = favNode }} toolsConfig={this.props.toolsConfig} currTool={this.props.currTool}
+              changeCurrentTool={this.props.changeCurrentTool} removeFavorite={this.props.removeFavorite} fav={favorite}
+              moveFavorite={this.props.moveFavorite} />
+          </div>
+        ))}
+        {/* Add Favorite Button */}
+        <Button className={styles.favorite + ' ' + styles.favoriteDiv} circular icon='plus' onClick={this.addFavorite} />
       </div>
     )
   }

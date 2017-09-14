@@ -187,7 +187,7 @@ export default class Board extends React.Component {
       return this.persist.getInitialBoardAsync(boardId == null ? currBoard.id : boardId, userAccessToken)
     }).then(initBoard => {
       // update this.grid
-      this.grid.addInitialFigures(initBoard.grid.figures)
+      this.grid.addInitialFigures(initBoard.grid.figures, this.canvasContext)
       this.grid.setCurrentFigId(initBoard.grid.maxId)
 
       const canvasSize = initBoard.canvasSize
