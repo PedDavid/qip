@@ -299,7 +299,7 @@ export default function Grid (initialFigures, currIdx) {
     return Array.from(figuresToRet.values()).map(figureId => figures.get(figureId))
   }
 
-  this.addInitialFigures = function (initialFigures) {
+  this.addInitialFigures = function (initialFigures, canvasContext) {
     // map initial figures to Figure Objects and add them to figure array
     initialFigures
       .sort((fig1, fig2) => Math.abs(fig1.id) - Math.abs(fig2.id))
@@ -310,7 +310,7 @@ export default function Grid (initialFigures, currIdx) {
           newFigure.points = initFig.points
           this.addFigure(newFigure)
         } else if (initFig.type === 'image') {
-          const newImage = new Image(initFig.srcPoint, initFig.src, initFig.width, initFig.height, initFig.id)
+          const newImage = new Image(initFig.Origin, initFig.Src, initFig.width, initFig.height, initFig.id, () => this.draw(canvasContext, 1))
           this.addImage(newImage)
         }
       })

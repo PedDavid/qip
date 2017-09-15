@@ -1,5 +1,6 @@
 import React from 'react'
-import { Modal, Input, Divider, Button, Message } from 'semantic-ui-react'
+import { Modal, Input, Divider, Button, Message, Icon } from 'semantic-ui-react'
+import styles from './styles.scss'
 
 const MAX_FILE_SIZE_MB = 10
 const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024
@@ -11,8 +12,10 @@ export default class ImportImageModal extends React.Component {
   }
 
   onClick = (event) => {
-    this.props.onClose()
-    this.props.onImageLoad(this.state.url)
+    if (this.state.url !== '') {
+      this.props.onClose()
+      this.props.onImageLoad(this.state.url)
+    }
   }
 
   onUpload = (event) => {
@@ -45,7 +48,13 @@ export default class ImportImageModal extends React.Component {
         <Modal.Content>
           <Input placeholder='Paste URL' fluid onInput={this.onInput} action={<Button onClick={this.onClick}>Import</Button>} />
           <Divider horizontal>Or</Divider>
-          <input accept='image/*' id='file-upload' onChange={this.onUpload} type='file' />
+          <label htmlFor='fileUpload'>
+            <Button onClick={null}>
+              <Icon name='upload' />
+              Upload
+            </Button>
+          </label>
+          <input accept='image/*' name='fileUpload' id='fileUpload' onChange={this.onUpload} className={styles.input} type='file' />
           <p>Max file size: {MAX_FILE_SIZE_MB} MB</p>
         </Modal.Content>
         <Message error hidden={this.state.fileSize < MAX_FILE_SIZE}>
