@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using WebSockets.Models;
@@ -22,29 +24,34 @@ namespace WebSockets.StringWebSockets {
         }
 
         public async Task AcceptRequests() {
-            do {
-                string msg = await _stringWebSocket.ReceiveAsync();
+            try {
+                do {
+                    string msg = await _stringWebSocket.ReceiveAsync();
 
-                if(string.IsNullOrWhiteSpace(msg)) {
+                    if(string.IsNullOrWhiteSpace(msg)) {
+                        continue;//TODO REVER
+                    }
 
-                    continue;//TODO REVER
-                }
+                    WSMessage info = JsonConvert.DeserializeObject<WSMessage>(msg);
 
-                WSMessage info = JsonConvert.DeserializeObject<WSMessage>(msg);
+                    var validationResults = new List<ValidationResult>();
+                    if(!Validator.TryValidateObject(info, new ValidationContext(info), validationResults, true)) {
+                        continue;//TODO REVER
+                    }
 
-                var validationResults = new List<ValidationResult>();
-                if(!Validator.TryValidateObject(info, new ValidationContext(info), validationResults, true)) {
-                    return;//TODO REVER
-                }
+                    OperationType type = info.Type.Value;
 
-                OperationType type = info.Type.Value;
+                    await _operations[type](_stringWebSocket, _session, info.Payload);
 
-                await _operations[type](_stringWebSocket, _session, info.Payload);
-
-            } while(!_stringWebSocket.CloseStatus.HasValue);
-
-            _session.Exit();
-            await _stringWebSocket.CloseAsync(_stringWebSocket.CloseStatus.Value, _stringWebSocket.CloseStatusDescription, CancellationToken.None);
+                } while(!_stringWebSocket.CloseStatus.HasValue);
+            }
+            catch(WebSocketException e) {
+                ////TODO REVER
+            }
+            finally {
+                _session.Exit();
+                await _stringWebSocket.CloseAsync(_stringWebSocket.CloseStatus.Value, _stringWebSocket.CloseStatusDescription, CancellationToken.None);
+            }
         }
     }
 }
