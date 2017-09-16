@@ -58,18 +58,11 @@ namespace API.Repositories {
         }
 
         public Task<IEnumerable<Board>> GetAllAsync(long index, long size) {
-            List<SqlParameter> parameters = new List<SqlParameter>();
-
-            parameters.Add("@take", SqlDbType.BigInt).Value = size;
-
-            parameters.Add("@skip", SqlDbType.BigInt).Value = index * size;
-
-            return _queryTemplate.QueryAsync(SELECT_ALL, parameters, GetBoard);
+            return GetAllAsync(index, size, null);
         }
 
         public Task<IEnumerable<Board>> GetAllAsync(long index, long size, string search) {
-            if(search == null)
-                return GetAllAsync(index, size);
+            string selectBoards = SELECT_ALL;
 
             List<SqlParameter> parameters = new List<SqlParameter>();
 
@@ -77,9 +70,12 @@ namespace API.Repositories {
 
             parameters.Add("@skip", SqlDbType.BigInt).Value = index * size;
 
-            parameters.Add("@search", SqlDbType.NVarChar).Value = search;
+            if(search != null) {
+                parameters.Add("@search", SqlDbType.NVarChar).Value = search;
+                selectBoards = SELECT_SEARCH;
+            }
 
-            return _queryTemplate.QueryAsync(SELECT_SEARCH, parameters, GetBoard);
+            return _queryTemplate.QueryAsync(selectBoards, parameters, GetBoard);
         }
 
         public Task RemoveAsync(long id) {

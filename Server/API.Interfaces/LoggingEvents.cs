@@ -148,9 +148,9 @@
         #endregion
 
         #region Events ImageOperations
-        //public const int InsertWSImage = 84;
-        //public const int UpdateWSImage = 85;
-        //public const int DeleteWSImage = 86;
+        public const int InsertWSImage = 84;
+        public const int UpdateWSImage = 85;
+        public const int DeleteWSImage = 86;
 
         public const int InsertWSImageNotAuthorized = 87;
         public const int UpdateWSImageNotAuthorized = 88;
@@ -165,30 +165,47 @@
 
         public const int UpdateWSImageNotFound = 95;
         public const int DeleteWSImageNotFound = 96;
+
+        public const int InsertWSImageUnexpectedServiceError = 97;
+        public const int UpdateWSImageUnexpectedServiceError = 98;
+        public const int DeleteWSImageUnexpectedServiceError = 99;
+
+        public const int InsertWSImageUnexpectedError = 100;
+        public const int UpdateWSImageUnexpectedError = 101;
+        public const int DeleteWSImageUnexpectedError = 102;
         #endregion
 
         #region Events LineOperations
-        //public const int InsertWSLine = 97;
-        //public const int UpdateWSLine = 98;
-        //public const int DeleteWSLine = 99;
+        public const int InsertWSLine = 103;
+        public const int UpdateWSLine = 104;
+        public const int DeleteWSLine = 105;
 
-        public const int InsertWSLineNotAuthorized = 100;
-        public const int UpdateWSLineNotAuthorized = 101;
-        public const int DeleteWSLineNotAuthorized = 101;
+        public const int InsertWSLineNotAuthorized = 106;
+        public const int UpdateWSLineNotAuthorized = 107;
+        public const int DeleteWSLineNotAuthorized = 108;
 
-        public const int InsertWSLineWrongBoardId = 102;
-        public const int UpdateWSLineWrongBoardId = 103;
+        public const int InsertWSLineWrongBoardId = 109;
+        public const int UpdateWSLineWrongBoardId = 110;
 
-        public const int InsertWSLineInvalidModel = 104;
-        public const int UpdateWSLineInvalidModel = 105;
-        public const int DeleteWSLineInvalidModel = 106;
+        public const int InsertWSLineInvalidModel = 111;
+        public const int UpdateWSLineInvalidModel = 112;
+        public const int DeleteWSLineInvalidModel = 113;
 
-        public const int UpdateWSLineNotFound = 107;
-        public const int DeleteWSLineNotFound = 108;
+        public const int UpdateWSLineNotFound = 114;
+        public const int DeleteWSLineNotFound = 115;
+
+        public const int InsertWSLineUnexpectedServiceError = 116;
+        public const int UpdateWSLineUnexpectedServiceError = 117;
+        public const int DeleteWSLineUnexpectedServiceError = 118;
+
+        public const int InsertWSLineUnexpectedError = 119;
+        public const int UpdateWSLineUnexpectedError = 120;
+        public const int DeleteWSLineUnexpectedError = 121;
         #endregion
 
-        public const int PointToNotAuthorized = 109;
-        public const int PointTo = 110;
-
+        #region Events PointerOperation
+        public const int PointToNotAuthorized = 116;
+        public const int PointTo = 117;
+        #endregion
     }
 }
