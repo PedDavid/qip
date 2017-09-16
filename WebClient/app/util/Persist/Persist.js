@@ -15,9 +15,8 @@ export class Persist {
   connectWS (boardId, accessToken) {
     // TODO(peddavid): Configuration of endpoints
     const scheme = document.location.protocol === 'https:' ? 'wss' : 'ws'
-    const port = document.location.port ? (57059) : ''
     const authorization = accessToken != null ? `?access_token=${accessToken}` : ''
-    const connectionUrl = `${scheme}://localhost:${port}/ws/${boardId}${authorization}`
+    const connectionUrl = `${scheme}://qipserverapi.azurewebsites.net/ws/${boardId}${authorization}`
     this.boardId = boardId // this should be here because even if ws connection goes wrong, there is a url to share
     console.log('making web socket connection to: ' + connectionUrl)
     this.socket = new WebSocket(connectionUrl)
