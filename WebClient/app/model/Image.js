@@ -14,10 +14,10 @@ export function Image (imgSrcPoint, imgSrc, imgWidth, imgHeight, id = null, onlo
     auxImg.onload = (e) => {
       // scale image
       const scale = auxImg.width / 300 // 200 is the default width
-      if (width === undefined || width === 0) { width = auxImg.width === 0 ? 200 : auxImg.width / scale }
-      if (height === undefined || height === 0) { height = auxImg.height === 0 ? 200 : auxImg.height / scale }
+      if (width === undefined || width === null || width === 0) { width = auxImg.width === 0 ? 200 : auxImg.width / scale }
+      if (height === undefined || height === null || height === 0) { height = auxImg.height === 0 ? 200 : auxImg.height / scale }
       img = auxImg
-      onload !== undefined && onload()
+      onload !== undefined && onload(this)
     }
     auxImg.src = src
   }
