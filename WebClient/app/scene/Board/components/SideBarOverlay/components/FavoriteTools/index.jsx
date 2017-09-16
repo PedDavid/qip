@@ -54,7 +54,8 @@ export default class FavoriteTools extends React.Component {
       <div className={styles.favoriteToolsDiv}>
         <Button circular className={styles.favorite + ' ' + styles.favoriteDiv} icon='list layout' onClick={this.props.toggleSideBar} />
         {this.props.favorites.map((favorite, idx) => (
-          <div ref={'div' + idx} key={'div' + idx} className={styles.favoriteDiv}> {/* this div allows onMove function to know offset positions of element */}
+          <div ref={'div' + idx} key={'div' + idx} className={styles.favoriteDiv}
+            onMouseUp={this.onMouseUp} onMouseMove={this.onMoveFav} onMouseDown={this.onMouseDownFav.bind(this, [idx, favorite])}>
             <Favorite ref={favNode => { favNodes[idx] = favNode }} toolsConfig={this.props.toolsConfig} currTool={this.props.currTool}
               changeCurrentTool={this.props.changeCurrentTool} removeFavorite={this.props.removeFavorite} fav={favorite}
               moveFavorite={this.props.moveFavorite} />
