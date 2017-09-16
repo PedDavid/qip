@@ -11,7 +11,7 @@
     "dev": "webpack-dev-server",
     "test": "standard && jest",
     "heroku-postbuild": "webpack -p",
-    "start": "webpack-dev-server"
+    "start": "node server.js"
   },
   "devDependencies": {
     "auth0-js": "^8.8.0",
