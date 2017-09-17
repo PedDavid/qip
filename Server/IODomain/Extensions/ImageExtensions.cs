@@ -1,8 +1,8 @@
-﻿using API.Domain;
-using IODomain.Input;
-using IODomain.Output;
+﻿using QIP.Domain;
+using QIP.IODomain.Input;
+using QIP.IODomain.Output;
 
-namespace IODomain.Extensions {
+namespace QIP.IODomain.Extensions {
     public static class ImageExtensions {
         public static OutImage Out(this Image image) {
             OutImage outImage = new OutImage() {

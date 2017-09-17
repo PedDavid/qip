@@ -1,4 +1,4 @@
-﻿using API.Domain;
+﻿using QIP.Domain;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Authorization.Requirements {

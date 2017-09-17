@@ -1,4 +1,4 @@
-﻿using API.MediaTypes;
+﻿using QIP.API.MediaTypes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 
-namespace API.Filters {
+namespace QIP.API.Filters {
     public class ValidateModelAttribute : ActionFilterAttribute { //TODO Rever o Problem+JSON
         private static readonly MediaTypeHeaderValue MEDIA_TYPE = new MediaTypeHeaderValue("application/problem+json");
         private static readonly string INDENTATION = "  ";

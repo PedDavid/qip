@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[DeleteBoard]
 	@id BIGINT
 AS
+SET NOCOUNT ON;
 begin try
 	begin TRAN
 		DELETE FROM dbo.User_Board WHERE boardId = @id

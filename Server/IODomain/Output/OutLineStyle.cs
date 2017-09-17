@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 
-namespace IODomain.Output {
+namespace QIP.IODomain.Output {
     public class OutLineStyle {
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public long? Id { get; set; }

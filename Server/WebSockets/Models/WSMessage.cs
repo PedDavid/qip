@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.ComponentModel.DataAnnotations;
 
-namespace WebSockets.Models {
+namespace QIP.WebSockets.Models {
     public class WSMessage {
         [Required]
         public OperationType? Type { get; set; }

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace IODomain.Input {
+namespace QIP.IODomain.Input {
     public class InUpdateLine {
         [Required]
         public long? Id { get; set; }

@@ -1,7 +1,7 @@
-﻿using API.Domain;
-using IODomain.Output;
+﻿using QIP.Domain;
+using QIP.IODomain.Output;
 
-namespace IODomain.Extensions {
+namespace QIP.IODomain.Extensions {
     public static class UserExtensions {
         public static OutUser Out(this User user) {
             return new OutUser() {

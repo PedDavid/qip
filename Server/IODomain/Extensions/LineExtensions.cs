@@ -1,9 +1,9 @@
-﻿using API.Domain;
-using IODomain.Input;
-using IODomain.Output;
+﻿using QIP.Domain;
+using QIP.IODomain.Input;
+using QIP.IODomain.Output;
 using System.Linq;
 
-namespace IODomain.Extensions {
+namespace QIP.IODomain.Extensions {
     public static class LineExtensions {
         public static OutLine Out(this Line line) {
             return new OutLine() {

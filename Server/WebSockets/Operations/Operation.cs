@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using WebSockets.StringWebSockets;
+using QIP.WebSockets.StringWebSockets;
 
-namespace WebSockets.Operations
+namespace QIP.WebSockets.Operations
 {
     public delegate Task Operation(StringWebSocket stringWebSocket, IStringWebSocketSession session, JObject payload);
 }

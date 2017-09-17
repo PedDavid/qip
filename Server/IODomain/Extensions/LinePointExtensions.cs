@@ -1,8 +1,8 @@
-﻿using API.Domain;
-using IODomain.Input;
-using IODomain.Output;
+﻿using QIP.Domain;
+using QIP.IODomain.Input;
+using QIP.IODomain.Output;
 
-namespace IODomain.Extensions {
+namespace QIP.IODomain.Extensions {
     public static class LinePointExtensions {
         public static OutLinePoint Out(this LinePoint point) {
             var outpoint = new OutLinePoint() {
