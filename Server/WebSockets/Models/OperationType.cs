@@ -6,6 +6,7 @@
         CREATE_LINE,
         DELETE_LINE,
         ALTER_LINE,
-        POINT_TO
+        POINT_TO,
+        BOARD_CLEAN
     }
 }

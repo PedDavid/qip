@@ -10,6 +10,8 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using WebSockets.Extensions;
@@ -44,6 +46,12 @@ namespace WebSockets.Operations {
             }
 
             InPoint inPoint = payload.ToObject<InPoint>();
+
+            var validationResults = new List<ValidationResult>();
+            if(!Validator.TryValidateObject(inPoint, new ValidationContext(inPoint), validationResults, true)) {
+                _logger.LogDebug(LoggingEvents.PointToInvalidModel, "PointTo (Board {boardId}) INVALID MODEL", boardId);
+                return;
+            }
 
             Point point = new Point().In(inPoint);
 

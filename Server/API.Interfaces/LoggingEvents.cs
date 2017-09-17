@@ -203,9 +203,24 @@
         public const int DeleteWSLineUnexpectedError = 121;
         #endregion
 
-        #region Events PointerOperation
-        public const int PointToNotAuthorized = 116;
-        public const int PointTo = 117;
+        #region Events PointerOperations
+        public const int PointToNotAuthorized = 122;
+        public const int PointTo = 123;
+        public const int PointToInvalidModel = 124;
+        #endregion
+
+        #region Events FiguresOperations
+        public const int DeleteWSFigures = 125;
+        public const int DeleteWSFiguresNotAuthorized = 126;
+        public const int DeleteWSFiguresInvalidModel = 127;
+        public const int DeleteWSFiguresWrongBoardId = 128;
+        public const int DeleteWSFiguresUnexpectedServiceError = 129;
+        public const int DeleteWSFiguresUnexpectedError = 130;
+        #endregion
+
+        #region Events FiguresController
+        public const int DeleteFigures = 131;
+        public const int DeleteFiguresNotAuthorized = 132;
         #endregion
     }
 }

@@ -18,9 +18,6 @@ namespace WebSockets.Controllers {
     public class WebSocketsController : Controller {
         private readonly IBoardService _boardService;
         private readonly StringWebSocketsSessionManager _sessionManager;
-        private readonly LineOperations _lineOperations;
-        private readonly ImageOperations _imageOperations;
-        private readonly PointerOperation _pointerOperations;
         private readonly IAuthorizationService _authorizationService;
         private readonly ILogger<WebSocketsController> _logger;
 
@@ -33,24 +30,27 @@ namespace WebSockets.Controllers {
             IFigureIdService figureIdService,
             IImageService imageService,
             ILineService lineService,
+            IFiguresService figuresService,
             ILoggerFactory logger
         ) {
             _boardService = boardService;
             _sessionManager = sessionManager;
             _authorizationService = authorizationService;
-            _imageOperations = new ImageOperations(imageService, figureIdService, authorizationService, new Logger<ImageOperations>(logger));
-            _lineOperations = new LineOperations(lineService, figureIdService, authorizationService, new Logger<LineOperations>(logger));
-            _pointerOperations = new PointerOperation(authorizationService, new Logger<PointerOperation>(logger));
+            var imageOperations = new ImageOperations(imageService, figureIdService, authorizationService, new Logger<ImageOperations>(logger));
+            var lineOperations = new LineOperations(lineService, figureIdService, authorizationService, new Logger<LineOperations>(logger));
+            var pointerOperations = new PointerOperation(authorizationService, new Logger<PointerOperation>(logger));
+            var figuresOperations = new FiguresOperations(figuresService, authorizationService, new Logger<FiguresOperations>(logger));
             _logger = new Logger<WebSocketsController>(logger);
 
             _operations = new Dictionary<Models.OperationType, Operation>() {
-                { Models.OperationType.CREATE_IMAGE, _imageOperations.CreateImage },
-                { Models.OperationType.DELETE_IMAGE, _imageOperations.DeleteImage },
-                { Models.OperationType.ALTER_IMAGE, _imageOperations.UpdateImage },
-                { Models.OperationType.CREATE_LINE, _lineOperations.CreateLine },
-                { Models.OperationType.DELETE_LINE, _lineOperations.DeleteLine },
-                { Models.OperationType.ALTER_LINE, _lineOperations.UpdateLine },
-                { Models.OperationType.POINT_TO, _pointerOperations.PointTo }
+                { Models.OperationType.CREATE_IMAGE, imageOperations.CreateImage },
+                { Models.OperationType.DELETE_IMAGE, imageOperations.DeleteImage },
+                { Models.OperationType.ALTER_IMAGE, imageOperations.UpdateImage },
+                { Models.OperationType.CREATE_LINE, lineOperations.CreateLine },
+                { Models.OperationType.DELETE_LINE, lineOperations.DeleteLine },
+                { Models.OperationType.ALTER_LINE, lineOperations.UpdateLine },
+                { Models.OperationType.POINT_TO, pointerOperations.PointTo },
+                { Models.OperationType.BOARD_CLEAN, figuresOperations.DeleteFigures }
             };
         }
 

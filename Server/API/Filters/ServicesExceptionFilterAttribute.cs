@@ -32,8 +32,8 @@ namespace API.Filters {
             NotFoundException notFound = exception as NotFoundException;
 
             var problem = new ProblemPlusJson() {
-                Status = HttpStatusCode.NotFound,
-                Title = "Resource Not Found",
+                Status = HttpStatusCode.BadRequest,
+                Title = "Resource Not Found",//TODO REVER
                 Details = notFound.Message
             };
 
