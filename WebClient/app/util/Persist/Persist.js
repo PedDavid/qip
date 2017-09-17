@@ -105,7 +105,7 @@ export class Persist {
 
   cleanCanvas () {
     return this.callWSLSFunc(
-      () => PersistWS._cleanCanvasWS(this.grid, this.socket),
+      () => PersistWS._cleanCanvasWS(this.boardId, this.socket),
       () => PersistLS._resetLocalStorage()
     )
   }
