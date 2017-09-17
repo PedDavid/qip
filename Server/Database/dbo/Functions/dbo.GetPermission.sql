@@ -10,9 +10,9 @@ BEGIN
 
 	SELECT @permission = IIF(ub.permission >= b.basePermission, ub.permission, b.basePermission)
 	FROM dbo.Board AS b
-	LEFT JOIN (SELECT * FROM dbo.User_Board WHERE userId=@userId) AS ub
+	LEFT JOIN dbo.User_Board AS ub
 	ON(b.id = ub.boardId)
-	WHERE b.id = @boardId
+	WHERE b.id = @boardId AND ub.userId=@userId
 
 	RETURN @permission
 END

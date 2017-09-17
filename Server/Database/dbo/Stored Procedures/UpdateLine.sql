@@ -4,7 +4,7 @@
 * Update Line Procedure
 *
 */
-create proc dbo.UpdateLine @boardId bigint, @figureId bigint, @color varchar(30) = null, @points dbo.Points readonly, @isClosedForm bit = 0
+create proc dbo.UpdateLine @boardId bigint, @figureId bigint, @color varchar(20) = null, @points dbo.Points readonly, @isClosedForm bit = 0
 AS
 SET NOCOUNT ON;
 begin try

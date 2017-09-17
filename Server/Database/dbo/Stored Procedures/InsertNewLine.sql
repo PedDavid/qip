@@ -1,4 +1,4 @@
-﻿create proc dbo.InsertNewLine @figureId bigint, @boardId bigint, @color varchar(30), @points dbo.Points readonly, @isClosedForm bit = 0
+﻿create proc dbo.InsertNewLine @figureId bigint, @boardId bigint, @color varchar(20), @points dbo.Points readonly, @isClosedForm bit = 0
 AS
 SET NOCOUNT ON;
 begin try
