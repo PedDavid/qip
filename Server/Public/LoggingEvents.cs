@@ -222,5 +222,11 @@
         public const int DeleteFigures = 131;
         public const int DeleteFiguresNotAuthorized = 132;
         #endregion
+
+        #region Events WSOperations
+        public const int WSOperationsInvalidMessage = 133;
+        public const int WSOperationsInvalidModel = 134;
+        public const int WSOperationsEndedAbruptly = 135;
+        #endregion
     }
 }

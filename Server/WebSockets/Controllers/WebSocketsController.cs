@@ -20,6 +20,7 @@ namespace QIP.WebSockets.Controllers {
         private readonly StringWebSocketsSessionManager _sessionManager;
         private readonly IAuthorizationService _authorizationService;
         private readonly ILogger<WebSocketsController> _logger;
+        private readonly ILogger<StringWebSocketsOperations> _operationsLogger;
 
         private readonly Dictionary<Models.OperationType, Operation> _operations;  // TODO(peddavid): Should this be immutable?
 
@@ -41,6 +42,7 @@ namespace QIP.WebSockets.Controllers {
             var pointerOperations = new PointerOperation(authorizationService, new Logger<PointerOperation>(logger));
             var figuresOperations = new FiguresOperations(figuresService, authorizationService, new Logger<FiguresOperations>(logger));
             _logger = new Logger<WebSocketsController>(logger);
+            _operationsLogger = new Logger<StringWebSocketsOperations>(logger);
 
             _operations = new Dictionary<Models.OperationType, Operation>() {
                 { Models.OperationType.CREATE_IMAGE, imageOperations.CreateImage },
@@ -88,7 +90,7 @@ namespace QIP.WebSockets.Controllers {
                 StringWebSocket webSocket = await HttpContext.WebSockets.AcceptStringWebSocketAsync(User);
 
                 var session = _sessionManager.Register(roomId, webSocket);
-                var swsopers = new StringWebSocketsOperations(roomId, webSocket, session, _operations);
+                var swsopers = new StringWebSocketsOperations(roomId, webSocket, session, _operations, _operationsLogger);
 
                 await swsopers.AcceptRequests();
             }
