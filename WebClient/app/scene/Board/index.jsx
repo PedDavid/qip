@@ -171,7 +171,9 @@ export default class Board extends React.Component {
       // check if user has not currentBoard predefined. If not, create one
       const adminBoards = this.state.userBoards.filter(board => board.userPermission === 3)
       if (userinfo.currentBoard == null && adminBoards.length === 0) { // remove userBoards.length check when userinfo from ws comes with currentBoard
-        return this.persist.addUserBoard('My First Board', userProfile, userAccessToken)
+        const newBoard = this.persist.addUserBoard('My First Board', userProfile, userAccessToken)
+        this.setState({userBoards: [newBoard]})
+        return newBoard
       }
       return userinfo.currentBoard != null ? userinfo.currentBoard : adminBoards[0] // return currBoard. todo: change to userinfo.currBoard
     }).then(currBoard => {
