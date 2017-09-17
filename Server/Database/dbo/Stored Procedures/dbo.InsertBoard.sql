@@ -5,6 +5,7 @@
 	@userId VARCHAR(128),
 	@boardId BIGINT OUT
 AS
+SET NOCOUNT ON;
 begin try
 	begin TRAN
 		INSERT INTO dbo.Board([name], maxDistPoints, basePermission) VALUES(@name, @maxDistPoints, @basePermission)

@@ -68,9 +68,9 @@ namespace WebSockets.Operations {
                 return;
             }
 
-            Task store = _figuresService.DeleteAsync(boardId, delFig.LastFigureToDelete);
+            Task store = _figuresService.DeleteAsync(boardId, delFig.MaxFigureId);
             if(store.IsFaulted) {
-                LogSynchronousFault(store, _logger, boardId, delFig.LastFigureToDelete);
+                LogSynchronousFault(store, _logger, boardId, delFig.MaxFigureId);
                 return;
             }
 
@@ -80,7 +80,7 @@ namespace WebSockets.Operations {
                 _logger.LogInformation(
                     LoggingEvents.DeleteWSFigures, 
                     "Figures up to {lastFigureToDelete} of Board {boardId} Deleted", 
-                    delFig.LastFigureToDelete, 
+                    delFig.MaxFigureId, 
                     boardId
                 );
 
@@ -91,7 +91,7 @@ namespace WebSockets.Operations {
                     LoggingEvents.DeleteWSFiguresUnexpectedError, 
                     e, 
                     "DeleteFigures up to {lastFigureToDelete} (Board {boardId}) UNEXPECTED ERROR", 
-                    delFig.LastFigureToDelete, 
+                    delFig.MaxFigureId, 
                     boardId
                 );
             }

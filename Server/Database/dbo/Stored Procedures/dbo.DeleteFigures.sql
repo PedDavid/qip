@@ -2,6 +2,7 @@
 	@boardId BIGINT,
 	@lastFigureToDelete BIGINT
 AS
+SET NOCOUNT ON;
 BEGIN TRY
 	BEGIN TRANSACTION
 		DELETE FROM dbo.Line WHERE boardId = @boardId AND figureId <= @lastFigureToDelete
