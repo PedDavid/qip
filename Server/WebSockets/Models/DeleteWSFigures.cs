@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace WebSockets.Models {
+namespace QIP.WebSockets.Models {
     public class DeleteWSFigures {
         [Required]
         public long BoardId { get; set; }

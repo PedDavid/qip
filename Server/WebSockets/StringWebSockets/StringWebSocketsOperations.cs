@@ -5,10 +5,10 @@ using System.ComponentModel.DataAnnotations;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
-using WebSockets.Models;
-using WebSockets.Operations;
+using QIP.WebSockets.Models;
+using QIP.WebSockets.Operations;
 
-namespace WebSockets.StringWebSockets {
+namespace QIP.WebSockets.StringWebSockets {
     public class StringWebSocketsOperations {
         private readonly StringWebSocket _stringWebSocket;
         private readonly Dictionary<Models.OperationType, Operation> _operations;

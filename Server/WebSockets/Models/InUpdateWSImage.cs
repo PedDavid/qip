@@ -1,6 +1,6 @@
-﻿using IODomain.Input;
+﻿using QIP.IODomain.Input;
 
-namespace WebSockets.Models {
+namespace QIP.WebSockets.Models {
     public class InUpdateWSImage : InUpdateImage {
         public string IsScaling { get; set; }
     }

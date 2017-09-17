@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
+    <RootNamespace>QIP.ApiServer</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,9 +27,9 @@
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\API.Interfaces\API.Interfaces.csproj" />
-    <ProjectReference Include="..\API.Repositories\API.Repositories.csproj" />
-    <ProjectReference Include="..\API.Services\API.Services.csproj" />
+    <ProjectReference Include="..\Public\Public.csproj" />
+    <ProjectReference Include="..\Repositories\Repositories.csproj" />
+    <ProjectReference Include="..\Services\Services.csproj" />
     <ProjectReference Include="..\API\API.csproj" />
     <ProjectReference Include="..\Authorization\Authorization.csproj" />
     <ProjectReference Include="..\WebSockets\WebSockets.csproj" />

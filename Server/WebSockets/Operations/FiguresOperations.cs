@@ -1,6 +1,6 @@
-﻿using API.Interfaces;
-using API.Interfaces.IServices;
-using API.Interfaces.ServicesExceptions;
+﻿using QIP.Public;
+using QIP.Public.IServices;
+using QIP.Public.ServicesExceptions;
 using Authorization;
 using Authorization.Extensions;
 using Authorization.Resources;
@@ -17,11 +17,11 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using WebSockets.Extensions;
-using WebSockets.Models;
-using WebSockets.StringWebSockets;
+using QIP.WebSockets.Extensions;
+using QIP.WebSockets.Models;
+using QIP.WebSockets.StringWebSockets;
 
-namespace WebSockets.Operations {
+namespace QIP.WebSockets.Operations {
     class FiguresOperations {
         private static readonly JsonSerializerSettings serializerSettings;
 

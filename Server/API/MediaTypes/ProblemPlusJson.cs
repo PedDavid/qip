@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace API.MediaTypes {
+namespace QIP.API.MediaTypes {
     public class ProblemPlusJson {
         public string Type { get; set; } = "about:blank";
         public string Title { get; set; }

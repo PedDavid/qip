@@ -1,4 +1,4 @@
-﻿namespace WebSockets.Models {
+﻿namespace QIP.WebSockets.Models {
     public enum OperationType {
         CREATE_IMAGE,
         DELETE_IMAGE,

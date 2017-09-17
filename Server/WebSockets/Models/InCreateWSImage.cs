@@ -1,8 +1,8 @@
-﻿using IODomain.Input;
+﻿using QIP.IODomain.Input;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace WebSockets.Models {
+namespace QIP.WebSockets.Models {
     class InCreateWSImage : InCreateImage {
         [Required]
         public long TempId { get; set; }

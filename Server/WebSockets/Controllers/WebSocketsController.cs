@@ -1,6 +1,6 @@
-﻿using API.Interfaces;
-using API.Interfaces.IRepositories;
-using API.Interfaces.IServices;
+﻿using QIP.Public;
+using QIP.Public.IRepositories;
+using QIP.Public.IServices;
 using Authorization;
 using Authorization.Extensions;
 using Authorization.Resources;
@@ -9,11 +9,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using WebSockets.Extensions;
-using WebSockets.Operations;
-using WebSockets.StringWebSockets;
+using QIP.WebSockets.Extensions;
+using QIP.WebSockets.Operations;
+using QIP.WebSockets.StringWebSockets;
 
-namespace WebSockets.Controllers {
+namespace QIP.WebSockets.Controllers {
     [Route("ws")]
     public class WebSocketsController : Controller {
         private readonly IBoardService _boardService;

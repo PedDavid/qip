@@ -1,6 +1,6 @@
-﻿using API.Filters;
-using API.Interfaces;
-using API.Interfaces.IServices;
+﻿using QIP.API.Filters;
+using QIP.Public;
+using QIP.Public.IServices;
 using Authorization;
 using Authorization.Extensions;
 using Authorization.Resources;
@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace API.Controllers {
+namespace QIP.API.Controllers {
     [Route("api/boards/{boardId}/[controller]")]
     [Produces("application/json")]
     [ServicesExceptionFilter]

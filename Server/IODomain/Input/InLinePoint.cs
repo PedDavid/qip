@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace IODomain.Input {
+namespace QIP.IODomain.Input {
     public class InLinePoint : InPoint {
         [Required]
         public int? Idx { get; set; }

@@ -1,10 +1,10 @@
-﻿using API.Domain;
-using API.Interfaces;
+﻿using QIP.Domain;
+using QIP.Public;
 using Authorization;
 using Authorization.Extensions;
 using Authorization.Resources;
-using IODomain.Extensions;
-using IODomain.Input;
+using QIP.IODomain.Extensions;
+using QIP.IODomain.Input;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -14,11 +14,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using WebSockets.Extensions;
-using WebSockets.Models;
-using WebSockets.StringWebSockets;
+using QIP.WebSockets.Extensions;
+using QIP.WebSockets.Models;
+using QIP.WebSockets.StringWebSockets;
 
-namespace WebSockets.Operations {
+namespace QIP.WebSockets.Operations {
     public class PointerOperation {
         private static readonly JsonSerializerSettings serializerSettings;
 

@@ -1,5 +1,5 @@
-﻿using API.Interfaces.ServicesExceptions;
-using API.MediaTypes;
+﻿using QIP.Public.ServicesExceptions;
+using QIP.API.MediaTypes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Newtonsoft.Json;
@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 
-namespace API.Filters {
+namespace QIP.API.Filters {
     public class ServicesExceptionFilterAttribute : ExceptionFilterAttribute { //TODO Rever o Problem+JSON
         private static readonly Microsoft.Net.Http.Headers.MediaTypeHeaderValue MEDIA_TYPE;
         private static readonly Dictionary<Type, Func<Exception, IActionResult>> _exceptionHandlers;

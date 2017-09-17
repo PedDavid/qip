@@ -1,4 +1,4 @@
-﻿namespace IODomain.Input {
+﻿namespace QIP.IODomain.Input {
     public enum InBoardPermission {
         // Required Permission Increase Order
         View = 1,

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 // TODO(peddavid): Change to more readable names
 
-namespace WebSockets.StringWebSockets {
+namespace QIP.WebSockets.StringWebSockets {
     public class StringWebSocketsSessionManager {
         private readonly ConcurrentDictionary<long, _StringWSSession> sessions 
             = new ConcurrentDictionary<long, _StringWSSession>();

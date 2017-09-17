@@ -1,5 +1,5 @@
-﻿using API.Domain;
-using API.Interfaces.IServices;
+﻿using QIP.Domain;
+using QIP.Public.IServices;
 using Authorization.Extensions;
 using Authorization.Requirements;
 using Authorization.Resources;
