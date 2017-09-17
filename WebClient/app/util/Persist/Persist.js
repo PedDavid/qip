@@ -198,6 +198,7 @@ export class Persist {
           fig => {
             fig.offsetPoint = {X: offsetPoint.x, Y: offsetPoint.y}
             fig.isScaling = isScaling
+            fig.isClosed = false
           }
         ))
     } else {
