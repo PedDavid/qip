@@ -48,6 +48,7 @@ export default class Tools extends React.Component {
 
   render () {
     const visibility = this.state.visible ? 'visible' : 'hidden'
+    const display = this.state.visible ? 'flex' : 'none'
     // todo: change the way this is done
     const btnStyle = !this.state.visible
     ? { left: this.state.left }
@@ -62,7 +63,7 @@ export default class Tools extends React.Component {
         <Button circular className={styles.plusMenuBtn} style={btnStyle} onClick={this.toggleTools}>
           <Icon className={'plus ' + styles.plusMenuBtnIcon} />
         </Button>
-        <div className={styles.plusMenuGrid} style={{visibility}}>
+        <div className={styles.plusMenuGrid} style={{display}}>
           {/* tool example = {type: pen, content:['black', 'red'] */}
           {this.props.toolsConfig.defaultTools.map((tool, idx) => (
             <Tool key={'tool' + idx} toolsConfig={this.props.toolsConfig} visibility={visibility} currTool={this.props.currTool} grid={this.props.grid} tool={tool} changeCurrentTool={this.props.changeCurrentTool} persist={this.props.persist} />

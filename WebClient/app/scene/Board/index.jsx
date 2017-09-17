@@ -327,7 +327,10 @@ export default class Board extends React.Component {
   }
 
   onImageLoad = (imageSrc) => {
-    const newImage = new Image({x: 80, y: 80}, imageSrc)
+    const newImage = new Image({x: 80, y: 80}, imageSrc, null, null, null, image => {
+      this.grid.addImage(image)
+      this.grid.draw(this.canvasContext, 1)
+    })
     uploadImage(imageSrc)
       .then(res => {
         console.info(`Image uploaded to ${res.data.link}`)
@@ -338,8 +341,6 @@ export default class Board extends React.Component {
       .catch(() => {
         this.notifyError('Error uploading image to imgur')
       })
-    this.grid.addImage(newImage)
-    this.grid.draw(this.canvasContext, 1)
   }
   toggleImportImageModal = () => {
     this.setState(prevState => ({showImportImageModal: !prevState.showImportImageModal}))
