@@ -20,6 +20,10 @@ export default function Grid (initialFigures, currIdx) {
     return toRet
   }
 
+  this.resetHistory = function () {
+    history = []
+  }
+
   this.updateHistoryFigureId = function (prevId, newId) {
     const toUpdate = history.find(fig => fig.figureId === prevId)
     toUpdate != null && (toUpdate.figureId = newId)

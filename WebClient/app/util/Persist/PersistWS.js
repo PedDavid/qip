@@ -101,9 +101,12 @@ export default class PersistLS {
           if (payload.point.X > 0 && payload.point.Y > 0) {
             Presentation._drawPointer(canvasContext, payload.point.X, payload.point.Y)
           }
-          break;
+          break
         case 'BOARD_CLEAN':
+          grid.resetHistory()
+          grid.getFiguresArray().forEach(figure => grid.removeFigure(figure.id, canvasContext, 1, false))
           grid.clean(canvasContext)
+          break
       }
     }
   }
@@ -183,11 +186,10 @@ export default class PersistLS {
     })
   }
 
-  static _cleanCanvasWS = function (boardId, socket) {
-    // todo: add an action in server to clean board
+  static _cleanCanvasWS = function (boardId, maxFigureId, socket) {
     socket.send(JSON.stringify({
       type: 'BOARD_CLEAN',
-      payload: {boardId}
+      payload: {boardId, maxFigureId}
     }))
   }
 
