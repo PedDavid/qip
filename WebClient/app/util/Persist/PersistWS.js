@@ -347,6 +347,9 @@ export default class PersistLS {
           },
           method: 'GET'
         }).then(boardInfoRes => {
+          if (boardInfoRes.status === 404) {
+            return null
+          }
           if (boardInfoRes.status >= 400) {
             throw new Error('Bad response from server. Check if Board Id is correct')
           }
@@ -358,7 +361,7 @@ export default class PersistLS {
     return Promise.all(promises)
       .then(allRes => {
         const boardInfo = allRes[0]
-        const userBoardInfo = allRes.length === 1 ? {permission: boardInfo.basePermission} : allRes[1] // if user is not authenticated, board permissions is 0
+        const userBoardInfo = allRes.length === 1 || allRes[1] === null ? {permission: boardInfo.basePermission} : allRes[1] // if user is not authenticated, board permissions is 0
         return new BoardData(boardInfo.id, boardInfo.name, boardInfo.basePermission, userBoardInfo.permission)
       })
   }
