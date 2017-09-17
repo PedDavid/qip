@@ -104,8 +104,9 @@ export default class PersistLS {
           break
         case 'BOARD_CLEAN':
           grid.resetHistory()
-          grid.getFiguresArray().forEach(figure => grid.removeFigure(figure.id, canvasContext, 1, false))
-          grid.clean(canvasContext)
+          grid.getFiguresArray()
+            .filter(figure => figure.id <= payload.maxFigureId)
+            .forEach(figure => grid.removeFigure(figure.id, canvasContext, 1, false))
           break
       }
     }
