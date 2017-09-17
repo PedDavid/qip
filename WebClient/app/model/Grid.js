@@ -310,7 +310,7 @@ export default function Grid (initialFigures, currIdx) {
           newFigure.points = initFig.points
           this.addFigure(newFigure)
         } else if (initFig.type === 'image') {
-          const newImage = new Image(initFig.Origin, initFig.Src, initFig.width, initFig.height, initFig.id, () => this.draw(canvasContext, 1))
+          const newImage = new Image(initFig.origin || initFig.Origin, initFig.src || initFig.Src, initFig.width, initFig.height, initFig.id, () => this.draw(canvasContext, 1))
           this.addImage(newImage)
         }
       })
