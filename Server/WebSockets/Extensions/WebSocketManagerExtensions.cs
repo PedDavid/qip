@@ -5,9 +5,9 @@ using System.Linq;
 using System.Net.WebSockets;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using WebSockets.StringWebSockets;
+using QIP.WebSockets.StringWebSockets;
 
-namespace WebSockets.Extensions
+namespace QIP.WebSockets.Extensions
 {
     public static class WebSocketManagerExtensions
     {

@@ -1,15 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.10
+VisualStudioVersion = 15.0.26730.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Database", "Database\Database.sqlproj", "{C114D5A5-B8D7-47C2-B21F-F750222F578D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API.Interfaces", "API.Interfaces\API.Interfaces.csproj", "{F2318A4E-325B-450E-82B5-6B385BE6602C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Public", "Public\Public.csproj", "{F2318A4E-325B-450E-82B5-6B385BE6602C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API.Domain", "API.Domain\API.Domain.csproj", "{F65A4739-5BBA-4781-935E-710F07B30B0F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "Domain\Domain.csproj", "{F65A4739-5BBA-4781-935E-710F07B30B0F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API.Repositories", "API.Repositories\API.Repositories.csproj", "{373DB411-7B98-48F7-8C76-660B746AFE22}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Repositories", "Repositories\Repositories.csproj", "{373DB411-7B98-48F7-8C76-660B746AFE22}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API", "API\API.csproj", "{697D8BEF-803C-47FA-960B-D3BF0626D623}"
 EndProject
@@ -17,11 +17,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebSockets", "WebSockets\We
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiServer", "ApiServer\ApiServer.csproj", "{ED83FBA3-0D5D-4134-9F63-9BAFB9636B46}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API.Services", "API.Services\API.Services.csproj", "{0025D419-A092-4F44-ABFB-6DCFB9E2394B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services", "Services\Services.csproj", "{0025D419-A092-4F44-ABFB-6DCFB9E2394B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IODomain", "IODomain\IODomain.csproj", "{30F23DB8-28A3-4A4D-8486-78D59C0E499A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Authorization", "Authorization\Authorization.csproj", "{7278C253-D4A0-4C55-8B53-5C2C7F64129D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Authorization", "Authorization\Authorization.csproj", "{7278C253-D4A0-4C55-8B53-5C2C7F64129D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

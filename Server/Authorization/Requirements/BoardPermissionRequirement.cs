@@ -1,7 +1,7 @@
-﻿using API.Domain;
+﻿using QIP.Domain;
 using Microsoft.AspNetCore.Authorization;
 
-namespace Authorization.Requirements {
+namespace QIP.Authorization.Requirements {
     public class BoardPermissionRequirement : IAuthorizationRequirement {
         public BoardPermission Permission { get; }
 

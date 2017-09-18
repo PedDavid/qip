@@ -1,10 +1,10 @@
-﻿using API.Domain;
-using API.Filters;
-using API.Interfaces;
-using API.Interfaces.IServices;
-using IODomain.Extensions;
-using IODomain.Input;
-using IODomain.Output;
+﻿using QIP.Domain;
+using QIP.API.Filters;
+using QIP.Public;
+using QIP.Public.IServices;
+using QIP.IODomain.Extensions;
+using QIP.IODomain.Input;
+using QIP.IODomain.Output;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace API.Controllers {
+namespace QIP.API.Controllers {
     [ValidateModel]
     [ServicesExceptionFilter]
     [Produces("application/json")]
@@ -101,90 +101,6 @@ namespace API.Controllers {
             _logger.LogInformation(LoggingEvents.InsertLineStyle, "LineStyle {ID} Created", style.Id);
 
             return CreatedAtRoute("GetLineStyle", new { id = style.Id }, style.Out());
-        }
-
-        /// <summary>
-        /// Updates a specific LineStyle
-        /// </summary>
-        /// <remarks>
-        /// Sample request:
-        ///
-        ///     PUT /api/LineStyle/0
-        ///     Content-Type: application/json
-        ///     Authorization: Bearer {ACCESS_TOKEN}
-        /// 
-        ///     {
-        ///         "id": 0,
-        ///         "color":"red"
-        ///     }
-        ///
-        /// </remarks>
-        /// <param name="id">Id of the Board to update</param>
-        /// <param name="inLineStyle">Information of the Line Style to update</param>
-        /// <response code="204">Line Style update succeeds</response>
-        /// <response code="400">If there is inconsistent information or the inLineStyle is null</response>
-        /// <response code="401">If the user is not authenticated</response>
-        /// <response code="403">If the user does not have authorization</response>
-        /// <response code="404">If the Line Style not exists</response>
-        [HttpPut("{id}")]
-        [Authorize("Administrator")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(404)]
-        public async Task<IActionResult> Update(long id, [FromBody] InUpdateLineStyle inLineStyle) {
-            if(inLineStyle == null) {
-                _logger.LogDebug(LoggingEvents.UpdateLineStyleWithoutBody, "Update() WITHOUT BODY");
-                return BadRequest();
-            }
-
-            if(inLineStyle.Id != id) {
-                //$"The id present on update is different of the expected. {Environment.NewLine}Expected: {id}{Environment.NewLine}Current: {inLineStyle.Id}"
-                _logger.LogDebug(LoggingEvents.UpdateLineStyleWrongId, "Update({ID}) WRONG ID {wrongId}", id, inLineStyle.Id);
-                return BadRequest();
-            }
-
-            LineStyle lineStyle = await _lineStyleService.GetAsync(id);
-            if(lineStyle == null) {
-                //$"The Line Style with id {id} not exists"
-                _logger.LogWarning(LoggingEvents.UpdateLineStyleNotFound, "Update({ID}) NOT FOUND", id);
-                return NotFound();
-            }
-
-            lineStyle.In(inLineStyle);
-
-            await _lineStyleService.UpdateAsync(lineStyle);
-            _logger.LogInformation(LoggingEvents.UpdateLineStyle, "LineStyle {ID} Updated", lineStyle.Id);
-
-            return NoContent();
-        }
-
-        /// <summary>
-        /// Deletes a specific LineStyle
-        /// </summary>
-        /// <param name="id">Id of the Line Style to delete</param>
-        /// <response code="204">Line Style deletion succeeds</response>
-        /// <response code="401">If the user is not authenticated</response>
-        /// <response code="403">If the user does not have authorization</response>
-        /// <response code="404">If the Line Style not exists</response>
-        [HttpDelete("{id}")]
-        [Authorize("Administrator")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(404)]
-        public async Task<IActionResult> Delete(long id) {
-            if(!await _lineStyleService.ExistsAsync(id)) {
-                //$"The Line Style with id {id} not exists"
-                _logger.LogWarning(LoggingEvents.DeleteLineStyleNotFound, "Delete({ID}) NOT FOUND", id);
-                return NotFound();
-            }
-
-            await _lineStyleService.DeleteAsync(id);
-            _logger.LogInformation(LoggingEvents.DeleteLineStyle, "LineStyle {ID} Deleted", id);
-
-            return NoContent();
         }
     }
 }

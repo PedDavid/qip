@@ -1,21 +1,21 @@
-﻿using API.Domain;
-using API.Filters;
-using API.Interfaces;
-using API.Interfaces.IServices;
-using Authorization;
-using Authorization.Extensions;
-using Authorization.Resources;
-using IODomain.Extensions;
-using IODomain.Input;
-using IODomain.Output;
+﻿using QIP.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using QIP.API.Filters;
+using QIP.Authorization.Extensions;
+using QIP.Authorization.Resources;
+using QIP.Domain;
+using QIP.IODomain.Extensions;
+using QIP.IODomain.Input;
+using QIP.IODomain.Output;
+using QIP.Public;
+using QIP.Public.IServices;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace API.Controllers {
+namespace QIP.API.Controllers {
     [ValidateModel]
     [ServicesExceptionFilter]
     [Produces("application/json")]

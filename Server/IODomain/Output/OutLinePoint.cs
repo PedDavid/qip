@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace IODomain.Output {
+namespace QIP.IODomain.Output {
     public class OutLinePoint : OutPoint {
         [Required]
         public int Idx { get; set; }

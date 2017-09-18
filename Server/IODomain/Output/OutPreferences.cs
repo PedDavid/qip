@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace IODomain.Output {
+namespace QIP.IODomain.Output {
     public class OutPreferences {
         [Required]
         public string UserId { get; set; }
