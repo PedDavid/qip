@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace WebSockets.StringWebSockets {
+namespace QIP.WebSockets.StringWebSockets {
     public interface IStringWebSocketSession {
         long Id { get; }
 

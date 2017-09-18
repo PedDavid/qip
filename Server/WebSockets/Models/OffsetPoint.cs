@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace WebSockets.Models {
+namespace QIP.WebSockets.Models {
     public class Offset {
         [Required]
         public int? X { get; set; }

@@ -1,9 +1,9 @@
-﻿using Authorization;
-using Authorization.Requirements;
-using Authorization.Extensions.DependencyInjection;
-using API.Repositories.Options;
-using API.Repositories.Extensions.DependencyInjection;
-using API.Services.Extensions.DependencyInjection;
+﻿using QIP.Authorization;
+using QIP.Authorization.Requirements;
+using QIP.Authorization.Extensions.DependencyInjection;
+using QIP.Repositories.Options;
+using QIP.Repositories.Extensions.DependencyInjection;
+using QIP.Services.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,16 +12,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using WebSockets.StringWebSockets;
+using QIP.WebSockets.StringWebSockets;
 using Newtonsoft.Json.Converters;
 using Microsoft.Extensions.Primitives;
 using System.Linq;
-using API.Domain;
+using QIP.Domain;
 using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.Extensions.PlatformAbstractions;
 using System.IO;
 
-namespace ApiServer {
+namespace QIP.ApiServer {
     public class Startup {
         public Startup(IHostingEnvironment env) {
             var builder = new ConfigurationBuilder()

@@ -1,22 +1,24 @@
-﻿using API.Domain;
-using API.Interfaces;
-using Authorization;
-using Authorization.Extensions;
-using Authorization.Resources;
-using IODomain.Extensions;
-using IODomain.Input;
+﻿using QIP.Domain;
+using QIP.Public;
+using QIP.Authorization;
+using QIP.Authorization.Extensions;
+using QIP.Authorization.Resources;
+using QIP.IODomain.Extensions;
+using QIP.IODomain.Input;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using WebSockets.Extensions;
-using WebSockets.Models;
-using WebSockets.StringWebSockets;
+using QIP.WebSockets.Extensions;
+using QIP.WebSockets.Models;
+using QIP.WebSockets.StringWebSockets;
 
-namespace WebSockets.Operations {
+namespace QIP.WebSockets.Operations {
     public class PointerOperation {
         private static readonly JsonSerializerSettings serializerSettings;
 
@@ -44,6 +46,12 @@ namespace WebSockets.Operations {
             }
 
             InPoint inPoint = payload.ToObject<InPoint>();
+
+            var validationResults = new List<ValidationResult>();
+            if(!Validator.TryValidateObject(inPoint, new ValidationContext(inPoint), validationResults, true)) {
+                _logger.LogDebug(LoggingEvents.PointToInvalidModel, "PointTo (Board {boardId}) INVALID MODEL", boardId);
+                return;
+            }
 
             Point point = new Point().In(inPoint);
 

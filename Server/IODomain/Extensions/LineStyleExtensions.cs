@@ -1,8 +1,8 @@
-﻿using API.Domain;
-using IODomain.Input;
-using IODomain.Output;
+﻿using QIP.Domain;
+using QIP.IODomain.Input;
+using QIP.IODomain.Output;
 
-namespace IODomain.Extensions {
+namespace QIP.IODomain.Extensions {
     public static class LineStyleExtensions {
         public static OutLineStyle Out(this LineStyle lineStyle) {
             return new OutLineStyle() {

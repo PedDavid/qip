@@ -1,8 +1,8 @@
-﻿using API.Domain;
-using IODomain.Input;
-using IODomain.Output;
+﻿using QIP.Domain;
+using QIP.IODomain.Input;
+using QIP.IODomain.Output;
 
-namespace IODomain.Extensions {
+namespace QIP.IODomain.Extensions {
     public static class UserBoardExtensions {
         public static OutUserBoard Out(this UserBoard userBoard) {
             return new OutUserBoard() {

@@ -1,12 +1,12 @@
-﻿using API.Domain;
-using API.Interfaces;
-using API.Interfaces.IServices;
-using API.Interfaces.ServicesExceptions;
-using Authorization;
-using Authorization.Extensions;
-using Authorization.Resources;
-using IODomain.Extensions;
-using IODomain.Output;
+﻿using QIP.Domain;
+using QIP.Public;
+using QIP.Public.IServices;
+using QIP.Public.ServicesExceptions;
+using QIP.Authorization;
+using QIP.Authorization.Extensions;
+using QIP.Authorization.Resources;
+using QIP.IODomain.Extensions;
+using QIP.IODomain.Output;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -19,11 +19,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using WebSockets.Extensions;
-using WebSockets.Models;
-using WebSockets.StringWebSockets;
+using QIP.WebSockets.Extensions;
+using QIP.WebSockets.Models;
+using QIP.WebSockets.StringWebSockets;
 
-namespace WebSockets.Operations {
+namespace QIP.WebSockets.Operations {
     public class LineOperations {
         private static readonly JsonSerializerSettings serializerSettings;
 

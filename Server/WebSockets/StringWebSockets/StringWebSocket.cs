@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WebSockets.StringWebSockets {
+namespace QIP.WebSockets.StringWebSockets {
     public class StringWebSocket : IDisposable {
         public WebSocket InternalWebSocket { get; }
         public ClaimsPrincipal User { get; }

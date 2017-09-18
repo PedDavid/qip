@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace IODomain.Input {
+namespace QIP.IODomain.Input {
     public class InPreferences {
         [Required]
         [StringLength(128)]

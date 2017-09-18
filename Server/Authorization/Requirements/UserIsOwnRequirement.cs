@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 
-namespace Authorization.Requirements {
+namespace QIP.Authorization.Requirements {
     public class UserIsOwnRequirement : IAuthorizationRequirement {
     }
 }

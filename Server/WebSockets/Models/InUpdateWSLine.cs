@@ -1,6 +1,6 @@
-﻿using IODomain.Input;
+﻿using QIP.IODomain.Input;
 
-namespace WebSockets.Models {
+namespace QIP.WebSockets.Models {
     public class InUpdateWSLine : InUpdateLine {
         public Offset OffsetPoint { get; set; }
 
