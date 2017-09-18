@@ -3,7 +3,10 @@ AS
 SET NOCOUNT ON;
 begin try
 	set transaction isolation level READ COMMITTED
-	begin tran
+	begin TRAN
+		--apagar a associação entre pontos e a figura a eliminar - caso seja uma imagem isto não faz nada
+		delete from dbo.Line_Point where boardId=@boardId and figureId = @figureId
+
 		declare @figType varchar(5)
 		select @figType=figureType from dbo.Figure where boardId=@boardId and id=@figureId
 			
@@ -15,9 +18,6 @@ begin try
 		end
 		else 
 			delete from dbo.[Image] where boardId=@boardId and figureId = @figureId
-
-		--apagar a associação entre pontos e a figura a eliminar - caso seja uma imagem isto não faz nada
-		delete from dbo.Line_Point where boardId=@boardId and figureId = @figureId
 
 		--apagar a figura geral
 		delete from dbo.Figure where boardId=@boardId and id=@figureId
