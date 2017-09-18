@@ -138,7 +138,7 @@ export default class SideBarOverlay extends React.Component {
                   .filter(board => {
                     return board.userPermission < 3
                   }).map(board => {
-                    return <Dropdown.Item onClick={this.changeCurrentBoard.bind(this, [board.id])} key={board.id}>{board.name}</Dropdown.Item>
+                    return <Dropdown.Item onContextMenu={event => this.openContextMenu(event, board.id)} onClick={this.changeCurrentBoard.bind(this, [board.id])} key={board.id}>{board.name}</Dropdown.Item>
                   })
                 }
                 <Dropdown.Item className={styles.addBoard}>
