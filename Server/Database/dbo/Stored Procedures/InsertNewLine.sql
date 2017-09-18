@@ -4,14 +4,6 @@ SET NOCOUNT ON;
 begin try
 	set transaction isolation level REPEATABLE READ
 	begin tran
-			
-		-- verificar se o estilo dos pontos é um json válido
-		declare @invalidJson int
-		SELECT @invalidJson = COUNT(*) FROM @points WHERE ISJSON(pointStyle) <> 1
-		if(@invalidJson <> 0)
-			throw 51000, 'Point Style is not a valid JSON', 1; 
-
-
 		INSERT INTO dbo.LineStyle(color) SELECT @color WHERE NOT EXISTS(SELECT * FROM dbo.LineStyle WHERE color = @color)
 
         DECLARE @styleId BIGINT
@@ -35,12 +27,21 @@ begin try
 										select points.x, points.y 
 										from dbo.Point points
 
+		INSERT INTO dbo.PointStyle(width) 
+		SELECT figPoints.pointStyleWidth AS width
+		FROM @points AS figPoints
+		EXCEPT
+		select styles.width
+		FROM dbo.PointStyle styles
+
 		--inserir na tabela Figure_Point os pontos associados à figura inserida, assim como o estilo de cada ponto
-		insert into dbo.Line_Point (figureId, boardId, pointId, pointIdx, pointStyle)
-									select @figureId, @boardId, points.id, figPoints.idx, figPoints.pointStyle
+		insert into dbo.Line_Point (figureId, boardId, pointId, pointIdx, pointStyleId)
+									select @figureId, @boardId, points.id, figPoints.idx, ps.id
 										from dbo.Point as points
 										inner join @points as figPoints
 										on(points.x=figPoints.x and points.y = figPoints.y)
+										INNER JOIN dbo.PointStyle AS ps
+										ON(figPoints.pointStyleWidth = ps.width)
 
 
 	commit

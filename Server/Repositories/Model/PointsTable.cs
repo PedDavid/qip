@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Data.SqlTypes;
 
 namespace QIP.Repositories.Model {
     /*
@@ -30,7 +31,7 @@ namespace QIP.Repositories.Model {
                 new SqlMetaData("x", SqlDbType.Int),
                 new SqlMetaData("y", SqlDbType.Int),
                 new SqlMetaData("idx", SqlDbType.Int),
-                new SqlMetaData("pointStyle", SqlDbType.VarChar, SqlMetaData.Max) // varchar(max)
+                new SqlMetaData("pointStyleWidth", SqlDbType.Int)
             };
         }
 
@@ -60,7 +61,7 @@ namespace QIP.Repositories.Model {
             row.SetInt32(0, point.X);
             row.SetInt32(1, point.Y);
             row.SetInt32(2, point.Idx);
-            row.SetString(3, JsonConvert.SerializeObject(point.Style));
+            row.SetSqlInt32(3, point.Style.Width??SqlInt32.Null);
 
             rows.Add(row);
         }

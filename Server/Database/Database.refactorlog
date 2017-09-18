@@ -7,4 +7,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="pointStyle" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="d60f4ccf-dd61-41d5-80c5-0f7cdece6d81" ChangeDateTime="09/18/2017 12:04:51">
+    <Property Name="ElementName" Value="[dbo].[Line_Point].[pointStyle]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Line_Point]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="pointStyleId" />
+  </Operation>
 </Operations>
