@@ -105,8 +105,8 @@ export default class PersistLS {
         case 'BOARD_CLEAN':
           grid.resetHistory()
           grid.getFiguresArray()
-            .filter(figure => figure.id <= payload.maxFigureId)
-            .forEach(figure => grid.removeFigure(figure.id, canvasContext, 1, false))
+            .filter(figure => figure.id >= 0 && figure.id <= payload.MaxFigureId)
+            .forEach(figure => grid.removeFigure(figure, canvasContext, 1, false))
           break
       }
     }
@@ -188,6 +188,7 @@ export default class PersistLS {
   }
 
   static _cleanCanvasWS = function (boardId, maxFigureId, socket) {
+    console.log(`sending BOARD_CLEAN with maxFigureId: ${maxFigureId}`)
     socket.send(JSON.stringify({
       type: 'BOARD_CLEAN',
       payload: {boardId, maxFigureId}

@@ -105,8 +105,11 @@ export class Persist {
 
   cleanCanvas () {
     this.grid.resetHistory()
+    const figureIds = this.grid.getFiguresArray()
+      .map(figure => figure.id)
+    const maxFigureId = Math.max(...figureIds)
     return this.callWSLSFunc(
-      () => PersistWS._cleanCanvasWS(this.boardId, this.grid.getCurrentFigureId(), this.socket),
+      () => PersistWS._cleanCanvasWS(this.boardId, maxFigureId, this.socket),
       () => PersistLS._resetLocalStorage()
     )
   }
