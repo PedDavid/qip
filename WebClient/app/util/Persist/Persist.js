@@ -149,6 +149,10 @@ export class Persist {
     return PersistWS._getUsersWS(accessToken)
   }
 
+  removeBoard (boardId, profile, accessToken, isOwner) {
+    return PersistWS._removeBoardWS(boardId, profile, accessToken, isOwner)
+  }
+
   sendPenAction (figure, currentFigureId) {
     console.log('sending pen action')
     if (this.connected) {

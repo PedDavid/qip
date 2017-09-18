@@ -32,7 +32,7 @@ export default class ContextMenu extends React.Component {
               {header}
               <Menu.Menu>
                 {menuSection.menuItems.map(item => {
-                  return <Menu.Item key={item.text} icon={item.icon} name={item.text} onClick={item.onClick} />
+                  return <Menu.Item key={item.text} icon={item.icon} name={item.text} onMouseDown={item.onClick} />
                 })}
               </Menu.Menu>
             </Menu.Item>

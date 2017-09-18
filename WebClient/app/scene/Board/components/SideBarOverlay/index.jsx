@@ -32,6 +32,7 @@ export default class SideBarOverlay extends React.Component {
       paddingRight: '0px',
       width: '150px'
     }})
+    this.props.closeContextMenu()
   }
 
   getAuthView () {
@@ -88,6 +89,22 @@ export default class SideBarOverlay extends React.Component {
     this.props.changeCurrentBoard(boardId)
   }
 
+  openContextMenu = (event, boardId) => {
+    event.preventDefault()
+    const contextMenu = [{
+      header: {icon: 'trash', text: 'Remove Board'},
+      menuItems: [{
+        icon: 'trash',
+        text: 'Remove',
+        onClick: () => {
+          this.props.removeBoard(boardId)
+          this.props.closeContextMenu()
+        }}]
+    }]
+
+    this.props.openContextMenu(event.clientX, event.clientY, contextMenu)
+  }
+
   render () {
     const { visible } = this.state
 
@@ -108,7 +125,11 @@ export default class SideBarOverlay extends React.Component {
                   .filter(board => {
                     return board.userPermission === 3
                   }).map(board => {
-                    return <Dropdown.Item onClick={this.changeCurrentBoard.bind(this, [board.id])} key={board.id}>{board.name}</Dropdown.Item>
+                    return (
+                      <Dropdown.Item onContextMenu={event => this.openContextMenu(event, board.id)} onClick={this.changeCurrentBoard.bind(this, [board.id])} key={board.id}>
+                        {board.name}
+                      </Dropdown.Item>
+                    )
                   })
                 }
                 <Dropdown.Divider />

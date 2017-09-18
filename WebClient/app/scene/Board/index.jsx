@@ -423,6 +423,20 @@ export default class Board extends React.Component {
     this.setState({contextMenuVisibility: false})
   }
 
+  removeBoard = (boardId) => {
+    if (this.state.currentBoard.id === boardId) {
+      return window.alert('You cannot delete your current board!')
+    }
+    this.setState(prevState => {
+      var index = prevState.userBoards.findIndex(board => board.id === boardId)
+      if (index > -1) {
+        prevState.userBoards.splice(index, 1)
+      }
+    })
+    const isOwner = this.state.userBoards.find(board => board.id === boardId).userPermission === 3
+    this.persist.removeBoard(boardId, this.auth.tryGetProfile(), this.auth.getAccessToken(), isOwner)
+  }
+
   render () {
     return (
       <div className={styles.boardStyle} style={{width: this.state.canvasSize.width, height: this.state.canvasSize.height}}>
@@ -432,7 +446,8 @@ export default class Board extends React.Component {
           onImageLoad={this.toggleImportImageModal} canvasSize={this.state.canvasSize} auth={this.auth} changeCurrentBoard={this.getInitialBoard}
           addBoard={this.toggleAddModal} currentBoard={this.state.currentBoard} userBoards={this.state.userBoards} persist={this.persist}
           openUserAccount={this.toggleUserAccountModal} moveFavorite={this.moveFavorite} openSettings={this.toggleSettingsModal}
-          undo={this.undo} toggleUsersManagementModal={this.toggleUsersManagementModal}>
+          undo={this.undo} toggleUsersManagementModal={this.toggleUsersManagementModal} removeBoard={this.removeBoard} closeContextMenu={this.closeContextMenu}
+          openContextMenu={this.openContextMenu}>
           <Canvas ref={this.refCallback} width={this.state.canvasSize.width} height={this.state.canvasSize.height} {...this.listeners}>
             HTML5 Canvas not supported
           </Canvas>

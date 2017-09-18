@@ -470,4 +470,36 @@ export default class PersistLS {
       return usersRes.json()
     })
   }
+
+  static _removeBoardWS = function (boardId, profile, accessToken, isOwner) {
+    if (isOwner) {
+      return apiFetch(`boards/${boardId}`, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        method: 'DELETE'
+      }).then(usersRes => {
+        if (usersRes.status >= 400) {
+          throw new Error('Bad response from server. Check if Board Id is correct')
+        }
+        return usersRes.json()
+      })
+    } else {
+      return apiFetch(`boards/${boardId}/usersboards/${profile.sub}`, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        method: 'DELETE'
+      }).then(usersRes => {
+        if (usersRes.status >= 400) {
+          throw new Error('Bad response from server. Check if Board Id is correct')
+        }
+        return usersRes.json()
+      })
+    }
+  }
 }
