@@ -1,12 +1,12 @@
 ﻿using QIP.Domain;
 using QIP.Public.IServices;
-using Authorization.Extensions;
-using Authorization.Requirements;
-using Authorization.Resources;
+using QIP.Authorization.Extensions;
+using QIP.Authorization.Requirements;
+using QIP.Authorization.Resources;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 
-namespace Authorization.Handlers {
+namespace QIP.Authorization.Handlers {
     public class BoardPermissionHandler : AuthorizationHandler<BoardPermissionRequirement, BoardRequest> {
         private readonly IUsersBoardsService _usersBoardsService;
 

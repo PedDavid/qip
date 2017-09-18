@@ -1,9 +1,9 @@
 ﻿using QIP.Public;
 using QIP.Public.IServices;
 using QIP.Public.ServicesExceptions;
-using Authorization;
-using Authorization.Extensions;
-using Authorization.Resources;
+using QIP.Authorization;
+using QIP.Authorization.Extensions;
+using QIP.Authorization.Resources;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;

@@ -1,4 +1,4 @@
-﻿namespace Authorization.Resources {
+﻿namespace QIP.Authorization.Resources {
     public class UserRequest {
         public string UserId { get; }
 

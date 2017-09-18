@@ -1,4 +1,4 @@
-﻿namespace Authorization {
+﻿namespace QIP.Authorization {
     public static class Policies {
         public static readonly string UserIsOwnPolicy = "UserIsOwn";
         public static readonly string BoardIsOwnPolicy = "BoardOwner";

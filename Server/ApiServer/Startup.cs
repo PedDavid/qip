@@ -1,6 +1,6 @@
-﻿using Authorization;
-using Authorization.Requirements;
-using Authorization.Extensions.DependencyInjection;
+﻿using QIP.Authorization;
+using QIP.Authorization.Requirements;
+using QIP.Authorization.Extensions.DependencyInjection;
 using QIP.Repositories.Options;
 using QIP.Repositories.Extensions.DependencyInjection;
 using QIP.Services.Extensions.DependencyInjection;

@@ -1,9 +1,8 @@
 ﻿using QIP.API.Filters;
 using QIP.Public;
 using QIP.Public.IServices;
-using Authorization;
-using Authorization.Extensions;
-using Authorization.Resources;
+using QIP.Authorization.Extensions;
+using QIP.Authorization.Resources;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -11,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using QIP.Authorization;
 
 namespace QIP.API.Controllers {
     [Route("api/boards/{boardId}/[controller]")]
@@ -35,7 +35,7 @@ namespace QIP.API.Controllers {
         /// <response code="204">Board's Figures deletion succeeds</response>
         /// <response code="401">If the user is not authenticated</response>
         /// <response code="403">If the user does not have authorization</response>
-        [HttpDelete("{id}")]
+        [HttpDelete]
         [ProducesResponseType(204)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
