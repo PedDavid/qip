@@ -41,8 +41,12 @@ begin try
 		
 		INSERT INTO dbo.LineStyle(color) SELECT @color WHERE NOT EXISTS(SELECT * FROM dbo.LineStyle WHERE color = @color) 
 
-		DECLARE @styleId BIGINT = SCOPE_IDENTITY()
-		IF(@@ROWCOUNT = 0)
+		DECLARE @styleId BIGINT
+		IF(@@ROWCOUNT <> 0)
+		BEGIN
+			SET @styleId = SCOPE_IDENTITY()
+        END
+		ELSE
         BEGIN
 			SELECT @styleId = lineStyleId FROM dbo.LineStyle WHERE color = @color
 		END
