@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Security.Claims;
 
-namespace Authorization.Extensions {
+namespace QIP.Authorization.Extensions {
     public static class ClaimsPrincipalExtensions {
         public static bool HasScope(this ClaimsPrincipal principal, string scope) {
             // If user does not have the scope claim, get out of here

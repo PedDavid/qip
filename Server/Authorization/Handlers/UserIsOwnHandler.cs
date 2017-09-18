@@ -1,12 +1,12 @@
-﻿using Authorization.Extensions;
-using Authorization.Requirements;
-using Authorization.Resources;
+﻿using QIP.Authorization.Extensions;
+using QIP.Authorization.Requirements;
+using QIP.Authorization.Resources;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace Authorization.Handlers {
+namespace QIP.Authorization.Handlers {
     public class UserIsOwnHandler : AuthorizationHandler<UserIsOwnRequirement, UserRequest> {
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, UserIsOwnRequirement requirement, UserRequest resource) {
             if(context.User == null || resource == null) {

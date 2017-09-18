@@ -14,8 +14,12 @@ begin try
 			
 		INSERT INTO dbo.Point(x, y) SELECT @x, @y WHERE NOT EXISTS(SELECT * FROM dbo.Point WHERE x=@x and y=@y)
 
-		DECLARE @pointId BIGINT = SCOPE_IDENTITY()
-		IF(@@ROWCOUNT = 0)
+		DECLARE @pointId BIGINT
+		IF(@@ROWCOUNT <> 0)
+        BEGIN
+			SET @pointId = SCOPE_IDENTITY()
+		END
+		ELSE
         BEGIN
 			SELECT @pointId = id FROM dbo.Point WHERE x=@x and y=@y
 		END

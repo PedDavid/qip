@@ -5,6 +5,8 @@ AS
 SET NOCOUNT ON;
 BEGIN TRY
 	BEGIN TRANSACTION
+		DELETE FROM dbo.Line_Point WHERE boardId = @boardId AND figureId <= @lastFigureToDelete
+
 		DELETE FROM dbo.Line WHERE boardId = @boardId AND figureId <= @lastFigureToDelete
 
 		DELETE FROM dbo.[Image] WHERE boardId = @boardId AND figureId <= @lastFigureToDelete

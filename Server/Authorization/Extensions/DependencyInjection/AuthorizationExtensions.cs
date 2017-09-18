@@ -1,8 +1,8 @@
-﻿using Authorization.Handlers;
+﻿using QIP.Authorization.Handlers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Authorization.Extensions.DependencyInjection {
+namespace QIP.Authorization.Extensions.DependencyInjection {
     public static class AuthorizationExtensions {
         public static IServiceCollection AddApiAuthorization(this IServiceCollection services) {
             services.AddSingleton<IAuthorizationHandler, AdminHandler>();
