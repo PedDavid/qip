@@ -105,8 +105,12 @@ export class Persist {
   }
 
   cleanCanvas () {
+    this.grid.resetHistory()
+    const figureIds = this.grid.getFiguresArray()
+      .map(figure => figure.id)
+    const maxFigureId = Math.max(...figureIds)
     return this.callWSLSFunc(
-      () => PersistWS._cleanCanvasWS(this.grid, this.socket),
+      () => PersistWS._cleanCanvasWS(this.boardId, maxFigureId, this.socket),
       () => PersistLS._resetLocalStorage()
     )
   }
@@ -144,6 +148,10 @@ export class Persist {
 
   getUsersAsync (accessToken) {
     return PersistWS._getUsersWS(accessToken)
+  }
+
+  removeBoard (boardId, profile, accessToken, isOwner) {
+    return PersistWS._removeBoardWS(boardId, profile, accessToken, isOwner)
   }
 
   sendPenAction (figure, currentFigureId) {
@@ -199,6 +207,7 @@ export class Persist {
           fig => {
             fig.offsetPoint = {X: offsetPoint.x, Y: offsetPoint.y}
             fig.isScaling = isScaling
+            fig.Closed = false
           }
         ))
     } else {

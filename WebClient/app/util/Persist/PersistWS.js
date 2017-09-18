@@ -102,6 +102,13 @@ export default class PersistLS {
           if (payload.point.X > 0 && payload.point.Y > 0) {
             Presentation._drawPointer(canvasContext, payload.point.X, payload.point.Y)
           }
+          break
+        case 'BOARD_CLEAN':
+          grid.resetHistory()
+          grid.getFiguresArray()
+            .filter(figure => figure.id >= 0 && figure.id <= payload.MaxFigureId)
+            .forEach(figure => grid.removeFigure(figure, canvasContext, 1, false))
+          break
       }
     }
   }
@@ -181,15 +188,12 @@ export default class PersistLS {
     })
   }
 
-  static _cleanCanvasWS = function (grid, socket) {
-    // todo: add an action in server to clean board
-    grid.getFiguresArray().forEach(fig => {
-      const objToSend = {
-        type: 'DELETE_LINE',
-        payload: {'id': fig.id}
-      }
-      socket.send(JSON.stringify(objToSend))
-    })
+  static _cleanCanvasWS = function (boardId, maxFigureId, socket) {
+    console.log(`sending BOARD_CLEAN with maxFigureId: ${maxFigureId}`)
+    socket.send(JSON.stringify({
+      type: 'BOARD_CLEAN',
+      payload: {boardId, maxFigureId}
+    }))
   }
 
   static _updateCanvasSizeWS = function (canvasSize) {}
@@ -345,6 +349,9 @@ export default class PersistLS {
           },
           method: 'GET'
         }).then(boardInfoRes => {
+          if (boardInfoRes.status === 404) {
+            return null
+          }
           if (boardInfoRes.status >= 400) {
             throw new Error('Bad response from server. Check if Board Id is correct')
           }
@@ -356,7 +363,7 @@ export default class PersistLS {
     return Promise.all(promises)
       .then(allRes => {
         const boardInfo = allRes[0]
-        const userBoardInfo = allRes.length === 1 ? {permission: boardInfo.basePermission} : allRes[1] // if user is not authenticated, board permissions is 0
+        const userBoardInfo = allRes.length === 1 || allRes[1] === null ? {permission: boardInfo.basePermission} : allRes[1] // if user is not authenticated, board permissions is 0
         return new BoardData(boardInfo.id, boardInfo.name, boardInfo.basePermission, userBoardInfo.permission)
       })
   }
@@ -463,5 +470,37 @@ export default class PersistLS {
       }
       return usersRes.json()
     })
+  }
+
+  static _removeBoardWS = function (boardId, profile, accessToken, isOwner) {
+    if (isOwner) {
+      return apiFetch(`boards/${boardId}`, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        method: 'DELETE'
+      }).then(usersRes => {
+        if (usersRes.status >= 400) {
+          throw new Error('Bad response from server. Check if Board Id is correct')
+        }
+        return usersRes.json()
+      })
+    } else {
+      return apiFetch(`boards/${boardId}/usersboards/${profile.sub}`, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        method: 'DELETE'
+      }).then(usersRes => {
+        if (usersRes.status >= 400) {
+          throw new Error('Bad response from server. Check if Board Id is correct')
+        }
+        return usersRes.json()
+      })
+    }
   }
 }

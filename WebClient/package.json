@@ -1,6 +1,6 @@
 {
   "name": "WebClient",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Web Application for QIP",
   "main": "index.js",
   "repository": "https://github.com/PedDavid/qip.git",
@@ -11,7 +11,7 @@
     "dev": "webpack-dev-server",
     "test": "standard && jest",
     "heroku-postbuild": "webpack -p",
-    "start": "webpack-dev-server"
+    "start": "node server.js"
   },
   "devDependencies": {
     "auth0-js": "^8.8.0",
