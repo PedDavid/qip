@@ -16,6 +16,7 @@ namespace QIP.Repositories.Extensions.DependencyInjection {
             services.AddScoped<ILineStyleRepository, LineStyleRepository>();
             services.AddScoped<IUsersBoardsRepository, UsersBoardsRepository>();
             services.AddScoped<IAuth0ManagementRepository, Auth0ManagementRepository>();
+            services.AddScoped<IFiguresRepository, FiguresRepository>();
 
             return services;
         }

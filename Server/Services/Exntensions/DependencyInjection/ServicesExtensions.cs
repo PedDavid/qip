@@ -12,6 +12,7 @@ namespace QIP.Services.Extensions.DependencyInjection {
             services.AddScoped<IUsersBoardsService, UsersBoardsService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IPreferencesService, PreferencesService>();
+            services.AddScoped<IFiguresService, FiguresService>();
 
             return services;
         }

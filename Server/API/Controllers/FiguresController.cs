@@ -36,11 +36,12 @@ namespace QIP.API.Controllers {
         /// <response code="401">If the user is not authenticated</response>
         /// <response code="403">If the user does not have authorization</response>
         [HttpDelete]
+        [AllowAnonymous]
         [ProducesResponseType(204)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         public async Task<IActionResult> Delete(long boardId, long? lastFigureToDelete) {
-            if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.BoardIsOwnPolicy)) {
+            if(!await _authorizationService.AuthorizeAsync(User, new BoardRequest(boardId), Policies.WriteBoadPolicy)) {
                 _logger.LogWarning(LoggingEvents.DeleteFiguresNotAuthorized, "Delete({boardId}) NOT AUTHORIZED {user_id}", boardId, User.GetNameIdentifier());
                 return Challenge();
             }
