@@ -35,10 +35,12 @@ namespace QIP.API.Controllers {
         /// <param name="userId">Id of the user to whom the preferences belong</param>
         /// <returns>Required Preferences</returns>
         /// <response code="200">Returns the required Preferences</response>
+        /// <response code="204">If users do not have preferences</response>
         /// <response code="401">If the user is not authenticated</response>
         /// <response code="403">If the user does not have authorization</response>
         [HttpGet(Name = "GetPreferences")]
         [ProducesResponseType(typeof(OutPreferences), 200)]
+        [ProducesResponseType(204)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         public async Task<IActionResult> GetById(string userId) {
@@ -51,9 +53,7 @@ namespace QIP.API.Controllers {
             Preferences preferences = await _preferencesService.GetAsync(userId);
 
             if(preferences == null) {
-                _logger.LogWarning(LoggingEvents.GetPreferencesNotFound, "GetById({userId}) NOT FOUND", userId);
-                //TODO Ver o que fazer
-                //Ideia: fornecer default preferences
+                _logger.LogDebug(LoggingEvents.GetPreferencesNotFound, "GetById({userId}) NOT FOUND - RETURN EMPTY", userId);
             }
 
             return Ok(preferences?.Out());//O método OK ao receber null transforma o OK(200) num NoContent(204)

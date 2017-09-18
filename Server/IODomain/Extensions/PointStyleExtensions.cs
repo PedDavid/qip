@@ -6,7 +6,7 @@ namespace QIP.IODomain.Extensions {
     public static class PointStyleExtensions {
         public static OutPointStyle Out(this PointStyle pointStyle) {
             return new OutPointStyle() {
-                Width = pointStyle.Width.Value
+                Width = pointStyle.Width
             };
         }
 

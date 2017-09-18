@@ -12,6 +12,7 @@ using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
+using QIP.Repositories.Extensions;
 
 namespace QIP.Repositories {
     public class LineRepository : ILineRepository {
@@ -46,7 +47,7 @@ namespace QIP.Repositories {
                 .Add("@boardId", SqlDbType.BigInt)
                 .Value = line.BoardId;
 
-            parameters//TODO rever, seria melhor receber o styleId, até porque isso é uma coisa que a app deveria saber; se quiser uma nova cor, ??insere quando seleciona??
+            parameters
                 .Add("@color", SqlDbType.VarChar)
                 .Value = line.Style.Color;
 
@@ -206,10 +207,10 @@ namespace QIP.Repositories {
         //SQL Functions
         private static readonly string LINE_EXISTS = "SELECT CAST(count(figureId) as BIT) FROM dbo.Line WHERE figureId = @id and boardId = @boardId";
         private static readonly string SELECT_ALL_LINES = "SELECT id, boardId, isClosedForm, lineStyleId, lineColor FROM dbo.GetLinesInfo(@boardId) ORDER BY id";
-        private static readonly string SELECT_ALL_LINES_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointStyle FROM dbo.GetLinesPoints(@boardId) ORDER BY id, linePointIdx";
+        private static readonly string SELECT_ALL_LINES_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointStyleWidth FROM dbo.GetLinesPoints(@boardId) ORDER BY id, linePointIdx";
 
         private static readonly string SELECT_LINE = "SELECT id, boardId, isClosedForm, lineStyleId, lineColor FROM dbo.GetLinesInfo(@boardId) WHERE id=@id";
-        private static readonly string SELECT_LINE_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointStyle FROM dbo.GetLinesPoints(@boardId) WHERE id=@id ORDER BY linePointIdx";
+        private static readonly string SELECT_LINE_POINTS = "SELECT id, boardId, linePointX, linePointY, linePointIdx, pointStyleWidth FROM dbo.GetLinesPoints(@boardId) WHERE id=@id ORDER BY linePointIdx";
 
         //SQL Stored Procedures
         private static readonly string INSERT_LINE = "dbo.InsertNewLine";
@@ -267,7 +268,9 @@ namespace QIP.Repositories {
                 X = dr.GetInt32(2),
                 Y = dr.GetInt32(3),
                 Idx = dr.GetInt32(4),
-                Style = JsonConvert.DeserializeObject<PointStyle>(dr.GetString(5))
+                Style = new PointStyle() {
+                    Width = dr.GetSqlInt32(5).ToNullableInt()
+                }
             };
         }
     }
