@@ -10,11 +10,10 @@ import Move from './../../model/tools/Move'
 import BoardData from './../../model/BoardData'
 
 const protocol = 'http'
-const domain = 'localhost'
-const port = '57059'
+const domain = 'qipserverapi.azurewebsites.net'
 
 function apiFetch (resource, options) {
-  return fetch(`${protocol}://${domain}:${port}/api/${resource}`, options)
+  return fetch(`${protocol}://${domain}/api/${resource}`, options)
 }
 
 export default class PersistLS {
