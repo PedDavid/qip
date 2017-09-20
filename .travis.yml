@@ -1,0 +1,28 @@
+matrix:
+  include:
+  - language: node_js
+    node_js:
+    - node
+    before_install: cd WebClient
+    install:
+    - curl -o- -L https://yarnpkg.com/install.sh | bash
+    - export PATH=$HOME/.yarn/bin:$PATH
+    before_script: yarn
+    script: yarn test -- --coverage
+    cache:
+      yarn: true
+      directories: WebClient/node_modules
+  - language: csharp
+    mono: none
+    dotnet: 1.0.4
+    dist: trusty
+    solution: Server.sln
+    before_script: cd Server
+    script:
+    - dotnet restore
+    - dotnet build API
+    - dotnet build WebSockets
+notifications:
+  slack:
+    rooms:
+      secure: K0OB/9l9zGVWk6C7CkkUKvYZl7Noz+QKrCXlBBGAieToip2sSgC0RoMJFqhNTeU1LQ/eAk3GgHuC0Ym1i1s0lcgCgZOS/ojz+eO+cHCJSfz+yZxdoJQwTRtaVbCUzU/A/PAKOUAH02xJxAmLsMyixcIwyi/tTJJfuEZTJePuFyn8WNa8y1OLL+tj0CHS8KsP2c3fbn8KnNToMteg0JgTR6FXUmKwrcS1Nnp513rWhA7wlRnJIWoZlnf8vD+YTx9IJ2Mdhprchy/q+76j2531MzLIpR1MqWABis8kP6yZkNgSCzKRfcMby0uFSnpZm/h8Yl+V7I6hSowfdL+MPOebZAO8ANYfZdhCno6gV2tVy3z2yeZtzqZQjPuqvpESLGfu9yPApyewuqkazUxBjRWjVyCnyYKIMRcXXul470H+CEqFHtosi4ZHWXMUDSoA0aqENLJM/IQ553ivucEeytTeMP2HyRj7laW5KmS3IkCG48TNYPc25MQfqO82+otrkLjaeKl+4HReDE0HAglNaD9uAumw8RDfCFQobiToMMOl5ie904OvZ5jFE2tyWrf+2vugz+lCsLnmU5VyvcoKVUMy083NEp7hesYj06HPppUVDB+ohMyQvtTPRZACar79lHvFAqKzHD8khfB4v2GFZt1F52sR5TtRuE70O8GXtTHUJ+w=

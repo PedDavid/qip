@@ -1,0 +1,33 @@
+.toolColumnDiv {
+  position: absolute;
+  display: flex;
+  flex-direction: row-reverse;
+  flex-wrap: wrap;
+  width: 800px;
+  right: 39px;
+  margin-top: -28px;
+
+  @media screen and (max-width: 800px) {
+    right: 79px;
+    margin-top: -34px;
+  }
+}
+
+.tool {
+  height: 40px !important;
+  width: 40px !important;
+  border: 1px solid #000000;
+  text-align: center !important;
+  cursor: pointer;
+  padding: 0px !important;
+  line-height: 2 !important;
+
+  @media screen and (max-width: 800px) {
+    width: 80px !important;
+    height: 80px !important;
+  }
+}
+
+.tool:hover {
+  background-color: lightgrey;
+}

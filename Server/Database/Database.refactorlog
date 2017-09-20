@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
+  <Operation Name="Rename Refactor" Key="31c4a768-7d3c-4b1b-8d02-2162f25f909c" ChangeDateTime="07/16/2017 15:14:08">
+    <Property Name="ElementName" Value="[dbo].[Line_Point].[pointStyleId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Line_Point]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="pointStyle" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d60f4ccf-dd61-41d5-80c5-0f7cdece6d81" ChangeDateTime="09/18/2017 12:04:51">
+    <Property Name="ElementName" Value="[dbo].[Line_Point].[pointStyle]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Line_Point]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="pointStyleId" />
+  </Operation>
+</Operations>

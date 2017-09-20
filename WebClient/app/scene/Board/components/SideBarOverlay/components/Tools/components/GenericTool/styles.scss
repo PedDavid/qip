@@ -1,0 +1,22 @@
+.tool {
+  height: 40px !important;
+  width: 40px !important;
+  border: 1px solid #000000;
+  text-align: center !important;
+  cursor: pointer;
+  padding: 0px !important;
+  font-size: small;
+  
+  @media screen and (max-width: 800px) {
+    width: 80px !important;
+    height: 80px !important;
+    font-size: x-large !important;
+  }
+
+  &:hover {
+    background-color: lightgrey;
+  }
+}
+.toolIcon {
+  line-height: 2 !important;
+}

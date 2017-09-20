@@ -1,0 +1,31 @@
+.favoriteToolsDiv {
+  position: absolute;
+  top: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.favorite {
+  height: 40px !important;
+  width: 40px !important;
+  border: 1px solid #000000;
+  text-align: center !important;
+  cursor: pointer;
+  padding: 0 !important;
+  margin: 0 !important;  
+  font-size: small;
+  
+  @media screen and (max-width: 800px) {
+    width: 80px !important;
+    height: 80px !important;
+    font-size: x-large !important;
+  }
+}
+.favoriteIcon {
+  line-height: 2 !important;
+}
+
+.favoriteDiv {
+  margin-bottom: 5px !important;
+  margin-top: 5px !important;
+}

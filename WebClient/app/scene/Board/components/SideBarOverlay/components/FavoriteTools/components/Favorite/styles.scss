@@ -1,0 +1,77 @@
+.fav {
+  height: 40px !important;
+  width: 40px !important;
+  margin: 0px !important;
+  padding: 0px !important;
+  display: inline-block;
+  font-size: small;
+
+  @media screen and (max-width: 800px) {
+    width: 80px !important;
+    height: 80px !important;
+    font-size: x-large !important;
+  }
+}
+.fav:hover {
+  transform: rotate(360deg) translate( 0px, 0px);
+  transition: 0.5s;
+}
+
+// Favorite Animation
+@keyframes spin {
+  from {transform:rotate(0deg);}
+  to {transform:rotate(360deg);}
+}
+
+@keyframes shake {
+  0% {
+    transform: translate(0);
+  }
+  25% {
+    transform: translate(7px);
+  }
+  50% {
+    transform: translate(-7px);
+  }
+  75% {
+    transform: translate(7px);
+  }
+  100% {
+    transform: translate(0);
+  }
+}
+
+.animateFav {
+  height: 40px;
+  display: inline-block;
+  animation: shake 0.5s 0s;
+}
+
+.favMenu {
+  z-index: -1;
+  width: 130px;
+  height: 40px;
+  float: left;
+  position: absolute;
+  transition: 0.5s;
+  text-align: right;
+
+  @media screen and (max-width: 800px) {
+    width: 230px !important;
+    height: 80px !important;
+    font-size: x-large !important;
+  }
+}
+
+.fontStyle {
+  position: relative;
+  bottom: -8px;
+  left: -4px;
+}
+
+.iconStyle {
+  position: relative !important;
+  top: 0px !important;
+  left: 0px !important;
+  margin: 0px !important;
+}

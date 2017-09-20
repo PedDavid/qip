@@ -1,0 +1,38 @@
+.plusDiv {
+  position: absolute;
+  top: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.plusMenuBtn {
+  height: 40px !important;
+  width: 40px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+
+  @media screen and (max-width: 800px) {
+    width: 80px !important;
+    height: 80px !important;
+  }
+}
+
+.plusMenuBtnIcon {
+  font-size: small;
+  margin: 0 !important;
+
+  @media screen and (max-width: 800px) {
+    font-size: x-large;
+  }
+}
+
+.plusMenuGrid {
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+  background-color: white;
+}
+
+.toolRow:hover {
+  background-color: lightgrey;
+}
