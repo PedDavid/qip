@@ -1,6 +1,6 @@
 {
   "name": "WebClient",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Web Application for QIP",
   "main": "index.js",
   "repository": "https://github.com/PedDavid/qip.git",

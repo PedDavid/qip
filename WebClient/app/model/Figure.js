@@ -108,8 +108,8 @@ export function Figure (figureStyle, id = null) {
   }
 
   this.draw = function (ctx, currScale) {
-    ctx.strokeStyle = this.figureStyle.color
     ctx.save()
+    ctx.strokeStyle = this.figureStyle.color
     // este scale tem em conta o estado em que a figura foi guardada.
     // Por exemplo se a figura 1 foi desenhada e foi feito zoom para o dobro esta figura é desenhada para o dobro.
     // Se outra figura for desenhada e, novamente, for feito zoom para o dobro, a primeira figura é desenhada com o quadruplo do zoom enquanto a segunda apenas é desenhada com o dobro do zoom
