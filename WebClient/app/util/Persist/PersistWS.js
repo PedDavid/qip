@@ -10,11 +10,10 @@ import Move from './../../model/tools/Move'
 import BoardData from './../../model/BoardData'
 
 const protocol = 'http'
-const domain = 'localhost'
-const port = '57059'
+const domain = 'qipserverapi.azurewebsites.net'
 
 function apiFetch (resource, options) {
-  return fetch(`${protocol}://${domain}:${port}/api/${resource}`, options)
+  return fetch(`${protocol}://${domain}/api/${resource}`, options)
 }
 
 export default class PersistLS {
@@ -50,8 +49,8 @@ export default class PersistLS {
             const simplePointStyle = new PointStyle(serverPoint.Style.Width)
             return new SimplePoint(serverPoint.X, serverPoint.Y, simplePointStyle, serverPoint.Idx)
           })
-          grid.addFigure(newFigure)
-          grid.draw(canvasContext, 1)
+          const figureToDraw = grid.addFigure(newFigure)
+          figureToDraw.draw(canvasContext, 1)
           console.log('received new line with id ' + payload.figure.Id)
           break
         case 'DELETE_LINE':

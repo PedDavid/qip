@@ -1,7 +1,7 @@
 import React from 'react'
 import { Modal, Button, Icon, Input, Message, Divider, Dropdown, Popup } from 'semantic-ui-react'
 
-const baseUrl = 'http://localhost:8080/board/'
+const baseUrl = 'http://qip-web-client.herokuapp.com/board/'
 
 export default class ShareBoardModal extends React.Component {
   users = []
