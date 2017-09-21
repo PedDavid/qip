@@ -145,7 +145,7 @@ namespace QIP.WebSockets.Operations {
 
             Image image = await _imageService.GetAsync(inImage.Id.Value, boardId);
             if(image == null) {
-                _logger.LogWarning(LoggingEvents.UpdateWSImageNotFound, "UpdateImage {id} (Board {boardId}) NOT FOUND", image.Id, boardId);
+                _logger.LogWarning(LoggingEvents.UpdateWSImageNotFound, "UpdateImage (Board {boardId}) NOT FOUND", boardId);
                 return;
             }
 
@@ -202,7 +202,7 @@ namespace QIP.WebSockets.Operations {
 
             Image image = await _imageService.GetAsync(id, boardId);
             if(image == null) {
-                _logger.LogWarning(LoggingEvents.DeleteWSImageNotFound, "DeleteImage {id} (Board {boardId}) NOT FOUND", image.Id, boardId);
+                _logger.LogWarning(LoggingEvents.DeleteWSImageNotFound, "DeleteImage (Board {boardId}) NOT FOUND", boardId);
                 return;
             }
 
