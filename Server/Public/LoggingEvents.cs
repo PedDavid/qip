@@ -227,6 +227,7 @@
         public const int WSOperationsInvalidMessage = 133;
         public const int WSOperationsInvalidModel = 134;
         public const int WSOperationsEndedAbruptly = 135;
+        public const int WSOperationsUnhandledException = 136;
         #endregion
     }
 }
