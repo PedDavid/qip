@@ -4,9 +4,11 @@ using System.ComponentModel.DataAnnotations;
 namespace QIP.IODomain.Input {
     public class InUpdateLine {
         [Required]
+        [Range(0, long.MaxValue)]
         public long? Id { get; set; }
 
         [Required]
+        [Range(0, long.MaxValue)]
         public long? BoardId { get; set; }
 
         [Required]

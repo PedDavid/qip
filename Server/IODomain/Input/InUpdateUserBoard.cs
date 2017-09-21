@@ -7,6 +7,7 @@ namespace QIP.IODomain.Input {
         public string UserId { get; set; }
 
         [Required]
+        [Range(0, long.MaxValue)]
         public long? BoardId { get; set; }
 
         [Required]
