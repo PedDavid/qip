@@ -106,7 +106,9 @@ export default class PersistLS {
           grid.resetHistory()
           grid.getFiguresArray()
             .filter(figure => figure.id >= 0 && figure.id <= payload.MaxFigureId)
-            .forEach(figure => grid.removeFigure(figure, canvasContext, 1, false))
+            .forEach(figure => figure instanceof Figure
+              ? grid.removeFigure(figure, canvasContext, 1, false)
+              : grid.removeImage(figure.id, canvasContext, 1, false))
           break
       }
     }

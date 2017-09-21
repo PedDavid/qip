@@ -341,6 +341,7 @@ export default class Board extends React.Component {
         newImage.persist(this.persist, this.grid)
       })
       .catch(() => {
+        this.grid.removeImage(newImage.id, this.canvasContext, 1, false)
         this.notifyError('Error uploading image to imgur')
       })
   }
