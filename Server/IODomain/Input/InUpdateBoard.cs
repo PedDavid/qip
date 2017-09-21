@@ -3,6 +3,7 @@
 namespace QIP.IODomain.Input {
     public class InUpdateBoard {
         [Required]
+        [Range(0, long.MaxValue)]
         public long? Id { get; set; }
 
         [Required]

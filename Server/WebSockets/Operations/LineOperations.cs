@@ -146,7 +146,7 @@ namespace QIP.WebSockets.Operations {
       
             Line line = await _lineService.GetAsync(inLine.Id.Value, boardId);
             if(line == null) {
-                _logger.LogWarning(LoggingEvents.UpdateWSLineNotFound, "UpdateLine {id} (Board {boardId}) NOT FOUND", line.Id, boardId);
+                _logger.LogWarning(LoggingEvents.UpdateWSLineNotFound, "UpdateLine (Board {boardId}) NOT FOUND", boardId);
                 return;
             }
 
@@ -207,7 +207,7 @@ namespace QIP.WebSockets.Operations {
 
             Line line = await _lineService.GetAsync(id, boardId);
             if(line == null) {
-                _logger.LogWarning(LoggingEvents.DeleteWSLineNotFound, "DeleteLine {id} (Board {boardId}) NOT FOUND", line.Id, boardId);
+                _logger.LogWarning(LoggingEvents.DeleteWSLineNotFound, "DeleteLine (Board {boardId}) NOT FOUND", boardId);
                 return;
             }
 
